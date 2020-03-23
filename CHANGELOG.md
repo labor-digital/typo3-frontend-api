@@ -1,6 +1,13 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## 9.1.0 (2020-03-23)
+
+
+### Features
+
+* first public release ([26fb8bd](https://github.com/labor-digital/typo3-frontend-api/commit/26fb8bd89354c25e214f586cab290c1ee1527d7b))
 
 ## [3.2.1] (2020-02-04)
 
