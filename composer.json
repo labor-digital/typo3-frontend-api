@@ -1,0 +1,25 @@
+{
+	"name": "labor-digital/typo3-frontend-api",
+	"type": "typo3-cms-extension",
+	"description": "TYPO3: Provides a frontend API handler with support for Single Page Apps",
+	"authors": [
+		{
+			"name": "LABOR GmbH",
+			"email": "info@labor.digital",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"labor-digital/typo3-better-api": "^9.0",
+		"league/route": "^4.3",
+		"laminas/laminas-httphandlerrunner": "^1.1",
+		"filp/whoops": "^2.5",
+		"league/fractal": "^0.18"
+	},
+	"autoload": {
+		"psr-4": {
+			"LaborDigital\\Typo3FrontendApi\\": "Classes"
+		}
+	},
+	"version": "9.0.0"
+}

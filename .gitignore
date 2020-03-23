@@ -1,0 +1,9 @@
+# Project git ignore
+.idea/
+.settings/
+node_modules
+vendor
+!.htaccess
+*.back
+
+
