@@ -2,13 +2,26 @@
 	"name": "labor-digital/typo3-frontend-api",
 	"type": "typo3-cms-extension",
 	"description": "TYPO3: Provides a frontend API handler with support for Single Page Apps",
+	"license": "Apache-2.0",
 	"authors": [
 		{
-			"name": "LABOR GmbH",
-			"email": "info@labor.digital",
+			"name": "LABOR.digital",
+			"email": "info@labor.tools",
+			"homepage": "https://www.labor.digital",
+			"role": "Company"
+		},
+		{
+			"name": "Martin Neundorfer",
+			"email": "code@neunerlei.eu",
+			"homepage": "https://www.neunerlei.eu",
 			"role": "Developer"
 		}
 	],
+	"support": {
+		"issues": "https://github.com/labor-digital/typo3-frontend-api/issues",
+		"source": "https://github.com/labor-digital/typo3-frontend-api",
+		"docs": "https://typo3-frontend-api.labor.tools"
+	},
 	"require": {
 		"labor-digital/typo3-better-api": "^9.0",
 		"league/route": "^4.3",
