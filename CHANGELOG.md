@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.1.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.1.0...v9.1.1) (2020-03-23)
+
+
+### Bug Fixes
+
+* add the correct vendor name and sorting options back ([8ef7bc6](https://github.com/labor-digital/typo3-frontend-api/commit/8ef7bc683a4e82bebe23d5254377294cc6b41600))
+
 ## 9.1.0 (2020-03-23)
 
 
