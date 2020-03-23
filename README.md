@@ -9,10 +9,6 @@ with endpoints for menus, translations, page content rendering and automatic gen
 Another key-aspect of this package is the easy handling of content elements. You can either use ext-base plugins/content elements,
 but you can also use powerful template-less content elements that utilize the Better API syntax for TCA definition and registration.
 
-::: warning
-This package is freshly released to the public so I'm working on a nice documentation.
-However, this will take a few weeks until I have something substantial. Bear with me, please.
-:::
 
 ## Requirements
 
