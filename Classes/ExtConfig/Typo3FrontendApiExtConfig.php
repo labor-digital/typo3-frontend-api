@@ -83,7 +83,6 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 	 */
 	public static function extendExtConfig(ExtConfigExtensionRegistry $extender, ExtConfigContext $context) {
 		$extender->registerOptionListEntry(FrontendApiOption::class);
-		$extender->registerFieldPreset(TmpPreset::class);
 	}
 	
 }
