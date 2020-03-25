@@ -46,7 +46,7 @@ class SiteMenuPreProcessorEvent {
 	 * True as long as the menu should be rendered by the typo script controller
 	 * @var bool
 	 */
-	protected $render;
+	protected $render = TRUE;
 	
 	/**
 	 * SiteMenuPreProcessorEvent constructor.
