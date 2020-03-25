@@ -21,6 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
+use LaborDigital\Typo3FrontendApi\FrontendApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageMenu;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use Neunerlei\Options\Options;
@@ -337,6 +338,26 @@ class SiteConfigurator {
 	 */
 	public function registerAdditionalRootLineFields(array $fields): SiteConfigurator {
 		$this->config->additionalRootLineFields = array_unique(array_merge($this->config->additionalRootLineFields, $fields));
+		return $this;
+	}
+	
+	/**
+	 * Used to register a root line data provider. Data providers are called once for every entry in the root line.
+	 * They receive the already prepared root line entry and can additional, dynamic data you can't implement
+	 * using just raw database fields.
+	 *
+	 * The class has to implement the RootLineDataProviderInterface interface
+	 *
+	 * @param string $class
+	 *
+	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
+	 * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface
+	 */
+	public function registerRootLineDataProvider(string $class): SiteConfigurator {
+		if (!in_array(RootLineDataProviderInterface::class, class_implements($class)))
+			throw new FrontendApiException("The given root line data provider class \"$class\" has to implement the required interface: " . RootLineDataProviderInterface::class);
+		$this->config->rootLineDataProviders[$class] = $class;
 		return $this;
 	}
 	

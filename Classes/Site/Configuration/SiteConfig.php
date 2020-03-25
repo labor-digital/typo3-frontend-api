@@ -70,6 +70,11 @@ class SiteConfig {
 	public $additionalRootLineFields = [];
 	
 	/**
+	 * @var callable
+	 */
+	public $rootLineDataProviders = [];
+	
+	/**
 	 * The time to live for the browser cache "Expire" tags.
 	 * If this is 0 There will be no browser caching!
 	 * @var float|int

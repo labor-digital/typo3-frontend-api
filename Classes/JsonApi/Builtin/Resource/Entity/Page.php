@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
+use LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface;
 use Neunerlei\Inflection\Inflector;
 
 class Page {
@@ -104,22 +105,37 @@ class Page {
 		$rootLine = [];
 		$rootLineRaw = $this->Page->getRootLine($this->id);
 		$additionalFields = $this->getCurrentSiteConfig()->additionalRootLineFields;
+		$dataProviders = $this->getCurrentSiteConfig()->rootLineDataProviders;
+		$c = 0;
 		foreach (array_reverse($rootLineRaw) as $pageData) {
 			$pageDataPrepared = [
 				"id"       => $pageData["uid"],
 				"parentId" => $pageData["pid"],
+				"level"    => $c++,
 				"title"    => $pageData["title"],
 				"navTitle" => $pageData["nav_title"],
 				"slug"     => $this->Links->getLink()->withPid($pageData["uid"])->build(["relative"]),
 			];
 			
 			// Merge in additional fields
+			$pageInfo = NULL;
 			if (!empty($additionalFields)) {
 				$pageInfo = $this->Page->getPageInfo($pageDataPrepared["id"]);
 				foreach ($additionalFields as $field) {
 					$propertyName = Inflector::toCamelBack($field);
 					if (isset($pageInfo[$field])) $pageDataPrepared["fields"][$propertyName] = $pageInfo[$field];
 					else $pageDataPrepared["fields"][$propertyName] = NULL;
+				}
+			}
+			
+			// Check if we have data providers
+			if (!empty($dataProviders)) {
+				if (empty($pageInfo)) $pageInfo = $this->Page->getPageInfo($pageData["uid"]);
+				foreach ($dataProviders as $dataProvider) {
+					/** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface $provider */
+					$provider = $this->getInstanceOf($dataProvider);
+					if (!$provider instanceof RootLineDataProviderInterface) continue;
+					$pageDataPrepared = $provider->addData($pageDataPrepared, $pageInfo, $rootLineRaw);
 				}
 			}
 			
