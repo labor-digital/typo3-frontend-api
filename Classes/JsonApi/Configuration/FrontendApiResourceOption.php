@@ -97,7 +97,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 	 * @see \LaborDigital\Typo3FrontendApi\JsonApi\Controller\AbstractResourceController
 	 * @see ResourceConfigurationInterface
 	 */
-	public function registerResourcesInDirectory(string $directory = "EXT:{{extkey}}/Classes/Controller/Resource", bool $asOverrides = FALSE): FrontendApiResourceOption {
+	public function registerResourcesDirectory(string $directory = "EXT:{{extkey}}/Classes/Controller/Resource", bool $asOverrides = FALSE): FrontendApiResourceOption {
 		return $this->addDirectoryToCachedStack("resources", $directory, function (string $class) {
 			return in_array(ResourceConfigurationInterface::class, class_implements($class));
 		}, function (string $class) {
