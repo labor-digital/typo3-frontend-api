@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.2.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.1.1...v9.2.0) (2020-03-25)
+
+
+### Features
+
+* **CommonElement:** add common custom element for dynamic elements based on a registered class ([254d084](https://github.com/labor-digital/typo3-frontend-api/commit/254d084799a7084dd1dff50d5c3a848d2ad55aff))
+* add support for menu post processors to filter generated menu arrays ([cb3a1ea](https://github.com/labor-digital/typo3-frontend-api/commit/cb3a1eacb6ff9c40f4bcc669c071d63dfb564593))
+* **Site:** add support for root line data provider for dynamic data generation ([0e27da6](https://github.com/labor-digital/typo3-frontend-api/commit/0e27da6e6374f51567d22ef5cddbd05f4a7c05d6))
+
+
+### Bug Fixes
+
+* add missing default value for $render in SiteMenuPreProcessorEvent ([cba4118](https://github.com/labor-digital/typo3-frontend-api/commit/cba4118671e5b9b9b0c937c6562b0ac86c1da029))
+* make sure the name of registerResourcesDirectory() is consistent ([efc5430](https://github.com/labor-digital/typo3-frontend-api/commit/efc5430fb3d5e857ef1151253f48659f9f8e6093))
+* remove debug fractal "fooPreset" ([2fc80d0](https://github.com/labor-digital/typo3-frontend-api/commit/2fc80d0b29ced270a8f4401f834ac16de97d7028))
+
 ### [9.1.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.1.0...v9.1.1) (2020-03-23)
 
 
