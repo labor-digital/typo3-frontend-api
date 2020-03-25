@@ -23,6 +23,13 @@ namespace LaborDigital\Typo3FrontendApi\Event;
 
 
 class SiteMenuPostProcessorEvent {
+	
+	/**
+	 * The key that was given for the menu / common element
+	 * @var string
+	 */
+	protected $key;
+	
 	/**
 	 * The parsed menu as array
 	 * @var array
@@ -44,14 +51,24 @@ class SiteMenuPostProcessorEvent {
 	/**
 	 * SiteMenuPostProcessorEvent constructor.
 	 *
+	 * @param string $key
 	 * @param array  $menu
 	 * @param string $type
 	 * @param array  $options
 	 */
-	public function __construct(array $menu, string $type, array $options) {
+	public function __construct(string $key, array $menu, string $type, array $options) {
+		$this->key = $key;
 		$this->menu = $menu;
 		$this->type = $type;
 		$this->options = $options;
+	}
+	
+	/**
+	 * Returns the key that was given for the menu / common element
+	 * @return string
+	 */
+	public function getKey(): string {
+		return $this->key;
 	}
 	
 	/**

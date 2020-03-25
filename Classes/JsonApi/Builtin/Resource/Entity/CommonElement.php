@@ -63,7 +63,7 @@ class CommonElement implements SelfTransformingInterface {
 				$contentElement = ContentElement::makeInstanceWithTypoScriptPopulation($config["value"]);
 				break;
 			case "menu":
-				$contentElement = PageMenu::makeInstance($config["value"]);
+				$contentElement = PageMenu::makeInstance($this->key, $config["value"]);
 				break;
 			default:
 				throw new JsonApiException("Could not render a common element with type: " . $config["type"]);

@@ -82,6 +82,18 @@ class SiteConfigurator {
 				"type"    => "array",
 				"default" => [],
 			],
+			"postProcessor"    => [
+				"type"      => ["string", "null"],
+				"default"   => NULL,
+				"validator" => function (?string $class) {
+					if (is_null($class)) return TRUE;
+					if (!class_exists($class)) return "The given post processor class: \"$class\" does not exist!";
+					if (!in_array(PageMenuPostProcessorInterface::class, class_implements($class)))
+						return "The given post processor \"$class\" must implement the required interface: " .
+							PageMenuPostProcessorInterface::class;
+					return TRUE;
+				},
+			],
 		];
 	}
 	

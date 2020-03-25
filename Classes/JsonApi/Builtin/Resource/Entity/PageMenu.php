@@ -83,6 +83,12 @@ class PageMenu implements SelfTransformingInterface {
 	protected $options;
 	
 	/**
+	 * The key that was given for this menu/common element
+	 * @var string
+	 */
+	protected $key;
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -101,13 +107,15 @@ class PageMenu implements SelfTransformingInterface {
 	/**
 	 * Factory method to create a new instance of myself
 	 *
-	 * @param array $options
+	 * @param string $key
+	 * @param array  $options
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageMenu
 	 */
-	public static function makeInstance(array $options): PageMenu {
+	public static function makeInstance(string $key, array $options): PageMenu {
 		$self = TypoContainer::getInstance()->get(static::class);
 		$self->options = $options;
+		$self->key = $key;
 		return $self;
 	}
 	
@@ -397,7 +405,15 @@ class PageMenu implements SelfTransformingInterface {
 	 * @return array
 	 */
 	protected function runPostProcessing(string $type, array $menu, array $options): array {
-		$this->EventBus->dispatch(($e = new SiteMenuPostProcessorEvent($menu, $type, $options)));
+		// Check if we have a post processor
+		if (!empty($options["postProcessor"]) && class_exists($options["postProcessor"])) {
+			/** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface $processor */
+			$processor = $this->getInstanceOf($options["postProcessor"]);
+			$menu = $processor->process($this->key, $menu, $options, $type);
+		}
+		
+		// Allow event based processing
+		$this->EventBus->dispatch(($e = new SiteMenuPostProcessorEvent($this->key, $menu, $type, $options)));
 		return $e->getMenu();
 	}
 }
