@@ -57,13 +57,18 @@ class CommonElement implements SelfTransformingInterface {
 		$config = $siteConfig->commonElements[$layout][$this->key];
 		switch ($config["type"]) {
 			case "contentElement":
-				$contentElement = ContentElement::makeInstanceElementWithAutomaticPopulation($config["value"]);
+				$data = ContentElement::makeInstanceElementWithAutomaticPopulation($config["value"])->asArray();
 				break;
 			case "ts":
-				$contentElement = ContentElement::makeInstanceWithTypoScriptPopulation($config["value"]);
+				$data = ContentElement::makeInstanceWithTypoScriptPopulation($config["value"])->asArray();
 				break;
 			case "menu":
-				$contentElement = PageMenu::makeInstance($this->key, $config["value"]);
+				$data = PageMenu::makeInstance($this->key, $config["value"])->asArray();
+				break;
+			case "custom":
+				/** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\CommonCustomElementInterface $handler */
+				$handler = $this->getInstanceOf($config["value"]["class"]);
+				$data = $handler->asArray($this->key, $config["value"]["data"]);
 				break;
 			default:
 				throw new JsonApiException("Could not render a common element with type: " . $config["type"]);
@@ -74,7 +79,7 @@ class CommonElement implements SelfTransformingInterface {
 			"id"          => $this->key,
 			"layout"      => $this->layout,
 			"elementType" => $config["type"],
-			"element"     => $contentElement->asArray(),
+			"element"     => $data,
 		];
 	}
 	

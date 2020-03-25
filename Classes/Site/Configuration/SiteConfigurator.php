@@ -125,8 +125,8 @@ class SiteConfigurator {
 	 * Renders a typoScript element using the TSFE and provides it as a "common element" for the pages
 	 *
 	 * @param string $key                   A unique key that identifies this object. Note that
-	 *                                      registerCommonTypoScriptElement() and registerCommonContentElement() share
-	 *                                      the same namespace when the objects are passed to the frontend.
+	 *                                      all common elements and menus share the same namespace
+	 *                                      when the objects are passed to the frontend.
 	 * @param string $typoScriptObjectPath  The path to the typoScript object you want to render.
 	 *                                      Probably something like lib.myObject
 	 * @param array  $loadForLayouts        Can be used to define the keys of layouts which should load this element.
@@ -144,8 +144,8 @@ class SiteConfigurator {
 	 * pages
 	 *
 	 * @param string $key            A unique key that identifies this object. Note that
-	 *                               registerCommonTypoScriptElement() and registerCommonContentElement() share
-	 *                               the same namespace when the objects are passed to the frontend.
+	 *                               all common elements and menus share the same namespace
+	 *                               when the objects are passed to the frontend.
 	 * @param int    $elementUid     The uid of the element in the tt_content table
 	 * @param array  $loadForLayouts Can be used to define the keys of layouts which should load this element.
 	 *                               If not given, this element will be auto-loaded on all pages. You may use "default"
@@ -155,6 +155,35 @@ class SiteConfigurator {
 	 */
 	public function registerCommonContentElement(string $key, int $elementUid, array $loadForLayouts = []): SiteConfigurator {
 		return $this->addToCommonElements("contentElement", $key, $loadForLayouts, $elementUid);
+	}
+	
+	/**
+	 * Registers a custom class as a common element handler. The class will be instantiated and executed
+	 * when the element is requested via the api
+	 *
+	 * @param string $key            A unique key that identifies this object. Note that
+	 *                               all common elements and menus share the same namespace
+	 *                               when the objects are passed to the frontend.
+	 * @param string $class          The class that should be used to generate the data for this element.
+	 *                               The class has to implement the CommonCustomElementInterface
+	 * @param array  $data           Optional data that will be passed to the element class.
+	 *                               WARNING: The data MUST BE serializable!
+	 * @param array  $loadForLayouts Can be used to define the keys of layouts which should load this element.
+	 *                               If not given, this element will be auto-loaded on all pages. You may use "default"
+	 *                               to load this element in the default layout
+	 *
+	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
+	 * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\CommonCustomElementInterface
+	 */
+	public function registerCommonCustomElement(string $key, string $class, array $data = [], array $loadForLayouts = []): SiteConfigurator {
+		if (!in_array(CommonCustomElementInterface::class, class_implements($class)))
+			throw new FrontendApiException("The given class: \"$class\" has to implement the required interface: " . CommonCustomElementInterface::class);
+		
+		return $this->addToCommonElements("custom", $key, $loadForLayouts, [
+			"class" => $class,
+			"data"  => $data,
+		]);
 	}
 	
 	/**
@@ -203,7 +232,9 @@ class SiteConfigurator {
 	/**
 	 * Registers a new page menu for this site
 	 *
-	 * @param string $key     A unique key to identify this menu with
+	 * @param string $key     A unique key to identify this menu with. Note that
+	 *                        all common elements and menus share the same namespace
+	 *                        when the objects are passed to the frontend.
 	 * @param array  $options The options to build this menu with
 	 *                        - entryLevel int(0): Defines at which level in the rootLine the menu should start.
 	 *                        Default is “0” which gives us a menu of the very first pages on the site.
