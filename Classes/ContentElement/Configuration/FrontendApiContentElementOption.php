@@ -319,15 +319,18 @@ class FrontendApiContentElementOption extends AbstractChildExtConfigOption {
 			
 			// Load the element config
 			/** @var \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfig $elementConfig */
-			$elementConfig = $this->context->Fs->getFileContent("frontendApi/ContentElementConfig.txt");
+			$cacheFile = "frontendApi/ContentElementConfig.txt";
+			if (!$this->context->Fs->hasFile($cacheFile)) return;
+			$elementConfig = $this->context->Fs->getFileContent($cacheFile);
 			if (empty($elementConfig)) return;
 			
 			// Register data handler action handlers
-			foreach ($elementConfig->dataHandlerActionHandlers as $tables)
-				foreach ($tables as $table => $actions)
-					foreach ($actions as $action => $handlers)
-						foreach ($handlers as $handler)
-							$this->context->DataHandlerActions->registerActionHandler($table, $action, ...$handler);
+			if (!empty($elementConfig->dataHandlerActionHandlers))
+				foreach ($elementConfig->dataHandlerActionHandlers as $tables)
+					foreach ($tables as $table => $actions)
+						foreach ($actions as $action => $handlers)
+							foreach ($handlers as $handler)
+								$this->context->DataHandlerActions->registerActionHandler($table, $action, ...$handler);
 			
 			// Register plugin wizard icons
 			$this->context->TypoScript->addPageTsConfig($elementConfig->tsConfig);
