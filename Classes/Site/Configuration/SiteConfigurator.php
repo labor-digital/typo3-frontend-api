@@ -249,8 +249,12 @@ class SiteConfigurator {
 	 *                        - loadForLayouts array: Can be used to define the keys of layouts which should load this
 	 *                        element. If not given, this element will be auto-loaded on all pages. You may use
 	 *                        "default" to load this element in the default layout
+	 *                        - postProcessor string: A class that can be used to filter/alter the menu array
+	 *                        before it is passed to the frontend api. Has to implement the
+	 *                        PageMenuPostProcessorInterface
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
 	 */
 	public function registerPageMenu(string $key, array $options = []): SiteConfigurator {
 		// Prepare options
@@ -285,8 +289,12 @@ class SiteConfigurator {
 	 *                        - loadForLayouts array: Can be used to define the keys of layouts which should load this
 	 *                        element. If not given, this element will be auto-loaded on all pages. You may use
 	 *                        "default" to load this element in the default layout
+	 *                        - postProcessor string: A class that can be used to filter/alter the menu array
+	 *                        before it is passed to the frontend api. Has to implement the
+	 *                        PageMenuPostProcessorInterface
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
 	 */
 	public function registerRootLineMenu(string $key, array $options = []): SiteConfigurator {
 		// Prepare options
@@ -328,8 +336,12 @@ class SiteConfigurator {
 	 *                            - loadForLayouts array: Can be used to define the keys of layouts which should load
 	 *                            this element. If not given, this element will be auto-loaded on all pages. You may
 	 *                            use "default" to load this element in the default layout
+	 *                            - postProcessor string: A class that can be used to filter/alter the menu array
+	 *                            before it is passed to the frontend api. Has to implement the
+	 *                            PageMenuPostProcessorInterface
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
 	 */
 	public function registerDirectoryMenu(string $key, $pid, array $options = []): SiteConfigurator {
 		// Prepare options
