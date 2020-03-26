@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.2.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.2.0...v9.2.1) (2020-03-26)
+
+
+### Bug Fixes
+
+* **ContentElementOption:** make sure the element config cache file exists before including it ([5b2920c](https://github.com/labor-digital/typo3-frontend-api/commit/5b2920c809a80878993bf1c40fecd1564755361d))
+
 ## [9.2.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.1.1...v9.2.0) (2020-03-25)
 
 
