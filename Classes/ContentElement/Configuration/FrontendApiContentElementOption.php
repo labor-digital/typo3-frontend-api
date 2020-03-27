@@ -292,7 +292,7 @@ class FrontendApiContentElementOption extends AbstractChildExtConfigOption {
 		$GLOBALS["TCA"]["tt_content"]["additionalConfig"]["virtualColumns"] = $elementConfig->virtualColumns;
 		
 		// Store a simplified version of the element config
-		$fieldsToKeep = ["backendActionHandlers", "tsConfig", "iconDefinitionArgs", "backendPreviewRenderers",
+		$fieldsToKeep = ["dataHandlerActionHandlers", "tsConfig", "iconDefinitionArgs", "backendPreviewRenderers",
 						 "backendListLabelRenderers",
 		];
 		foreach (get_object_vars($elementConfig) as $k => $v) {
@@ -325,12 +325,10 @@ class FrontendApiContentElementOption extends AbstractChildExtConfigOption {
 			if (empty($elementConfig)) return;
 			
 			// Register data handler action handlers
-			if (!empty($elementConfig->dataHandlerActionHandlers))
-				foreach ($elementConfig->dataHandlerActionHandlers as $tables)
-					foreach ($tables as $table => $actions)
-						foreach ($actions as $action => $handlers)
-							foreach ($handlers as $handler)
-								$this->context->DataHandlerActions->registerActionHandler($table, $action, ...$handler);
+			foreach ($elementConfig->dataHandlerActionHandlers as $table => $actions)
+				foreach ($actions as $action => $handlers)
+					foreach ($handlers as $handler)
+						$this->context->DataHandlerActions->registerActionHandler($table, $action, ...$handler);
 			
 			// Register plugin wizard icons
 			$this->context->TypoScript->addPageTsConfig($elementConfig->tsConfig);
