@@ -34,7 +34,6 @@ use Neunerlei\TinyTimy\DateTimy;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
-use TYPO3\CMS\Fluid\ViewHelpers\Format\HtmlViewHelper;
 
 abstract class AbstractResourceTransformer extends TransformerAbstract {
 	use ResourceTransformerTrait;
@@ -294,11 +293,8 @@ abstract class AbstractResourceTransformer extends TransformerAbstract {
 		if (stripos($input, "t3://") === 0 && strip_tags($input) == $input) {
 			// Simple url handling
 			return $this->Links->getTypoLink($input);
-		} else if (!empty($v) && is_string($v) && stripos($v, "t3://") !== FALSE) {
-			// Hijack the html viewHelper to render the links of our content
-			return HtmlViewHelper::renderStatic(["parseFuncTSPath" => "lib.parseFunc_RTE"], function () use ($input) {
-				return $input;
-			}, $this->getInstanceOf(DummyRenderingContext::class));
+		} else if (!empty($input) && is_string($input) && stripos($input, "t3://") !== FALSE) {
+			return $this->getInstanceOf(RteContentParser::class)->parseContent($input);
 		} else return $input;
 	}
 	
