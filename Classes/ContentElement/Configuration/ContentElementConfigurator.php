@@ -554,6 +554,7 @@ class ContentElementConfigurator {
 	 * @inheritDoc
 	 */
 	protected function getDataHandlerFieldConstraints(): array {
+		if ($this->isUsedForExistingElement()) return ["CType" => $this->getExistingElementCType()];
 		return ["CType" => $this->signature];
 	}
 	
