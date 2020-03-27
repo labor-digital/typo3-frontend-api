@@ -295,6 +295,7 @@ class ContentElementConfigGenerator implements CachedStackGeneratorInterface {
 		return array_values([
 			"rendererClass"    => ContentElementHandler::class,
 			"fieldConstraints" => ["CType" => $configurator->getSignature()],
+			"override"         => TRUE,
 		]);
 	}
 	
