@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.3.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.2.1...v9.3.0) (2020-03-27)
+
+
+### Features
+
+* **ContentElement:** always override content element previews ([6a942a7](https://github.com/labor-digital/typo3-frontend-api/commit/6a942a7a0dd91a80adbafecea2e9ac9d1ed12bd8))
+* **ResourceTransformer:** implement a more reliable parsing solution for RTE link/html parsing ([4f49c52](https://github.com/labor-digital/typo3-frontend-api/commit/4f49c523de4a14802dfee3b205283790c741b74a))
+
+
+### Bug Fixes
+
+* **ContentElementConfigurator:** make ctype registration more straight forward ([3388ccb](https://github.com/labor-digital/typo3-frontend-api/commit/3388ccb42c5ddb827752feb1806139178dd1ee2c))
+* fix action handler registration for content elements ([565b611](https://github.com/labor-digital/typo3-frontend-api/commit/565b611cb89485a3c395f946b78c50f41c39783a))
+* **ContentElementConfigurator:** register data handler field constraints on the correct c-type when overwriting an existing element ([af6dc9f](https://github.com/labor-digital/typo3-frontend-api/commit/af6dc9f07d65b52d2ceeb8423f43e129379f51bf))
+
 ### [9.2.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.2.0...v9.2.1) (2020-03-26)
 
 
