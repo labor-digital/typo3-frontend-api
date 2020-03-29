@@ -85,8 +85,9 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
 		$id = $context->getUid();
 		if (substr($id, 0, 3) !== "NEW" && (((int)$id) . "") === $id . "") {
 			// Update existing record
-			/** @var \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler */
-			$dataHandler = $context->getEvent()->getArgs()["handler"];
+			/** @var \LaborDigital\Typo3BetterApi\Event\Events\DataHandlerSaveFilterEvent $event */
+			$event = $context->getEvent();
+			$dataHandler = $event->getDataHandler();
 			$currentValues = $dataHandler->recordInfo("tt_content", $context->getUid(), TtContentOverrides::VIRTUAL_COLUMN_FIELD);
 			$currentValues = Arrays::shorten($currentValues);
 			if (!empty($currentValues) && is_string($currentValues))
