@@ -93,7 +93,18 @@ class Page {
 		$pageLayoutField = $this->getCurrentSiteConfig()->pageLayoutField;
 		$pageData = $this->Page->getPageInfo($this->id);
 		if (empty($pageData)) $pageData = [];
-		return $this->pageLayout = !empty($pageData[$pageLayoutField]) ? $pageData[$pageLayoutField] : "default";
+		// Find layout by root line if required
+		if (!empty($pageData[$pageLayoutField]))
+			$this->pageLayout = $pageData[$pageLayoutField];
+		$rootLine = $this->Page->getRootLine($this->id);
+		$lookupField = $pageLayoutField . "_next_level";
+		foreach ($rootLine as $row) {
+			if (!empty($row[$pageLayoutField]))
+				return $this->pageLayout;
+			if (!empty($row[$lookupField]))
+				return $this->pageLayout = $row[$lookupField];
+		}
+		return $this->pageLayout = "default";
 	}
 	
 	/**
