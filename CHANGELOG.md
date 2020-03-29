@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.4.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.3.0...v9.4.0) (2020-03-29)
+
+
+### Features
+
+* **Page:** add more reliable page layout lookup for the page entity ([ea2983a](https://github.com/labor-digital/typo3-frontend-api/commit/ea2983a22642afa8c6de0cd8903d063154707fe5))
+
+
+### Bug Fixes
+
+* **VirtualColumnEventHandler:** fix data handler event extraction ([402bcc4](https://github.com/labor-digital/typo3-frontend-api/commit/402bcc4cf6318e8f82a72923ecbe44128d75c6e4))
+
 ## [9.3.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.2.1...v9.3.0) (2020-03-27)
 
 
