@@ -22,8 +22,10 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer;
 
 use DOMDocument;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
+use LaborDigital\Typo3FrontendApi\Event\PageMetaTagsFilterEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
+use Neunerlei\Arrays\Arrays;
 use Neunerlei\PathUtil\Path;
 use TYPO3\CMS\Core\MetaTag\MetaTagManagerRegistry;
 use TYPO3\CMS\Seo\Canonical\CanonicalGenerator;
@@ -101,20 +103,38 @@ class PageDataTransformer extends AbstractResourceTransformer {
 	 * @return array
 	 */
 	protected function getMetaTags(PageData $value): array {
+		$pageInfo = $value->getPageInfo();
 		foreach ($this->metaTagManagerRegistry->getAllManagers() as $manager) $manager->removeAllProperties();
-		$this->metaTagGenerator->generate(["page" => $value->getPageInfo()]);
+		$this->metaTagGenerator->generate(["page" => $pageInfo]);
 		$tagsString = "";
 		foreach ($this->metaTagManagerRegistry->getAllManagers() as $manager) $tagsString .= $manager->renderAllProperties();
 		$html = new DOMDocument("1.0", "utf-8");
 		$html->loadHTML($tagsString);
 		$tags = [];
+		$knownNodes = [];
 		foreach ($html->getElementsByTagName("meta") as $node) {
 			/** @var \DOMElement $node */
 			$attributes = [];
 			foreach ($node->attributes as $attr) $attributes[$attr->nodeName] = $attr->nodeValue;
 			$tags[] = $attributes;
+			if(isset($attributes["name"])) $knownNodes[] = $attributes["name"];
 		}
-		return $tags;
+		
+		// Add additional meta tags
+		if(!empty($pageInfo["description"]) && !in_array("description", $knownNodes))
+			$tags[] = [
+				"name" => "description",
+				"content" => trim($pageInfo["description"])
+			];
+		if(!empty($pageInfo["keywords"]) && !in_array("keywords", $knownNodes))
+			$tags[] = [
+				"name" => "keywords",
+				"content" => implode(",", Arrays::makeFromStringList($pageInfo["keywords"]))
+		];
+		
+		// Allow filtering
+		$this->EventBus->dispatch(($e = new PageMetaTagsFilterEvent($tags, $value)));
+		return $e->getTags();
 	}
 	
 }
