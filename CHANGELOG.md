@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.5.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.4.0...v9.5.0) (2020-03-30)
+
+
+### Features
+
+* **PageData:** add more relevant fields to the page data model + add event to filter page info array before processing it ([1242254](https://github.com/labor-digital/typo3-frontend-api/commit/1242254a97d76a9ad353c19cc66b0836645d2127))
+* **PageData:** extend support for meta tag generation for build in fields + allow filtering via event ([b3d6132](https://github.com/labor-digital/typo3-frontend-api/commit/b3d6132fae3f59ee5b2546d3c5c46887a0aa59f7))
+
 ## [9.4.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.3.0...v9.4.0) (2020-03-29)
 
 
