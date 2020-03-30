@@ -21,6 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3FrontendApi\Event\PageDataPageInfoFilterEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\Shared\ModelHydrationTrait;
@@ -64,7 +65,8 @@ class PageData {
 		if (isset($this->pageInfo)) return $this->pageInfo;
 		$pageInfo = $this->Page->getPageInfo($this->id);
 		if (empty($pageInfo)) throw new NotFoundException();
-		return $this->pageInfo = $pageInfo;
+		$this->EventBus->dispatch(($e = new PageDataPageInfoFilterEvent($this->id, $pageInfo)));
+		return $this->pageInfo = $e->getRow();
 	}
 	
 	/**

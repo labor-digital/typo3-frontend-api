@@ -32,12 +32,12 @@ class PageDataModel extends BetterEntity {
 	/**
 	 * @var string
 	 */
-	protected $layout;
+	protected $navTitle;
 	
 	/**
 	 * @var string
 	 */
-	protected $backendLayout;
+	protected $slug;
 	
 	/**
 	 * @var string
@@ -62,46 +62,46 @@ class PageDataModel extends BetterEntity {
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function getNavTitle(): string {
+		return $this->navTitle;
+	}
+	
+	/**
+	 * @param string $navTitle
+	 *
+	 * @return PageDataModel
+	 */
+	public function setNavTitle(string $navTitle): PageDataModel {
+		$this->navTitle = $navTitle;
+		return $this;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getSlug(): string {
+		return $this->slug;
+	}
+	
+	/**
+	 * @param string $slug
+	 *
+	 * @return PageDataModel
+	 */
+	public function setSlug(string $slug): PageDataModel {
+		$this->slug = $slug;
+		return $this;
+	}
+	
+	/**
 	 * @param string $title
 	 *
 	 * @return PageDataModel
 	 */
 	public function setTitle(string $title): PageDataModel {
 		$this->title = $title;
-		return $this;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getLayout(): string {
-		return (string)$this->layout;
-	}
-	
-	/**
-	 * @param string $layout
-	 *
-	 * @return PageDataModel
-	 */
-	public function setLayout(string $layout): PageDataModel {
-		$this->layout = $layout;
-		return $this;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getBackendLayout(): string {
-		return (string)$this->backendLayout;
-	}
-	
-	/**
-	 * @param string $backendLayout
-	 *
-	 * @return PageDataModel
-	 */
-	public function setBackendLayout(string $backendLayout): PageDataModel {
-		$this->backendLayout = $backendLayout;
 		return $this;
 	}
 	
