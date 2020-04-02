@@ -25,7 +25,6 @@ use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3BetterApi\Link\TypoLink;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPreProcessorEvent;
-use LaborDigital\Typo3FrontendApi\Shared\Adapter\DummyRenderingContext;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;

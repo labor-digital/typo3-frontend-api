@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright 2020 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.03.21 at 20:30
+ * Last modified: 2020.04.01 at 20:11
  */
 
-module.exports = {
-	title: "TYPO3 - Frontend API by LABOR.digital",
-	themeConfig: {
-		sidebarDepth: 2,
-		sidebar: [
-			"/",
-			"/guide/Tools.md"
-		]
-	}
-};
+namespace LaborDigital\Typo3FrontendApi\Imaging;
+
+
+use LaborDigital\Typo3FrontendApi\FrontendApiException;
+
+class ImagingException extends FrontendApiException {
+	
+}

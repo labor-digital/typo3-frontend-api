@@ -27,7 +27,8 @@
 		"league/route": "^4.3",
 		"laminas/laminas-httphandlerrunner": "^1.1",
 		"filp/whoops": "^2.5",
-		"league/fractal": "^0.18"
+		"league/fractal": "^0.18",
+		"rosell-dk/webp-convert": "^2.3"
 	},
 	"autoload": {
 		"psr-4": {

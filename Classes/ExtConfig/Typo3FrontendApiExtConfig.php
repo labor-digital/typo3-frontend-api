@@ -34,6 +34,7 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\ErrorHandler\Erro
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\ResponseFactory;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
+use LaborDigital\Typo3FrontendApi\Imaging\ImagingEventHandler;
 use LaborDigital\Typo3FrontendApi\TypoMiddleware\ApiMiddlewareFork;
 use Psr\Http\Message\ResponseFactoryInterface;
 
@@ -50,7 +51,9 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 		$configurator->table()->registerTableOverride(TtContentOverrides::class, "tt_content");
 		
 		// Register our event handlers
-		$configurator->event()->registerLazySubscriber(CacheMiddlewareEventHandler::class);
+		$configurator->event()
+			->registerLazySubscriber(CacheMiddlewareEventHandler::class)
+			->registerLazySubscriber(ImagingEventHandler::class);
 		
 		// Register default middlewares
 		$frontendApi = $configurator->frontendApi();

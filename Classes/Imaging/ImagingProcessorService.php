@@ -1,0 +1,124 @@
+<?php
+/**
+ * Copyright 2020 LABOR.digital
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Last modified: 2020.04.01 at 12:11
+ */
+
+namespace LaborDigital\Typo3FrontendApi\Imaging;
+
+
+use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3BetterApi\Event\TypoEventBus;
+use LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService;
+use LaborDigital\Typo3FrontendApi\Event\ImagingPostProcessorEvent;
+use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
+use LaborDigital\Typo3FrontendApi\Imaging\Provider\ImagingProviderInterface;
+use Neunerlei\FileSystem\Fs;
+use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
+
+class ImagingProcessorService {
+	
+	/**
+	 * @var \LaborDigital\Typo3BetterApi\Container\TypoContainer
+	 */
+	protected $container;
+	
+	/**
+	 * @var \LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService
+	 */
+	protected $falFileService;
+	
+	/**
+	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+	 */
+	protected $configRepository;
+	
+	/**
+	 * @var \LaborDigital\Typo3BetterApi\Event\TypoEventBus
+	 */
+	protected $eventBus;
+	
+	/**
+	 * ImagingProcessorService constructor.
+	 *
+	 * @param \LaborDigital\Typo3BetterApi\Container\TypoContainer                 $container
+	 * @param \LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService            $falFileService
+	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
+	 */
+	public function __construct(TypoContainer $container, FalFileService $falFileService,
+								FrontendApiConfigRepository $configRepository, TypoEventBus $eventBus) {
+		$this->container = $container;
+		$this->falFileService = $falFileService;
+		$this->configRepository = $configRepository;
+		$this->eventBus = $eventBus;
+	}
+	
+	/**
+	 * Processes the given imaging context by creating the required processed files and their matching redirect configuration
+	 *
+	 * @param \LaborDigital\Typo3FrontendApi\Imaging\ImagingContext $context
+	 *
+	 * @throws \LaborDigital\Typo3FrontendApi\Imaging\ImagingException
+	 */
+	public function process(ImagingContext $context) {
+		
+		// Prepare the definition
+		$definitions = $this->configRepository->tool()->get("imaging.definitions", []);
+		if (!isset($definitions[$context->getDefinitionKey()]))
+			throw new ImagingException("Invalid definition key given", 400);
+		$definition = $definitions[$context->getDefinitionKey()];
+		
+		// Resolve the file / file reference based on the id
+		try {
+			$fileOrReference = $context->getType() === "reference" ? $this->falFileService->getFileReference($context->getUid()) :
+				$this->falFileService->getFile($context->getUid());
+		} catch (ResourceDoesNotExistException $e) {
+		}
+		if (empty($fileOrReference)) throw new ImagingException("File was not found in FAL", 404);
+		$fileInfo = $this->falFileService->getFileInfo($fileOrReference);
+		if (!$fileInfo->isImage()) throw new ImagingException("The requested file is not an image", 404);
+		
+		// Check if we got a valid crop override
+		$crop = NULL;
+		if (!empty($context->getCrop())) {
+			$crop = $context->getCrop();
+			$cropVariants = $fileInfo->getImageInfo()->getCropVariants();
+			if ($crop === "none") $crop = FALSE;
+			else if (!isset($cropVariants[$crop]))
+				if (isset($cropVariants["default"])) $crop = "default";
+				else $crop = NULL;
+		}
+		if (!is_null($crop)) $definition["crop"] = $crop;
+		
+		// Create and execute the provider
+		$providerClass = $this->configRepository->tool()->get("imaging.options.imagingProvider");
+		$provider = $this->container->get($providerClass);
+		if (!$provider instanceof ImagingProviderInterface) throw new ImagingException("The provider does not implement the required interface!");
+		$provider->process($definition, $fileInfo, $context);
+		
+		// Allow post processing
+		$this->eventBus->dispatch(($e = new ImagingPostProcessorEvent(
+			$definition, $fileInfo, $context, $provider->getDefaultRedirect(), $provider->getWebPRedirect()
+		)));
+		
+		// Write the redirect files
+		$defaultRedirect = $e->getDefaultRedirect();
+		Fs::writeFile($context->getRedirectPath(), $defaultRedirect);
+		$webPRedirect = $e->getWebPRedirect();
+		if (!empty($webPRedirect))
+			Fs::writeFile($context->getRedirectPath() . "-webp", $webPRedirect);
+	}
+}
