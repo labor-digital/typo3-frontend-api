@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.6.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.5.0...v9.6.0) (2020-04-07)
+
+
+### Features
+
+* add imaging feature ([33f477b](https://github.com/labor-digital/typo3-frontend-api/commit/33f477b6d5dcbc00336c64a76b2c186e577373f5))
+
 ## [9.5.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.4.0...v9.5.0) (2020-03-30)
 
 
