@@ -76,7 +76,7 @@ class ImagingEndpointGenerator {
 		$entryPointDepth = count($endpointPathParts);
 		
 		// Load the template and apply the placeholders
-		$tpl = Fs::readFile(__DIR__ . "/imaging.tempalte.php");
+		$tpl = Fs::readFile(__DIR__ . "/imaging.template.php");
 		$tpl = str_replace(["@@FAI_HOST@@", "@@FAI_REDIRECT_DIR@@", "@@FAI_VENDOR_DIR@@", "@@FAI_EPD@@"],
 			[$hostname, $varDir, $vendorDir, $entryPointDepth], $tpl);
 		

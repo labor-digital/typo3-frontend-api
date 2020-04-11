@@ -53,6 +53,12 @@ class ImagingContext {
 	protected $crop;
 	
 	/**
+	 * True if a x2 version for retina displays is requested
+	 * @var bool
+	 */
+	protected $isX2;
+	
+	/**
 	 * ImagingContext constructor.
 	 *
 	 * @param string      $type
@@ -60,13 +66,16 @@ class ImagingContext {
 	 * @param string      $redirectPath
 	 * @param string      $definition
 	 * @param string|null $crop
+	 * @param bool        $isX2
 	 */
-	public function __construct(string $type, int $uid, string $redirectPath, string $definition, ?string $crop) {
+	public function __construct(string $type, int $uid, string $redirectPath, string $definition,
+								?string $crop, bool $isX2) {
 		$this->type = $type;
 		$this->uid = $uid;
 		$this->redirectPath = $redirectPath;
 		$this->definition = $definition;
 		$this->crop = $crop;
+		$this->isX2 = $isX2;
 	}
 	
 	/**
@@ -123,5 +132,13 @@ class ImagingContext {
 	 */
 	public function getCrop(): ?string {
 		return $this->crop;
+	}
+	
+	/**
+	 * Returns true if the x2 definition is required for retina images
+	 * @return bool
+	 */
+	public function isX2(): bool {
+		return $this->isX2;
 	}
 }

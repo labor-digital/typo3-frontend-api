@@ -81,6 +81,18 @@ class ImagingProcessorService {
 			throw new ImagingException("Invalid definition key given", 400);
 		$definition = $definitions[$context->getDefinitionKey()];
 		
+		// Prepare x2 definition
+		if ($context->isX2()) {
+			foreach ($definition as $k => $v) {
+				if (empty($v)) continue;
+				if (!in_array($k, ["width", "height", "maxWidth", "maxHeight", "minWidth", "minHeight"])) continue;
+				$definition[$k] = preg_replace_callback("~[0-9.,]+~si", function ($m) {
+					$v = floatval(str_replace(",", ".", $m[0]));
+					return ($v * 2) . "";
+				}, $v);
+			}
+		}
+		
 		// Resolve the file / file reference based on the id
 		try {
 			$fileOrReference = $context->getType() === "reference" ? $this->falFileService->getFileReference($context->getUid()) :

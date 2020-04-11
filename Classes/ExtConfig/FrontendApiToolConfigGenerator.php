@@ -21,6 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\ExtConfig;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\ExtConfig\Option\CachedValueGeneratorInterface;
+use LaborDigital\Typo3BetterApi\FileAndFolder\ResizedImageOptionsTrait;
 use LaborDigital\Typo3FrontendApi\Imaging\Provider\CoreImagingProvider;
 use LaborDigital\Typo3FrontendApi\Imaging\Provider\ImagingProviderInterface;
 use Neunerlei\Arrays\Arrays;
@@ -29,6 +30,7 @@ use Neunerlei\Options\Options;
 use Neunerlei\PathUtil\Path;
 
 class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface {
+	use ResizedImageOptionsTrait;
 	
 	/**
 	 * @var ExtConfigContext
@@ -101,31 +103,8 @@ class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface {
 	protected function generateImagingConfig(array $definitions, array $options): array {
 		// Validate the definitions
 		if (!isset($definitions["default"])) $definitions["default"] = [];
-		$def = [
-			"type"    => ["number", "null", "string"],
-			"default" => NULL,
-			"filter"  => function ($v) {
-				if (!is_null($v)) return (string)$v;
-				return NULL;
-			},
-		];
-		$definitions = Options::makeSingle("sets", $definitions, [
-			"type"     => "array",
-			"children" => [
-				"*" => [
-					"width"     => $def,
-					"minWidth"  => $def,
-					"maxWidth"  => $def,
-					"height"    => $def,
-					"minHeight" => $def,
-					"maxHeight" => $def,
-					"crop"      => [
-						"type"    => ["bool", "string"],
-						"default" => FALSE,
-					],
-				],
-			],
-		]);
+		foreach ($definitions as $k => $def)
+			$definitions[$k] = $this->applyResizedImageOptions($def);
 		
 		// Validate the options
 		$options = Options::make($options, [

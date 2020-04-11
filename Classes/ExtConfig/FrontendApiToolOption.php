@@ -85,13 +85,16 @@ class FrontendApiToolOption extends AbstractChildExtConfigOption {
 	 *                           Each value array can contain the following keys:
 	 *                           - width int|string: see *1
 	 *                           - height int|string: see *1
-	 *                           - minWidth int|string: see *1
-	 *                           - minHeight int|string: see *1
-	 *                           - maxWidth int|string: see *1
-	 *                           - maxHeight int|string: see *1
-	 *                           - crop bool|string (FALSE): True if the image should be cropped instead of stretched
+	 *                           - minWidth int The minimal width of the image in pixels
+	 *                           - minHeight int The minimal height of the image in pixels
+	 *                           - maxWidth int The maximal width of the image in pixels
+	 *                           - maxHeight int The maximal height of the image in pixels
+	 *                           - crop bool|string|array: True if the image should be cropped instead of stretched
 	 *                           Can also be the name of a cropVariant that should be rendered
+	 *                           Can be an array with (x,y,width,height) keys to provide a custom crop mask
 	 *                           Can be overwritten using the "crop" GET parameter on the endpoint
+	 *                           - params string: Additional command line parameters for imagick
+	 *                           see: https://imagemagick.org/script/command-line-options.php
 	 * @param array $options     Additional options for the imaging endpoint
 	 *                           - redirectDirectoryPath string: defines the directory
 	 *                           where the redirect information is stored (not the real image files!).
@@ -107,7 +110,8 @@ class FrontendApiToolOption extends AbstractChildExtConfigOption {
 	 *                           - webPConverterOptions array: Optional, additional options to be passed to the
 	 *                           webP converter implementation (rosell-dk/webp-convert). See the link below for possible options
 	 *
-	 * *1: A numeric value, can end a "c" to crop the image to the target width
+	 * *1: A numeric value, can also be a simple calculation. For further details take a look at imageResource.width:
+	 * https://docs.typo3.org/m/typo3/reference-typoscript/8.7/en-us/Functions/Imgresource/Index.html
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiToolOption
 	 * @see \LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService::getResizedImage()

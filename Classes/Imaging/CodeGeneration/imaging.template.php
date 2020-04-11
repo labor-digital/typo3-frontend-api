@@ -62,6 +62,9 @@ call_user_func(function () {
 	// Get the crop value
 	$crop = !empty($_GET["crop"]) && is_string($_GET["crop"]) ? $_GET["crop"] : NULL;
 	
+	// Check if an x2 image is requested
+	$isX2 = !empty($_GET["x2"]) && is_string($_GET["x2"]) && in_array(strtolower($_GET["x2"]), ["true", "1", "yes", "on"]);
+	
 	// Extract the id and type from the requested file
 	$fileParts = explode(".", $file);
 	if (count($fileParts) !== 4) _imagingError(400, "Invalid file given! Three parts are expected!");
@@ -78,14 +81,14 @@ call_user_func(function () {
 	
 	// Try to extract the redirect path from the local storage
 	$redirectInfoPath = FRONTEND_API_IMAGING_REDIRECT_DIR;
-	$redirectInfoPath .= $hash[0] . "/" . $hash[1] . "/" . $hash[2] . "/" . $type . "-" . $uid . "/";
+	$redirectInfoPath .= $hash[0] . "/" . $hash[1] . "/" . $hash[2] . "/" . $type . "-" . $uid . ($isX2 ? "-x2" : "") . "/";
 	$redirectInfoPath .= preg_replace("~[^a-zA-Z0-9\-_]~", "", $definition . rtrim("-" . $crop, "-"));
 	$redirectInfoPath .= "-" . md5($definition . "." . $crop);
 	$redirectInfoExists = file_exists($redirectInfoPath);
 	if (!$redirectInfoExists) {
 		// Build redirect info for the file
 		call_user_func(function (string $type, int $uid, string $redirectInfoPath,
-								 string $definition, ?string $crop) {
+								 string $definition, ?string $crop, bool $isX2) {
 			$composerFile = FRONTEND_API_IMAGING_VENDOR_DIR . "autoload.php";
 			if (!file_exists($composerFile)) _imagingError(500, "Could not find composer autoload.php");
 			$classLoader = require $composerFile;
@@ -97,12 +100,12 @@ call_user_func(function () {
 				"args" => [
 					$container->get(ImagingContext::class, [
 						"args" => [
-							$type, $uid, $redirectInfoPath, $definition, $crop,
+							$type, $uid, $redirectInfoPath, $definition, $crop, $isX2,
 						],
 					]),
 				],
 			])->run();
-		}, $type, $uid, $redirectInfoPath, $definition, $crop);
+		}, $type, $uid, $redirectInfoPath, $definition, $crop, $isX2);
 	}
 	
 	// Check if the file exists now

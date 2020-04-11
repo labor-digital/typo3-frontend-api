@@ -96,13 +96,13 @@ on the FalFileService!
 Each value array can contain the following keys:
     - **width** int|string: see *1
     - **height** int|string: see *1
-    - **minWidth** int|string: see *1
-    - **minHeight** int|string: see *1
-    - **maxWidth** int|string: see *1
-    - **maxHeight** int|string: see *1
-    - **crop** bool|string (FALSE): True if the image should be cropped instead of stretched
+    - minWidth int The minimal width of the image in pixels
+    - minHeight int The minimal height of the image in pixels
+    - maxWidth int The maximal width of the image in pixels
+    - maxHeight int The maximal height of the image in pixels
+    - crop bool|string|array: True if the image should be cropped instead of stretched
     Can also be the name of a cropVariant that should be rendered
-    Can be overwritten using the "crop" GET parameter on the endpoint
+    Can be an array with (x,y,width,height) keys to provide a custom crop mask
 - $options Additional options for the imaging endpoint
     - **redirectDirectoryPath** string: defines the directory
     where the redirect information is stored (not the original image files!).
@@ -115,7 +115,7 @@ Each value array can contain the following keys:
     - **webPConverterOptions** array: Optional, additional options to be passed to the
     webP converter implementation (rosell-dk/webp-convert). See the link below for possible options
     
-*1: A numeric value, can end a "c" to crop the image to the target width
+*1: A numeric value, can also be a simple calculation. For further details take a look at [imageResource.width](https://docs.typo3.org/m/typo3/reference-typoscript/8.7/en-us/Functions/Imgresource/Index.html)
 :::
 ```php
 <?php
@@ -162,6 +162,8 @@ You can create any definition key for every image file served by Imaging.
 * If you want to crop the image to a format that is not part of your definition, you can pass the "&crop=CROP_VARIANT" parameter to the URL.
     * If the requested image does not have the given variant, the original image dimensions are used.
     * To disable the cropping for a definition that defines a crop variant set "crop" to "none".
+* If you want to generate the image for retina displays you can append the "&x2=true" parameter to the URL.
+When you use this parameter all values will be multiplied by 2 before they are applied to the image
 
 ### Caching
 All generated redirects are cached as files in the ```/var/imaging``` directory. To reset all generated redirects, clear your "global TYPO3 cache".
