@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.7.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.6.0...v9.7.0) (2020-04-11)
+
+
+### Features
+
+* **Imaging:** add x2 option to render retina images + use new resize image options trait ([6b00a60](https://github.com/labor-digital/typo3-frontend-api/commit/6b00a60ab65bce89c575dbfab2952b82aa09ef8d))
+
 ## [9.6.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.5.0...v9.6.0) (2020-04-07)
 
 
