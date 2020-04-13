@@ -21,6 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3FrontendApi\Event\PageRootLineFilterEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
 use LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface;
 use Neunerlei\Inflection\Inflector;
@@ -123,6 +124,13 @@ class Page {
 		if (!is_null($this->rootLine)) return $this->rootLine;
 		$rootLine = [];
 		$rootLineRaw = $this->Page->getRootLine($this->id);
+		$this->rootLine = $rootLineRaw;
+		
+		// Allow filtering
+		$this->EventBus->dispatch(($e = new PageRootLineFilterEvent($this, $rootLineRaw)));
+		$this->rootLine = NULL;
+		$rootLineRaw = $e->getRootLine();
+		
 		$additionalFields = $this->getCurrentSiteConfig()->additionalRootLineFields;
 		$dataProviders = $this->getCurrentSiteConfig()->rootLineDataProviders;
 		$c = 0;
