@@ -44,7 +44,8 @@ class PageTransformer extends AbstractResourceTransformer {
 			$this->defaultIncludes[] = "translation";
 		
 		// Check if we have to render the common elements, because we changed the layout
-		if (!empty($value->getLastLayout()) && $value->getLastLayout() !== $value->getPageLayout())
+		// or check if common elements have to be refreshed
+		if ($value->isLayoutChange() || !empty($value->getRefreshCommon()))
 			$this->defaultIncludes[] = "common";
 		
 		// Convert the page object itself

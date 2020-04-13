@@ -70,9 +70,10 @@ class PageController extends AbstractResourceController {
 		// Extract filters
 		$loadedLanguageCodes = Arrays::makeFromStringList($context->getQuery()->get("loadedLanguageCodes", ""));
 		$currentLayout = $context->getQuery()->get("currentLayout", "");
+		$refreshCommon = Arrays::makeFromStringList($context->getQuery()->get("refreshCommon", ""));
 		
 		// Get the additional
-		return Page::makeInstance($id, $currentLayout, $loadedLanguageCodes);
+		return Page::makeInstance($id, $currentLayout, $loadedLanguageCodes, $refreshCommon);
 	}
 	
 	/**

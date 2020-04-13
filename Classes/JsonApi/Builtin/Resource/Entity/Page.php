@@ -56,6 +56,14 @@ class Page {
 	protected $loadedLanguageCodes;
 	
 	/**
+	 * An optional list of common element keys that should be included in the response.
+	 * Useful if elements have to be refreshed on every page load.
+	 * This is overwritten if the layout is changed because in that case all common elements will be rendered!
+	 * @var array
+	 */
+	protected $refreshCommon;
+	
+	/**
 	 * The last known layout of the frontend.
 	 * This is used to check which common elements should be rendered.
 	 * Common elements are only rendered if this layout does not match the page's layout
@@ -192,6 +200,22 @@ class Page {
 	}
 	
 	/**
+	 * Returns true if we detected a layout change between the requests -> render all common elements
+	 * @return bool
+	 */
+	public function isLayoutChange(): bool {
+		return !empty($this->getLastLayout()) && $this->getLastLayout() !== $this->getPageLayout();
+	}
+	
+	/**
+	 * Returns a list of common element keys that should be included in the response.
+	 * @return array
+	 */
+	public function getRefreshCommon(): array {
+		return $this->refreshCommon;
+	}
+	
+	/**
 	 * Returns the page data object for this page
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
 	 */
@@ -213,7 +237,7 @@ class Page {
 	 * @return array
 	 */
 	public function getCommonElements(): array {
-		return $this->getCommonElementsInternal($this->getPageLayout());
+		return $this->getCommonElementsInternal($this->getPageLayout(), ($this->isLayoutChange() ? [] : $this->getRefreshCommon()));
 	}
 	
 	/**
@@ -231,13 +255,16 @@ class Page {
 	 * @param string $lastLayout
 	 * @param array  $loadedLanguageCodes
 	 *
+	 * @param array  $refreshCommon
+	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
 	 */
-	public static function makeInstance(int $pageId, string $lastLayout, array $loadedLanguageCodes): Page {
+	public static function makeInstance(int $pageId, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon): Page {
 		$self = TypoContainer::getInstance()->get(static::class);
 		$self->id = $pageId;
 		$self->lastLayout = $lastLayout;
 		$self->loadedLanguageCodes = $loadedLanguageCodes;
+		$self->refreshCommon = $refreshCommon;
 		return $self;
 	}
 }
