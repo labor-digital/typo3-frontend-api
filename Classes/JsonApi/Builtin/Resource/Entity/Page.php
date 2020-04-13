@@ -204,7 +204,7 @@ class Page {
 	 * @return bool
 	 */
 	public function isLayoutChange(): bool {
-		return !empty($this->getLastLayout()) && $this->getLastLayout() !== $this->getPageLayout();
+		return empty($this->getLastLayout()) || $this->getLastLayout() !== $this->getPageLayout();
 	}
 	
 	/**
