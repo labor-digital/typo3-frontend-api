@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.8.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.7.0...v9.8.0) (2020-04-13)
+
+
+### Features
+
+* **Page:** add "refreshCommon" query argument to refresh common elements while a page is rendered ([161b258](https://github.com/labor-digital/typo3-frontend-api/commit/161b258b74ff7f01b1212fafaae1edb1fc43fbcf))
+* **Page:** allow filtering of the raw root line array before it is processed by the API ([b869887](https://github.com/labor-digital/typo3-frontend-api/commit/b8698875f96d3ab90d8244aaf4c825587ae52d9e))
+
+
+### Bug Fixes
+
+* **Page:** make sure the common elements are returned by default again ([f452b68](https://github.com/labor-digital/typo3-frontend-api/commit/f452b68c600e762bf26c6f097cdf16edb5f06935))
+
 ## [9.7.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.6.0...v9.7.0) (2020-04-11)
 
 
