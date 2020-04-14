@@ -103,6 +103,24 @@ class ImagingProcessorService {
 		$fileInfo = $this->falFileService->getFileInfo($fileOrReference);
 		if (!$fileInfo->isImage()) throw new ImagingException("The requested file is not an image", 404);
 		
+		// Validate the hash
+		if (!Fs::exists($context->getRedirectHashPath())) {
+			$givenHash = basename($context->getRedirectHashPath());
+			$realHash = md5($fileInfo->getHash() . \GuzzleHttp\json_encode($fileInfo->getImageInfo()->getCropVariants()));
+			
+			// If the hashes do match -> a new crop was created or the image changed -> flush the directory
+			if ($givenHash === $realHash) {
+				$dirName = dirname($context->getRedirectHashPath());
+				Fs::flushDirectory($dirName);
+				Fs::mkdir($dirName);
+				Fs::touch($context->getRedirectHashPath());
+			} else {
+				// The hashes don't match, does the redirect file exist?
+				// Yes -> Okay handle the file like normally -> outdated link...
+				if (Fs::exists($context->getRedirectPath())) return;
+			}
+		}
+		
 		// Check if we got a valid crop override
 		$crop = NULL;
 		if (!empty($context->getCrop())) {

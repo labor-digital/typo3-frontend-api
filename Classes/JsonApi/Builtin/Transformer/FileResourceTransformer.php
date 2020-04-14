@@ -107,11 +107,12 @@ class FileResourceTransformer extends AbstractResourceTransformer {
 				// Handle crop variants or advanced endpoint
 				if (!empty($this->ConfigRepository->tool()->get("imaging", FALSE))) {
 					// Make the identifier
+					$cropVariants = $imageInfo->getCropVariants();
 					$identifier = $fileInfo->getFileName();
 					$identifier = substr($identifier, 0, -strlen($fileInfo->getExtension()) - 1);
 					$identifier = Inflector::toSlug($identifier);
 					$identifier = preg_replace("~-+~", "-", $identifier);
-					$identifier .= "." . $fileInfo->getHash();
+					$identifier .= "." . md5($fileInfo->getHash() . \GuzzleHttp\json_encode($cropVariants));
 					$identifier .= "." . ($fileInfo->isFileReference() ? "r" : "f") . $fileInfo->getUid();
 					$identifier .= "." . $fileInfo->getExtension();
 					
@@ -120,7 +121,7 @@ class FileResourceTransformer extends AbstractResourceTransformer {
 					$endpointUrl = Path::makeRelative($endpointPath, $this->TypoContext->getPathAspect()->getPublicPath());
 					$info["url"] = $this->Links->getHost() . "/" . $endpointUrl .
 						"/imaging.php?file=" . urlencode($identifier);
-					$info["image"]["variants"] = array_keys($imageInfo->getCropVariants());
+					$info["image"]["variants"] = array_keys($cropVariants);
 				} else {
 					// Build all crop variants
 					$variants = [];

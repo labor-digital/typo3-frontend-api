@@ -80,6 +80,7 @@ class CoreImagingProvider extends AbstractImagingProvider {
 		// Handle web-p generation
 		if (in_array(strtolower($processed->getExtension()), ["png", "webp", "jpg", "jpeg"])) {
 			// Create a new processed file for the webp storage
+			$definition["hash"] = $processed->getSha1();
 			$definition["asWebP"] = TRUE;
 			$processedWebp = $this->fileRepository->findOneByOriginalFileAndTaskTypeAndConfiguration(
 				$fileInfo->getFile(), ProcessedFile::CONTEXT_IMAGECROPSCALEMASK, $definition);

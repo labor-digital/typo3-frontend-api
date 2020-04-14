@@ -35,6 +35,12 @@ class ImagingContext {
 	protected $uid;
 	
 	/**
+	 * The unique hash for the image and variants
+	 * @var string
+	 */
+	protected $redirectHashPath;
+	
+	/**
 	 * The path to the file where the redirect information is stored
 	 * @var string
 	 */
@@ -68,11 +74,12 @@ class ImagingContext {
 	 * @param string|null $crop
 	 * @param bool        $isX2
 	 */
-	public function __construct(string $type, int $uid, string $redirectPath, string $definition,
+	public function __construct(string $type, int $uid, string $redirectPath, string $redirectHashPath, string $definition,
 								?string $crop, bool $isX2) {
 		$this->type = $type;
 		$this->uid = $uid;
 		$this->redirectPath = $redirectPath;
+		$this->redirectHashPath = $redirectHashPath;
 		$this->definition = $definition;
 		$this->crop = $crop;
 		$this->isX2 = $isX2;
@@ -116,6 +123,13 @@ class ImagingContext {
 	 */
 	public function getRedirectPath(): string {
 		return $this->redirectPath;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getRedirectHashPath(): string {
+		return $this->redirectHashPath;
 	}
 	
 	/**

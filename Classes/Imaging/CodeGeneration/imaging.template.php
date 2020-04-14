@@ -81,13 +81,17 @@ call_user_func(function () {
 	
 	// Try to extract the redirect path from the local storage
 	$redirectInfoPath = FRONTEND_API_IMAGING_REDIRECT_DIR;
-	$redirectInfoPath .= $hash[0] . "/" . $hash[1] . "/" . $hash[2] . "/" . $type . "-" . $uid . ($isX2 ? "-x2" : "") . "/";
+	$idHash = md5($type . "-" . $uid);
+	$redirectInfoPath .= $idHash[0] . "/" . $idHash[1] . "/" . $idHash[2] . "/";
+	$redirectInfoPath .= $type . "-" . $uid . ($isX2 ? "-x2" : "") . "/";
+	$redirectHashPath = $redirectInfoPath . $hash;
 	$redirectInfoPath .= preg_replace("~[^a-zA-Z0-9\-_]~", "", $definition . rtrim("-" . $crop, "-"));
 	$redirectInfoPath .= "-" . md5($definition . "." . $crop);
 	$redirectInfoExists = file_exists($redirectInfoPath);
-	if (!$redirectInfoExists) {
+	$redirectHashExists = $redirectInfoExists && file_exists($redirectHashPath);
+	if (!$redirectInfoExists || !$redirectHashExists) {
 		// Build redirect info for the file
-		call_user_func(function (string $type, int $uid, string $redirectInfoPath,
+		call_user_func(function (string $type, int $uid, string $redirectInfoPath, string $redirectHashPath,
 								 string $definition, ?string $crop, bool $isX2) {
 			$composerFile = FRONTEND_API_IMAGING_VENDOR_DIR . "autoload.php";
 			if (!file_exists($composerFile)) _imagingError(500, "Could not find composer autoload.php");
@@ -100,12 +104,12 @@ call_user_func(function () {
 				"args" => [
 					$container->get(ImagingContext::class, [
 						"args" => [
-							$type, $uid, $redirectInfoPath, $definition, $crop, $isX2,
+							$type, $uid, $redirectInfoPath, $redirectHashPath, $definition, $crop, $isX2,
 						],
 					]),
 				],
 			])->run();
-		}, $type, $uid, $redirectInfoPath, $definition, $crop, $isX2);
+		}, $type, $uid, $redirectInfoPath, $redirectHashPath, $definition, $crop, $isX2);
 	}
 	
 	// Check if the file exists now
