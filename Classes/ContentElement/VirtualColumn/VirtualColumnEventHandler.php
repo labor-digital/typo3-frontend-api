@@ -23,8 +23,10 @@ namespace LaborDigital\Typo3FrontendApi\ContentElement\VirtualColumn;
 use LaborDigital\Typo3BetterApi\DataHandler\DataHandlerActionContext;
 use LaborDigital\Typo3BetterApi\Event\Events\DataHandlerDbFieldsFilterEvent;
 use LaborDigital\Typo3BetterApi\Event\Events\DataHandlerRecordInfoFilterEvent;
+use LaborDigital\Typo3BetterApi\Event\Events\RefIndexRecordDataFilterEvent;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
+use Neunerlei\Arrays\ArrayGeneratorException;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\EventBus\Subscription\EventSubscriptionInterface;
 use Neunerlei\EventBus\Subscription\LazyEventSubscriberInterface;
@@ -64,6 +66,7 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
 	public static function subscribeToEvents(EventSubscriptionInterface $subscription) {
 		$subscription->subscribe(DataHandlerRecordInfoFilterEvent::class, "__dataHandlerRecordInfoFilter");
 		$subscription->subscribe(DataHandlerDbFieldsFilterEvent::class, "__dataHandlerFieldArrayFilter");
+		$subscription->subscribe(RefIndexRecordDataFilterEvent::class, "__refIndexFieldFilter");
 	}
 	
 	/**
@@ -183,6 +186,30 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
 		$row = array_diff_key($row, $allVirtualColumns);
 		
 		// Done
+		$event->setRow($row);
+	}
+	
+	/**
+	 * This listener makes sure the v-columns are correctly de-serialized when the ref index is generated
+	 *
+	 * @param \LaborDigital\Typo3BetterApi\Event\Events\RefIndexRecordDataFilterEvent $event
+	 */
+	public function __refIndexFieldFilter(RefIndexRecordDataFilterEvent $event) {
+		// Ignore if we are not listening...
+		if ($event->getTableName() !== "tt_content") return;
+		
+		// Load the field array
+		$row = $event->getRow();
+		
+		// Unpack the vcols
+		if (empty($row[TtContentOverrides::VIRTUAL_COLUMN_FIELD])) return;
+		try {
+			$row = Arrays::merge($row, Arrays::makeFromJson($row[TtContentOverrides::VIRTUAL_COLUMN_FIELD]));
+		} catch (ArrayGeneratorException $exception) {
+			// Ignore exception and continue silently...
+		}
+		
+		// Update the row
 		$event->setRow($row);
 	}
 	
