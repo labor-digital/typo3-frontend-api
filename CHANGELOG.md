@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.9.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.9.0...v9.9.1) (2020-04-15)
+
+
+### Bug Fixes
+
+* **Page:** make sure the correct page layout is returned ([ea1307c](https://github.com/labor-digital/typo3-frontend-api/commit/ea1307c6a3fc06ac6783eb63a8720de9a4016d1d))
+
 ## [9.9.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.8.0...v9.9.0) (2020-04-15)
 
 
