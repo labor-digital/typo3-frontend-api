@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.9.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.8.0...v9.9.0) (2020-04-15)
+
+
+### Features
+
+* **Imaging:** prevent file system bloating using the file hash + make endpoint aware of crop changes ([33ad237](https://github.com/labor-digital/typo3-frontend-api/commit/33ad23771fd50ca900903ecbf3c6640fe00cbb27))
+
+
+### Bug Fixes
+
+* **VirtualColumn:** make sure the ref-index is correctly generated for virtual columns ([4507403](https://github.com/labor-digital/typo3-frontend-api/commit/450740309ecf23fe5f5a924e7bfdfef61cad73ef))
+
 ## [9.8.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.7.0...v9.8.0) (2020-04-13)
 
 
