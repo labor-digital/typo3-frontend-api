@@ -104,7 +104,7 @@ class Page {
 		if (empty($pageData)) $pageData = [];
 		// Find layout by root line if required
 		if (!empty($pageData[$pageLayoutField]))
-			$this->pageLayout = $pageData[$pageLayoutField];
+			return $this->pageLayout = $pageData[$pageLayoutField];
 		$rootLine = $this->Page->getRootLine($this->id);
 		$lookupField = $pageLayoutField . "_next_level";
 		foreach ($rootLine as $row) {
