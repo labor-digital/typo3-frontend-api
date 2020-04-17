@@ -121,15 +121,14 @@ class ImagingProcessorService {
 			}
 		}
 		
-		// Check if we got a valid crop override
-		$crop = NULL;
+		// Select the best matching crop variant
+		$cropVariants = $fileInfo->getImageInfo()->getCropVariants();
+		if (isset($definition["crop"]) && isset($cropVariants[$definition["crop"]])) $crop = $definition["crop"];
+		else $crop = isset($cropVariants["default"]) ? "default" : NULL;
 		if (!empty($context->getCrop())) {
-			$crop = $context->getCrop();
-			$cropVariants = $fileInfo->getImageInfo()->getCropVariants();
-			if ($crop === "none") $crop = FALSE;
-			else if (!isset($cropVariants[$crop]))
-				if (isset($cropVariants["default"])) $crop = "default";
-				else $crop = NULL;
+			$givenCrop = $context->getCrop();
+			if ($givenCrop === "none") $crop = FALSE;
+			else if (isset($cropVariants[$givenCrop])) $crop = $givenCrop;
 		}
 		if (!is_null($crop)) $definition["crop"] = $crop;
 		

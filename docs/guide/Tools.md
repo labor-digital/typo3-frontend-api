@@ -165,6 +165,14 @@ You can create any definition key for every image file served by Imaging.
 * If you want to generate the image for retina displays you can append the "&x2=true" parameter to the URL.
 When you use this parameter all values will be multiplied by 2 before they are applied to the image
 
+::: tip A note on "crop"
+- If no crop parameter BUT a "default" crop variant exists, it is automatically selected.
+- If the definition specifies a "crop" option it will be preferred over the "default" option.
+- If you want to retrieve the uncropped image use crop=none
+- If the given crop option (either as parameter or via definition) was not found for the image "default" will be used as a fallback
+- If no "default" variant was found for the image the uncropped image will be returned
+:::
+
 ### Caching
 All generated redirects are cached as files in the ```/var/imaging``` directory. To reset all generated redirects, clear your "global TYPO3 cache".
  
