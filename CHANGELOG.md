@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.10.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.9.1...v9.10.0) (2020-04-17)
+
+
+### Features
+
+* **PageData:** add support for page data sliding -> inherit configuration from parent pages ([4944b39](https://github.com/labor-digital/typo3-frontend-api/commit/4944b39a0e9e68ae275040665f55b7754fa14e78))
+
+
+### Bug Fixes
+
+* **Imaging:** make lookup of default crop variant more reliable ([a18f4bd](https://github.com/labor-digital/typo3-frontend-api/commit/a18f4bdab42057de3851fa8588ccc5b7c42b70a8))
+
 ### [9.9.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.9.0...v9.9.1) (2020-04-15)
 
 
