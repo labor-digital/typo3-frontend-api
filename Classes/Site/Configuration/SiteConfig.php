@@ -37,6 +37,12 @@ class SiteConfig {
 	public $pageDataClass = PageDataModel::class;
 	
 	/**
+	 * A list of database fields that should be inherited from the parent pages if their current value is empty
+	 * @var array
+	 */
+	public $pageDataSlideFields = [];
+	
+	/**
 	 * Defines which field is used to define the layout of the frontend page.
 	 * By default this is "backend_layout", but it can be any field of the pages table.
 	 * @var string

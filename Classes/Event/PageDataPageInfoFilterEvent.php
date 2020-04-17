@@ -41,14 +41,21 @@ class PageDataPageInfoFilterEvent {
 	protected $row;
 	
 	/**
+	 * The map of fields and their parent page uids to map references correctly
+	 * @var array
+	 */
+	protected $slideFieldPidMapping;
+	
+	/**
 	 * PageDataPageInfoFilterEvent constructor.
 	 *
 	 * @param int   $uid
 	 * @param array $row
 	 */
-	public function __construct(int $uid, array $row) {
+	public function __construct(int $uid, array $row, array $slideFieldPidMapping) {
 		$this->uid = $uid;
 		$this->row = $row;
+		$this->slideFieldPidMapping = $slideFieldPidMapping;
 	}
 	
 	/**
@@ -57,6 +64,14 @@ class PageDataPageInfoFilterEvent {
 	 */
 	public function getUid(): int {
 		return $this->uid;
+	}
+	
+	/**
+	 * Returns the map of fields and their parent page uids to map references correctly
+	 * @return array
+	 */
+	public function getSlideFieldPidMapping(): array {
+		return $this->slideFieldPidMapping;
 	}
 	
 	/**
@@ -69,6 +84,7 @@ class PageDataPageInfoFilterEvent {
 	
 	/**
 	 * Updates the raw page data as an array to filter
+	 *
 	 * @param array $row
 	 *
 	 * @return PageDataPageInfoFilterEvent

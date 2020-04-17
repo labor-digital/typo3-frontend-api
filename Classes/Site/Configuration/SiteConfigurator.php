@@ -203,6 +203,19 @@ class SiteConfigurator {
 	}
 	
 	/**
+	 * Used to configure a list of database fields that should be inherited from the parent pages if their current value is empty.
+	 * Useful for page media or social media tags to inherit data easily
+	 *
+	 * @param array $fields A list of database field names to inherit
+	 *
+	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+	 */
+	public function setPageDataSlideFields(array $fields): SiteConfigurator {
+		$this->config->pageDataSlideFields = $fields;
+		return $this;
+	}
+	
+	/**
 	 * Can be used to change which field is used to define the layout of the frontend page.
 	 * By default this is "backend_layout", but it can be any field of the pages table.
 	 *
