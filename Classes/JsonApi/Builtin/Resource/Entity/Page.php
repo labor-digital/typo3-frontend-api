@@ -224,6 +224,14 @@ class Page {
 	}
 	
 	/**
+	 * Returns the list of pids that are configured for this page
+	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PagePidConfig
+	 */
+	public function getPagePidConfig(): PagePidConfig {
+		return $this->getInstanceOf(PagePidConfig::class, [$this->id]);
+	}
+	
+	/**
 	 * Returns the page data object for this page
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
 	 */

@@ -22,16 +22,20 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer;
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
-use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
 
 class PageTransformer extends AbstractResourceTransformer {
 	
 	/**
-	 * Make the page layout optional
+	 * Prepare the list of available includes
 	 * @var array
 	 */
-	protected $availableIncludes = ["data", "content", "common", "translation"];
+	protected $availableIncludes = ["data", "content", "common", "translation", "pidConfig"];
+	
+	/**
+	 * Register all default includes
+	 * @var array
+	 */
+	protected $defaultIncludes = ["pidConfig"];
 	
 	/**
 	 * @inheritDoc
@@ -61,6 +65,18 @@ class PageTransformer extends AbstractResourceTransformer {
 	}
 	
 	/**
+	 * Allow the inclusion of the page pid configuration object
+	 *
+	 * @param $value
+	 *
+	 * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+	 */
+	public function includePidConfig($value) {
+		if (!$value instanceof Page) return $this->null();
+		return $this->autoIncludeItem($value->getPagePidConfig());
+	}
+	
+	/**
 	 * Allow the inclusion of the page data object
 	 *
 	 * @param $value
@@ -69,7 +85,7 @@ class PageTransformer extends AbstractResourceTransformer {
 	 */
 	public function includeData($value) {
 		if (!$value instanceof Page) return $this->null();
-		return new Item($value->getPageData(), $this->transformerFactory->getTransformer(), "pageData");
+		return $this->autoIncludeItem($value->getPageData());
 	}
 	
 	/**
@@ -81,7 +97,7 @@ class PageTransformer extends AbstractResourceTransformer {
 	 */
 	public function includeContent($value) {
 		if (!$value instanceof Page) return $this->null();
-		return new Item($value->getPageContents(), $this->transformerFactory->getTransformer(), "pageContent");
+		return $this->autoIncludeItem($value->getPageContents());
 	}
 	
 	/**
@@ -93,7 +109,7 @@ class PageTransformer extends AbstractResourceTransformer {
 	 */
 	public function includeCommon($value) {
 		if (!$value instanceof Page) return $this->null();
-		return new Collection($value->getCommonElements(), $this->transformerFactory->getTransformer(), "commonElement");
+		return $this->autoIncludeCollection($value->getCommonElements());
 	}
 	
 	/**
@@ -105,6 +121,6 @@ class PageTransformer extends AbstractResourceTransformer {
 	 */
 	public function includeTranslation($value) {
 		if (!$value instanceof Page) return $this->null();
-		return new Item($value->getPageTranslation(), $this->transformerFactory->getTransformer(), "pageTranslation");
+		return $this->autoIncludeItem($value->getPageTranslation());
 	}
 }
