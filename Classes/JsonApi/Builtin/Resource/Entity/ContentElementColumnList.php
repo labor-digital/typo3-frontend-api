@@ -38,6 +38,28 @@ class ContentElementColumnList implements SelfTransformingInterface {
 	public $columns = [];
 	
 	/**
+	 * ContentElementColumnList constructor.
+	 *
+	 * @param array         $contents
+	 * @param TypoContainer $container
+	 */
+	public function __construct(array $contents, TypoContainer $container) {
+		foreach ($contents as $colId => $columnElements) {
+			foreach ($columnElements as $columnElement) {
+				$element = $container->get(ContentElement::class, [
+					"args" => [
+						ContentElement::TYPE_TT_CONTENT, $columnElement["uid"],
+					],
+				]);
+				if (!empty($columnElement["children"]))
+					$element->children = $container->get(ContentElementColumnList::class,
+						["args" => [$columnElement["children"]]]);
+				$this->columns[$colId][] = $element;
+			}
+		}
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -67,18 +89,10 @@ class ContentElementColumnList implements SelfTransformingInterface {
 	 * @param array $contents
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
-	 * @see \LaborDigital\Typo3BetterApi\Page\PageService::getPageContents()
+	 * @see        \LaborDigital\Typo3BetterApi\Page\PageService::getPageContents()
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstanceFromPageContentsArray(array $contents): ContentElementColumnList {
-		$self = TypoContainer::getInstance()->get(static::class);
-		foreach ($contents as $colId => $columnElements) {
-			foreach ($columnElements as $columnElement) {
-				$element = ContentElement::makeInstanceElementWithAutomaticPopulation($columnElement["uid"]);
-				if (!empty($columnElement["children"]))
-					$element->children = ContentElementColumnList::makeInstanceFromPageContentsArray($columnElement["children"]);
-				$self->columns[$colId][] = $element;
-			}
-		}
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$contents]]);
 	}
 }

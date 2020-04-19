@@ -44,7 +44,7 @@ class PageDataController extends AbstractResourceController {
 	 * @inheritDoc
 	 */
 	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return PageData::makeInstance($id);
+		return $this->getInstanceOf(PageData::class, [$id]);
 	}
 	
 	/**

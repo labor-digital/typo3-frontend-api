@@ -58,6 +58,15 @@ class PageData {
 	protected $slideParentPageInfoMap = [];
 	
 	/**
+	 * PageData constructor.
+	 *
+	 * @param int $id The pid of the page we should represent the data for
+	 */
+	public function __construct(int $id) {
+		$this->id = $id;
+	}
+	
+	/**
 	 * Returns the page data representation as an object
 	 * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 	 * @throws \League\Route\Http\Exception\NotFoundException
@@ -118,11 +127,10 @@ class PageData {
 	 * @param int $id
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(int $id): PageData {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->id = $id;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$id]]);
 	}
 	
 	/**

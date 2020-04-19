@@ -20,9 +20,10 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
+use Closure;
+use InvalidArgumentException;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler;
 use LaborDigital\Typo3FrontendApi\ContentElement\SpaContentPreparedException;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementSpaEvent;
@@ -31,6 +32,10 @@ use Neunerlei\TinyTimy\DateTimy;
 
 class ContentElement implements SelfTransformingInterface {
 	use CommonServiceLocatorTrait;
+	
+	public const TYPE_TT_CONTENT  = 0;
+	public const TYPE_TYPO_SCRIPT = 1;
+	public const TYPE_MANUAL      = 2;
 	
 	/**
 	 * The uid that defines this content element
@@ -101,6 +106,50 @@ class ContentElement implements SelfTransformingInterface {
 	protected static $listener;
 	
 	/**
+	 * ContentElement constructor.
+	 *
+	 * @param int  $type   The type of content element to render -> Use one of the TYPE_ constants
+	 * @param null $source The source to gather the content with:
+	 *                     If $type = TYPE_TT_CONTENT OR $type = TYPE_MANUAL the uid of the tt_content record to render
+	 *                     If $type = TYPE_TYPO_SCRIPT the TypoScript Object path to render
+	 */
+	public function __construct(int $type, $source) {
+		$this->uid = is_numeric($source) ? (int)$source : md5(microtime(TRUE) . rand(0, 10) . random_bytes(10));
+		$this->languageCode = $this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
+		
+		// Use a generator based on the given type
+		switch ($type) {
+			case static::TYPE_TT_CONTENT:
+				if (!is_numeric($source))
+					throw new InvalidArgumentException("The given \$source argument has to be a numeric uid of a tt_content record!");
+				
+				// Render the content element based on the uid
+				$this->populateMyself(function () {
+					return $this->TypoScript->renderContentObject("RECORDS", [
+						"tables"       => "tt_content",
+						"source"       => $this->uid,
+						"dontCheckPid" => 1,
+					]);
+				});
+				break;
+			case static::TYPE_TYPO_SCRIPT:
+				if (!is_string($source) || empty($source))
+					throw new InvalidArgumentException("The given \$source argument has to be the TypoScript selector of an object to render!");
+				
+				// Render the content element based on the given object path
+				$this->populateMyself(function () use ($source) {
+					return $this->TypoScript->renderContentObjectWith($source);
+				});
+				break;
+			case static::TYPE_MANUAL:
+				// Don't do anything...
+				break;
+			default:
+				throw new InvalidArgumentException("Invalid \$type given. Refer to the TYPE_ constants of this object!");
+		}
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -136,23 +185,9 @@ class ContentElement implements SelfTransformingInterface {
 	 * using the content element handler, or by a given typoScript object path,
 	 * which is then used to render a static element
 	 *
-	 * @param string|null $typoScriptObjectPath
+	 * @param \Closure $generator
 	 */
-	protected function populateMyself(?string $typoScriptObjectPath = NULL): void {
-		
-		// Prepare the generator
-		$generator = is_null($typoScriptObjectPath) ?
-			function () {
-				// Render the content element based on the uid
-				return $this->TypoScript->renderContentObject("RECORDS", [
-					"tables"       => "tt_content",
-					"source"       => $this->uid,
-					"dontCheckPid" => 1,
-				]);
-			} : function () use ($typoScriptObjectPath) {
-				// Render the content element based on the given object path
-				return $this->TypoScript->renderContentObjectWith($typoScriptObjectPath);
-			};
+	protected function populateMyself(Closure $generator): void {
 		
 		// Prepare the spa event handler
 		static::$listener = function (ContentElementSpaEvent $event) {
@@ -196,13 +231,10 @@ class ContentElement implements SelfTransformingInterface {
 	 * @param int|null $uid
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(?int $uid = NULL): ContentElement {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->uid = !is_null($uid) ? $uid : md5(microtime(TRUE) . rand(0, 10) . random_bytes(10));
-		$self->languageCode = TypoContainer::getInstance()->get(TypoContext::class)
-			->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
-		return $self;
+		return TypoContainer::getInstance()->get(ContentElement::class, ["args" => [ContentElement::TYPE_TT_CONTENT, $uid]]);
 	}
 	
 	/**
@@ -212,11 +244,10 @@ class ContentElement implements SelfTransformingInterface {
 	 * @param int $uid
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstanceElementWithAutomaticPopulation(int $uid): ContentElement {
-		$self = static::makeInstance($uid);
-		$self->populateMyself();
-		return $self;
+		return TypoContainer::getInstance()->get(ContentElement::class, ["args" => [ContentElement::TYPE_TT_CONTENT, $uid]]);
 	}
 	
 	/**
@@ -229,10 +260,11 @@ class ContentElement implements SelfTransformingInterface {
 	 * @param string $typoScriptObjectPath
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement*
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstanceWithTypoScriptPopulation(string $typoScriptObjectPath): ContentElement {
-		$self = static::makeInstance(NULL);
-		$self->populateMyself($typoScriptObjectPath);
-		return $self;
+		return TypoContainer::getInstance()->get(ContentElement::class, [
+			"args" => [ContentElement::TYPE_TYPO_SCRIPT, $typoScriptObjectPath],
+		]);
 	}
 }

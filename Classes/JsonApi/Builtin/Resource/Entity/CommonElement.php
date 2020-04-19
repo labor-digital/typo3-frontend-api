@@ -41,6 +41,17 @@ class CommonElement implements SelfTransformingInterface {
 	protected $layout;
 	
 	/**
+	 * CommonElement constructor.
+	 *
+	 * @param string $layout The layout this common element is requested for
+	 * @param string $key    The object key for this element
+	 */
+	public function __construct(string $layout, string $key) {
+		$this->layout = $layout;
+		$this->key = $key;
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -57,13 +68,15 @@ class CommonElement implements SelfTransformingInterface {
 		$config = $siteConfig->commonElements[$layout][$this->key];
 		switch ($config["type"]) {
 			case "contentElement":
-				$data = ContentElement::makeInstanceElementWithAutomaticPopulation($config["value"])->asArray();
+				$data = $this->getInstanceOf(ContentElement::class,
+					[ContentElement::TYPE_TT_CONTENT, $config["value"]])->asArray();
 				break;
 			case "ts":
-				$data = ContentElement::makeInstanceWithTypoScriptPopulation($config["value"])->asArray();
+				$data = $this->getInstanceOf(ContentElement::class,
+					[ContentElement::TYPE_TYPO_SCRIPT, $config["value"]])->asArray();
 				break;
 			case "menu":
-				$data = PageMenu::makeInstance($this->key, $config["value"])->asArray();
+				$data = $this->getInstanceOf(PageMenu::class, [$this->key, $config["value"]])->asArray();
 				break;
 			case "custom":
 				/** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\CommonCustomElementInterface $handler */
@@ -90,11 +103,9 @@ class CommonElement implements SelfTransformingInterface {
 	 * @param string $key
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\CommonElement
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(string $layout, string $key): CommonElement {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->key = $key;
-		$self->layout = $layout;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$layout, $key]]);
 	}
 }

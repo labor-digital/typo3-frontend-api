@@ -91,7 +91,9 @@ class HybridAppDataProvider implements LazyEventSubscriberInterface {
 		// Transform the value like any other json api response, but remove the id
 		$value = $this->transformerFactory->getTransformer()->transform([
 			"id"           => -1,
-			"translations" => HybridTranslation::makeInstance($this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getLanguageId()),
+			"translations" => $this->getInstanceOf(HybridTranslation::class, [
+				$this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getLanguageId(),
+			]),
 			"data"         => $hybridAppConfig->getGlobalData(),
 		]);
 		unset($value["id"]);

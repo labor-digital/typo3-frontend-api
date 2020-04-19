@@ -73,6 +73,21 @@ class Page {
 	protected $lastLayout;
 	
 	/**
+	 * Page constructor.
+	 *
+	 * @param int    $id
+	 * @param string $lastLayout
+	 * @param array  $loadedLanguageCodes
+	 * @param array  $refreshCommon
+	 */
+	public function __construct(int $id, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon) {
+		$this->id = $id;
+		$this->lastLayout = $lastLayout;
+		$this->loadedLanguageCodes = $loadedLanguageCodes;
+		$this->refreshCommon = $refreshCommon;
+	}
+	
+	/**
 	 * Returns the page id this object represents
 	 * @return int
 	 */
@@ -236,7 +251,7 @@ class Page {
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
 	 */
 	public function getPageData(): PageData {
-		return PageData::makeInstance($this->id);
+		return $this->getInstanceOf(PageData::class, [$this->id]);
 	}
 	
 	/**
@@ -244,7 +259,7 @@ class Page {
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageContent
 	 */
 	public function getPageContents(): PageContent {
-		return PageContent::makeInstance($this->id);
+		return $this->getInstanceOf(PageContent::class, [$this->id]);
 	}
 	
 	/**
@@ -261,7 +276,8 @@ class Page {
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageTranslation
 	 */
 	public function getPageTranslation() {
-		return PageTranslation::makeInstance($this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage());
+		return $this->getInstanceOf(PageTranslation::class,
+			[$this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()]);
 	}
 	
 	/**
@@ -274,13 +290,11 @@ class Page {
 	 * @param array  $refreshCommon
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(int $pageId, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon): Page {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->id = $pageId;
-		$self->lastLayout = $lastLayout;
-		$self->loadedLanguageCodes = $loadedLanguageCodes;
-		$self->refreshCommon = $refreshCommon;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, [
+			"args" => [$pageId, $lastLayout, $loadedLanguageCodes, $refreshCommon],
+		]);
 	}
 }

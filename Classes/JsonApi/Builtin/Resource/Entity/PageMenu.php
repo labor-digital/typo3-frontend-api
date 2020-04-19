@@ -89,6 +89,17 @@ class PageMenu implements SelfTransformingInterface {
 	protected $key;
 	
 	/**
+	 * PageMenu constructor.
+	 *
+	 * @param string $key     The key that was given for this menu/common element
+	 * @param array  $options The options that are defining how the menu should look like
+	 */
+	public function __construct(string $key, array $options) {
+		$this->key = $key;
+		$this->options = $options;
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -111,12 +122,10 @@ class PageMenu implements SelfTransformingInterface {
 	 * @param array  $options
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageMenu
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(string $key, array $options): PageMenu {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->options = $options;
-		$self->key = $key;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$key, $options]]);
 	}
 	
 	/**

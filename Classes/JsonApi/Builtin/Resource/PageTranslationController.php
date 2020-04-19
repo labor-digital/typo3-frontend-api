@@ -43,7 +43,7 @@ class PageTranslationController extends AbstractResourceController {
 	 * @inheritDoc
 	 */
 	public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context) {
-		return PageTranslation::makeInstance($id);
+		return $this->getInstanceOf(PageTranslation::class, [$id]);
 	}
 	
 	/**
@@ -52,7 +52,7 @@ class PageTranslationController extends AbstractResourceController {
 	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
 		$languages = [];
 		foreach ($this->ConfigRepository->site()->getSite()->getLanguages() as $language)
-			$languages[] = PageTranslation::makeInstance($language);
+			$languages[] = $this->getInstanceOf(PageTranslation::class, [$language]);
 		return $languages;
 	}
 }

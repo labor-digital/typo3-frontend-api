@@ -40,7 +40,7 @@ class ContentElementController extends AbstractResourceController {
 	 * @inheritDoc
 	 */
 	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return ContentElement::makeInstanceElementWithAutomaticPopulation($id);
+		return $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_TT_CONTENT, $id]);
 	}
 	
 	/**

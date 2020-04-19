@@ -61,7 +61,7 @@ trait SiteConfigAwareTrait {
 		if (empty($elementList[$layout])) $layout = "default";
 		foreach ($elementList[$layout] as $key => $foo) {
 			if (!empty($requestedKeys) && !in_array($key, $requestedKeys)) continue;
-			$collection[] = CommonElement::makeInstance($layout, $key);
+			$collection[] = $this->getInstanceOf(CommonElement::class, [$layout, $key]);
 		}
 		return $collection;
 	}

@@ -34,6 +34,15 @@ abstract class AbstractTranslation {
 	protected $languageId;
 	
 	/**
+	 * AbstractTranslation constructor.
+	 *
+	 * @param mixed $languageId Either the sys language uid or the two char iso code of a language
+	 */
+	public function __construct($languageId) {
+		$this->languageId = $languageId;
+	}
+	
+	/**
 	 * Internal logic to translate the list of given labels and return a flattened array of all translations
 	 *
 	 * @param array $labels
@@ -68,10 +77,9 @@ abstract class AbstractTranslation {
 	 * @param $languageId
 	 *
 	 * @return PageTranslation|HybridTranslation
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance($languageId): AbstractTranslation {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->languageId = $languageId;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$languageId]]);
 	}
 }

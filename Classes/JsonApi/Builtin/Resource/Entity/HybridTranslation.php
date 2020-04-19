@@ -31,11 +31,10 @@ class HybridTranslation extends AbstractTranslation implements SelfTransformingI
 	protected $configRepository;
 	
 	/**
-	 * HybridTranslation constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
+	 * @inheritDoc
 	 */
-	public function __construct(FrontendApiConfigRepository $configRepository) {
+	public function __construct($languageId, FrontendApiConfigRepository $configRepository) {
+		parent::__construct($languageId);
 		$this->configRepository = $configRepository;
 	}
 	

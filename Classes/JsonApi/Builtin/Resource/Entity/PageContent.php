@@ -40,6 +40,15 @@ class PageContent implements SelfTransformingInterface {
 	protected $id;
 	
 	/**
+	 * PageContent constructor.
+	 *
+	 * @param int $id The pid of the page to gather the contents for
+	 */
+	public function __construct(int $id) {
+		$this->id = $id;
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function asArray(): array {
@@ -55,9 +64,8 @@ class PageContent implements SelfTransformingInterface {
 	 */
 	public function getContents(): ContentElementColumnList {
 		if (isset($this->columnList)) return $this->columnList;
-		return $this->columnList = ContentElementColumnList::makeInstanceFromPageContentsArray(
-			$this->Page->getPageContents($this->id)
-		);
+		return $this->columnList = $this->getInstanceOf(ContentElementColumnList::class,
+			[$this->Page->getPageContents($this->id)]);
 	}
 	
 	/**
@@ -66,10 +74,9 @@ class PageContent implements SelfTransformingInterface {
 	 * @param int $id
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageContent
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(int $id): PageContent {
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->id = $id;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, ["args" => [$id]]);
 	}
 }

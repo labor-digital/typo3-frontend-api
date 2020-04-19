@@ -186,7 +186,9 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		$cssClasses = array_unique($cssClasses);
 		
 		// Build the context
-		$context = ContentElementControllerContext::makeInstance($cType, $config, $model, $request, $environment, $cssClasses);
+		$context = $this->getInstanceOf(ContentElementControllerContext::class, [
+			$cType, $config, $model, $request, $environment, $cssClasses,
+		]);
 		
 		// Remap the virtual TCA columns
 		$result = $this->handleVirtualColumnTcaRewrite($cType, function () use ($isFrontend, $controller, $context) {
@@ -204,7 +206,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		if (is_string($result)) return $result;
 		
 		// Create the element
-		$element = ContentElement::makeInstance($model->getUid());
+		$element = $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_MANUAL, $model->getUid()]);
 		$element->useLoaderComponent = $context->useLoaderComponent();
 		$element->componentType = $context->getType();
 		$element->initialState = $this->ResourceRepository->findForInitialState($context->getInitialStateRequest());

@@ -53,7 +53,7 @@ class CommonElementController extends AbstractResourceController {
 		$key = (string)$context->getParams()["id"];
 		if (!isset($elements[$layout]) || !isset($elements[$layout][$key]))
 			throw new NotFoundException("There is no common object with the given key: " . $key);
-		return CommonElement::makeInstance($layout, $key);
+		return $this->getInstanceOf(CommonElement::class, [$layout, $key]);
 	}
 	
 	/**

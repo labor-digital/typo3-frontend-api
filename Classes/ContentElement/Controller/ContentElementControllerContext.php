@@ -110,6 +110,28 @@ class ContentElementControllerContext {
 	protected $useLoaderComponent = TRUE;
 	
 	/**
+	 * ContentElementControllerContext constructor.
+	 *
+	 * @param string                      $cType       The configured cType for this content element
+	 * @param array                       $config      The given typoScript configuration array
+	 * @param AbstractContentElementModel $model       The prepared model of data for ths controller
+	 * @param ServerRequestInterface      $request     The request that was used to execute this content element
+	 * @param array                       $environment Additional data that was passed from the environment
+	 * @param array                       $cssClasses  The css classes that should be provided to this content element
+	 */
+	public function __construct(string $cType, array $config, AbstractContentElementModel $model,
+								ServerRequestInterface $request, array $environment, array $cssClasses) {
+		$this->config = $config;
+		$this->data = $model;
+		$this->request = $request;
+		$this->cType = $cType;
+		$type = explode("_", $cType);
+		$this->type = Arrays::getPath($config, ["type"], $type[0] . "/" . $type[1]);
+		$this->environment = $environment;
+		$this->cssClasses = $cssClasses;
+	}
+	
+	/**
 	 * Returns the instance of the data model for this content element
 	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel|\LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\DefaultContentElementModel
 	 */
@@ -385,20 +407,16 @@ class ContentElementControllerContext {
 	 * @param array                       $cssClasses  The css classes that should be provided to this content element
 	 *
 	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext
+	 * @deprecated removed in v10 use the __construct method instead
 	 */
 	public static function makeInstance(string $cType, array $config, AbstractContentElementModel $model,
 										ServerRequestInterface $request, array $environment, array $cssClasses): ContentElementControllerContext {
 		/** @var \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext $self */
-		$self = TypoContainer::getInstance()->get(static::class);
-		$self->config = $config;
-		$self->data = $model;
-		$self->request = $request;
-		$self->cType = $cType;
-		$type = explode("_", $cType);
-		$self->type = Arrays::getPath($config, ["type"], $type[0] . "/" . $type[1]);
-		$self->environment = $environment;
-		$self->cssClasses = $cssClasses;
-		return $self;
+		return TypoContainer::getInstance()->get(static::class, [
+			"args" => [
+				$cType, $config, $model, $request, $environment, $cssClasses,
+			],
+		]);
 	}
 	
 }
