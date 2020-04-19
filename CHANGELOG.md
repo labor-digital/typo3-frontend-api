@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.11.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.10.0...v9.11.0) (2020-04-19)
+
+
+### Features
+
+* mark all makeInstance methods deprecated and replace them with proper constructors ([87fe596](https://github.com/labor-digital/typo3-frontend-api/commit/87fe5960871932f54a32892aac770fa57e5dab91))
+* **ApiRouter:** add redirect support for api requests ([b74fa81](https://github.com/labor-digital/typo3-frontend-api/commit/b74fa81e5c69f8913348a21769df3df8e8cf0fcc))
+* **JsonApi:** implement official pid endpoint and hook it up to the page data ([415ffa8](https://github.com/labor-digital/typo3-frontend-api/commit/415ffa818d7dafa220fce904289c7fd11b52f3fe))
+
 ## [9.10.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.9.1...v9.10.0) (2020-04-17)
 
 
