@@ -32,6 +32,7 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\Cach
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddlewareEventHandler;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\ErrorHandler\ErrorHandlerMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\RedirectHandler\ApiRedirectMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\ResponseFactory;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingEventHandler;
@@ -61,6 +62,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 			->middleware()
 			->registerGlobalMiddleware(ErrorHandlerMiddleware::class, ["middlewareStack" => "external"])
 			->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
+			->registerGlobalMiddleware(ApiRedirectMiddleware::class, ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
 			->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
 		
 		// Register the default resources
