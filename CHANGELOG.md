@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.12.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.11.0...v9.12.0) (2020-04-30)
+
+
+### Features
+
+* **Page:** add the siteUrl to the page data for the frontend ([670cbda](https://github.com/labor-digital/typo3-frontend-api/commit/670cbda580290183f2e25d9b2016a809052c4a78))
+
 ## [9.11.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.10.0...v9.11.0) (2020-04-19)
 
 
