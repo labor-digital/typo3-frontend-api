@@ -109,6 +109,14 @@ class Page {
 	}
 	
 	/**
+	 * Returns the base url for the site that contains this page
+	 * @return string
+	 */
+	public function getSiteUrl(): string {
+		return $this->TypoContext->getSiteAspect()->getSite()->getBase()->__toString();
+	}
+	
+	/**
 	 * Returns the page layout identifier of the current page
 	 * @return string
 	 */

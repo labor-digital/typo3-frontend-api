@@ -55,6 +55,7 @@ class PageTransformer extends AbstractResourceTransformer {
 		// Convert the page object itself
 		return [
 			"id"            => $value->getId(),
+			"siteUrl"       => $value->getSiteUrl(),
 			"siteLanguages" => $value->getLanguageCodes(),
 			"languageCode"  => $value->getLanguageCode(),
 			"pageLayout"    => $value->getPageLayout(),
