@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.13.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.12.0...v9.13.0) (2020-05-11)
+
+
+### Features
+
+* **FrontendSimulationMiddleware:** make site resolution more resilient ([4e38416](https://github.com/labor-digital/typo3-frontend-api/commit/4e38416978108d0a2a3ceadce853026b2d58921c))
+
 ## [9.12.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.11.0...v9.12.0) (2020-04-30)
 
 
