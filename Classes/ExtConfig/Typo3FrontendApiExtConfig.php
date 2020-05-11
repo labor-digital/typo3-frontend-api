@@ -25,7 +25,7 @@ use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigInterface;
 use LaborDigital\Typo3BetterApi\ExtConfig\Extension\ExtConfigExtensionInterface;
 use LaborDigital\Typo3BetterApi\ExtConfig\Extension\ExtConfigExtensionRegistry;
 use LaborDigital\Typo3BetterApi\ExtConfig\OptionList\ExtConfigOptionList;
-use LaborDigital\Typo3BetterApi\Middleware\SiteCollectorMiddleware;
+use LaborDigital\Typo3BetterApi\Middleware\RequestCollectorMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\SchedulerController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\UpController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddleware;
@@ -76,7 +76,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 		// Register typo middleware
 		$configurator->http()->registerMiddleware(ApiMiddlewareFork::class, "frontend", [
 			"after"  => [
-				SiteCollectorMiddleware::class,
+				RequestCollectorMiddleware::class,
 				"typo3/cms-frontend/base-redirect-resolver",
 			],
 			"before" => "typo3/cms-frontend/static-route-resolver",

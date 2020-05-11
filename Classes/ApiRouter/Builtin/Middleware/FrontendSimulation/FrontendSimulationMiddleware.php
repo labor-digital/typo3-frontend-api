@@ -23,7 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSim
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator;
 use LaborDigital\Typo3FrontendApi\Event\FrontendSimulationMiddlewareFilterEvent;
-use LaborDigital\Typo3FrontendApi\FrontendApiException;
+use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use League\Route\Http\Exception\BadRequestException;
 use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Arrays\Arrays;
@@ -71,16 +71,24 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 	protected $slugCache = [];
 	
 	/**
+	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+	 */
+	protected $configRepository;
+	
+	/**
 	 * FrontendSimulationMiddleware constructor.
 	 *
-	 * @param \LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator $simulator
-	 * @param \TYPO3\CMS\Core\Routing\SiteMatcher                          $siteMatcher
-	 * @param \Neunerlei\EventBus\EventBusInterface                        $eventBus
+	 * @param \LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator         $simulator
+	 * @param \TYPO3\CMS\Core\Routing\SiteMatcher                                  $siteMatcher
+	 * @param \Neunerlei\EventBus\EventBusInterface                                $eventBus
+	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
 	 */
-	public function __construct(EnvironmentSimulator $simulator, SiteMatcher $siteMatcher, EventBusInterface $eventBus) {
+	public function __construct(EnvironmentSimulator $simulator, SiteMatcher $siteMatcher,
+								EventBusInterface $eventBus, FrontendApiConfigRepository $configRepository) {
 		$this->simulator = $simulator;
 		$this->siteMatcher = $siteMatcher;
 		$this->eventBus = $eventBus;
+		$this->configRepository = $configRepository;
 	}
 	
 	/**
@@ -95,7 +103,46 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 		// Preset the page id
 		/** @var \TYPO3\CMS\Core\Site\Entity\Site $site */
 		$site = $request->getAttribute("site");
-		$pageId = $site->getRootPageId();
+		
+		// Try again with changed http/https scheme if we did not get a site
+		if ($site instanceof NullSite) {
+			// Check if we can find a forwarded site for a proxy
+			$knownHost = $request->getUri()->getHost();
+			$server = $request->getServerParams();
+			if (!empty($server["HTTP_X_HOST"]) && $server["HTTP_X_HOST"] !== $knownHost) {
+				// Update the host
+				$uri = $request->getUri();
+				$uri = $uri->withHost($server["HTTP_X_HOST"]);
+				
+				// Try to find the site again
+				$subRequest = $request->withUri($uri);
+				$siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
+				
+				// Try to modify the scheme if we did not find the site
+				if ($siteRouteResult->getSite() instanceof NullSite) {
+					// Check if we also got a HTTP_X_FORWARDED_PROTO
+					if (!empty($server["HTTP_X_FORWARDED_PROTO"]))
+						$uri = $uri->withScheme($server["HTTP_X_FORWARDED_PROTO"]);
+					else {
+						// Try again with changed http/https scheme if we did not get a site
+						$uri = $uri->withScheme($uri->getScheme() === "http" ? "https" : "http");
+					}
+					
+					// Try to find the site again
+					$subRequest = $request->withUri($uri);
+					$siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
+				}
+				
+				// Update the site if we got it correctly now
+				if (!$siteRouteResult->getSite() instanceof NullSite) {
+					$site = $siteRouteResult->getSite();
+					$request = $request->withAttribute("site", $site);
+				} else {
+					// I can't help you here, pal!
+					throw new BadRequestException("Could not find a site for the given uri!");
+				}
+			}
+		}
 		
 		// Get the query params
 		$queryParams = $request->getQueryParams();
@@ -111,18 +158,9 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 					$siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
 					$site = $siteRouteResult->getSite();
 					
-					// Try again with changed http/https scheme if we did not get a site
-					if ($site instanceof NullSite) {
-						$subRequest = $subRequest->withUri($subRequest->getUri()->withScheme(
-							$subRequest->getUri()->getScheme() === "http" ? "https" : "http"));
-						$siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
-						if (method_exists($siteRouteResult->getSite(), "getRouter")) {
-							$site = $siteRouteResult->getSite();
-						}
-					}
-					
 					// Fail if we could not find a matching site
-					if (!method_exists($site, "getRouter")) throw new FrontendApiException("Could not find the getRouter method on the site object!");
+					if (!method_exists($site, "getRouter"))
+						throw new BadRequestException("Could not find the getRouter method on the site object!");
 					/** @var \TYPO3\CMS\Core\Routing\PageRouter $router */
 					$router = $site->getRouter();
 					/** @var \TYPO3\CMS\Core\Routing\PageArguments $pageArguments */
@@ -147,6 +185,19 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 				$this->slugCache[$slug] = [$language, $pageId];
 			} else {
 				[$language, $pageId] = $this->slugCache[$slug];
+			}
+		} else {
+			
+			// Try to find page id by query parameters
+			if (is_numeric($queryParams["pid"]))
+				$pageId = (int)$queryParams["pid"];
+			else {
+				// Try to find the pid for the page resource query
+				$routing = $this->configRepository->routing();
+				$expectedUri = $routing->getRootUriPart() . "/" . $routing->getResourceBaseUriPart();
+				$expectedUri .= "/page/";
+				if (preg_match("~$expectedUri(\d+)(/|$)~", $request->getUri()->getPath(), $m))
+					$pageId = (int)$m[1];
 			}
 		}
 		
