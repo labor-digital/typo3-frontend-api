@@ -132,6 +132,23 @@ class ResourceConfigChildRepository implements FrontendApiConfigChildRepositoryI
 	}
 	
 	/**
+	 * Returns either the special object transformer class for the given object class or null
+	 * if there was none registered for the object type
+	 *
+	 * @param string $class The name of the class to get the transformer for
+	 *
+	 * @return string|null
+	 */
+	public function getSpecialObjectTransformerFor(string $class): ?string {
+		$transformers = $this->parent->getConfiguration("specialObjectTransformers");
+		if (!is_array($transformers)) return NULL;
+		if (!class_exists($class)) return NULL;
+		foreach (Arrays::attach([$class], class_parents($class), class_implements($class)) as $class)
+			if (isset($transformers[$class])) return $transformers[$class];
+		return NULL;
+	}
+	
+	/**
 	 * Internal helper to create a dummy resource type for not configured objects
 	 *
 	 * @param string $type

@@ -42,6 +42,15 @@ class Transformer extends AbstractResourceTransformer {
 			$result = $value->asArray();
 			if ($value instanceof HybridSelfTransformingInterface)
 				$result = $this->autoTransform($value);
+		} else if ($this->config->specialObjectTransformerClass !== NULL) {
+			/** @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer $transformer */
+			$transformer = $this->getInstanceOf($this->config->specialObjectTransformerClass);
+			$transformer->setFactory($this->transformerFactory);
+			$transformer->setTransformerConfig($this->config);
+			$result = [
+				"id"    => md5(microtime(TRUE)),
+				"value" => $transformer->transformValue($value),
+			];
 		} else {
 			// Handle objects
 			$this->setAvailableIncludes(array_keys($this->config->includes));

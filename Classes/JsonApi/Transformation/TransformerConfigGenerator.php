@@ -20,7 +20,6 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-use DateTime;
 use LaborDigital\Typo3BetterApi\Container\TypoContainerInterface;
 use LaborDigital\Typo3BetterApi\LazyLoading\LazyLoadingTrait;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
@@ -117,15 +116,20 @@ class TransformerConfigGenerator implements SingletonInterface {
 			
 			// Handle self transforming objects
 			if (in_array(SelfTransformingInterface::class, class_implements($type)))
-				$this->makeSpecialConfiguration($config, "selfTransforming");
+				$config->isSelfTransforming = TRUE;
+			
+			// Handle special object transformation
+			if (($specialObjectTransformer = $this->configRepository->resource()
+					->getSpecialObjectTransformerFor($type)) !== NULL)
+				$config->specialObjectTransformerClass = $specialObjectTransformer;
 			
 			// Create config for extbase entity
-			if (in_array(AbstractEntity::class, class_parents($type)))
+			else if (in_array(AbstractEntity::class, class_parents($type)))
 				$this->makeConfigForEntity($config, $type);
 			
 			// Handle iterables
 			else if (is_iterable($value))
-				$this->makeSpecialConfiguration($config, "array");
+				$config->isArray = TRUE;
 			
 			// Handle generic objects
 			else $this->makeConfigForGenericObject($config, $value, $type);
@@ -133,14 +137,14 @@ class TransformerConfigGenerator implements SingletonInterface {
 			
 			// Scalar values
 			if (is_scalar($value))
-				$this->makeSpecialConfiguration($config, "scalar");
+				$config->isScalar = TRUE;
 			
 			// Array values
 			else if (is_array($value))
-				$this->makeSpecialConfiguration($config, "array");
+				$config->isArray = TRUE;
 			
 			// Not found
-			else $this->makeSpecialConfiguration($config, "null");
+			else $config->isNull = TRUE;
 		}
 		
 		// Read class name and post processors from resource config
@@ -251,7 +255,9 @@ class TransformerConfigGenerator implements SingletonInterface {
 			
 			// Make classes includable, if non of the simple classes
 			$returnType = $ref->getReturnType()->getName();
-			if (class_exists($returnType) && !in_array($returnType, [DateTime::class])) {
+			$hasSpecialObjectTransformer = $this->configRepository->resource()
+					->getSpecialObjectTransformerFor($returnType) !== NULL;
+			if (class_exists($returnType) && !$hasSpecialObjectTransformer) {
 				$resourceType = $this->configRepository->resource()->getResourceTypeByClassName($returnType, TRUE);
 				$config->includes[$property] = [
 					"isCollection" => in_array(Traversable::class, class_implements($returnType)),
@@ -299,19 +305,6 @@ class TransformerConfigGenerator implements SingletonInterface {
 		else $config->idGetter = function () {
 			return md5(microtime(TRUE));
 		};
-	}
-	
-	/**
-	 * Helper to add a "special" configuration flag to the configuration
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig $config
-	 * @param string                                                                  $type
-	 */
-	protected function makeSpecialConfiguration(TransformerConfig $config, string $type): void {
-		if ($type === "null") $config->isNull = TRUE;
-		else if ($type === "array") $config->isArray = TRUE;
-		else if ($type === "scalar") $config->isScalar = TRUE;
-		else if ($type === "selfTransforming") $config->isSelfTransforming = TRUE;
 	}
 	
 	/**

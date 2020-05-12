@@ -65,6 +65,13 @@ class TransformerConfig {
 	public $isArray = FALSE;
 	
 	/**
+	 * If the value has a registered special object transformer class
+	 * this property will hold the transformer class name
+	 * @var string|null
+	 */
+	public $specialObjectTransformerClass;
+	
+	/**
 	 * Properties that can be included
 	 * @var array
 	 */

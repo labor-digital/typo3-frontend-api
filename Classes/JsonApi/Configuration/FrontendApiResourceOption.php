@@ -21,6 +21,9 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Configuration;
 
 
 use LaborDigital\Typo3BetterApi\ExtConfig\Option\AbstractChildExtConfigOption;
+use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
+use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer;
+use Neunerlei\Arrays\Arrays;
 use Neunerlei\Inflection\Inflector;
 use Neunerlei\PathUtil\Path;
 
@@ -29,6 +32,12 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiOption
 	 */
 	protected $parent;
+	
+	/**
+	 * The list of special object transformers
+	 * @var array
+	 */
+	protected $specialObjectTransformers = [];
 	
 	/**
 	 * Registers a new resource configuration into the api.
@@ -106,6 +115,29 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 	}
 	
 	/**
+	 * Sometimes you have objects in your resource that do not require their own endpoint (for example dateTime objects,
+	 * Uri objects, and so on). Those classes can be handled using a special object transformer.
+	 * The registered transformer class can either handle a single object type or multiple object types.
+	 *
+	 * @param string $transformerClass The transformer class that is used to convert the given classes into their simple version
+	 *                                 The transformer has to extend the AbstractSpecialObjectTransformer
+	 * @param        $classOrClasses
+	 *
+	 * @return $this
+	 * @throws \LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException
+	 * @see \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer
+	 */
+	public function registerSpecialObjectTransformer(string $transformerClass, $classOrClasses) {
+		if (is_string($classOrClasses)) $classOrClasses = Arrays::makeFromStringList($classOrClasses);
+		if (!is_array($classOrClasses)) throw new \InvalidArgumentException("\$classOrClasses has to be a string or an array of strings!");
+		if (!in_array(AbstractSpecialObjectTransformer::class, class_parents($transformerClass)))
+			throw new JsonApiException("The given transformer class $transformerClass has to extend the " . AbstractSpecialObjectTransformer::class);
+		foreach ($classOrClasses as $class)
+			$this->specialObjectTransformers[$class] = $transformerClass;
+		return $this;
+	}
+	
+	/**
 	 * Internal helper to fill the main config repository' config array with the local configuration
 	 *
 	 * @param array $config
@@ -115,6 +147,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 			$this->runCachedStackGenerator("resources", ResourceConfigGenerator::class, [
 				"resourceBaseUriPart" => $this->parent->routing()->getResourceBaseUriPart(),
 			]);
+		$config["specialObjectTransformers"] = $this->specialObjectTransformers;
 	}
 	
 	/**

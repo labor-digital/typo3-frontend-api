@@ -198,6 +198,7 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 				$expectedUri .= "/page/";
 				if (preg_match("~$expectedUri(\d+)(/|$)~", $request->getUri()->getPath(), $m))
 					$pageId = (int)$m[1];
+				else $pageId = $site->getRootPageId();
 			}
 		}
 		

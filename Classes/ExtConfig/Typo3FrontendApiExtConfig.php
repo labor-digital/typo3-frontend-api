@@ -20,11 +20,13 @@
 namespace LaborDigital\Typo3FrontendApi\ExtConfig;
 
 
+use DateTime;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigInterface;
 use LaborDigital\Typo3BetterApi\ExtConfig\Extension\ExtConfigExtensionInterface;
 use LaborDigital\Typo3BetterApi\ExtConfig\Extension\ExtConfigExtensionRegistry;
 use LaborDigital\Typo3BetterApi\ExtConfig\OptionList\ExtConfigOptionList;
+use LaborDigital\Typo3BetterApi\Link\TypoLink;
 use LaborDigital\Typo3BetterApi\Middleware\RequestCollectorMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\SchedulerController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\UpController;
@@ -36,8 +38,11 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\RedirectHandler\A
 use LaborDigital\Typo3FrontendApi\ApiRouter\ResponseFactory;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingEventHandler;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer\DefaultSpecialObjectTransformer;
 use LaborDigital\Typo3FrontendApi\TypoMiddleware\ApiMiddlewareFork;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\UriInterface;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 
 class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface {
 	/**
@@ -67,6 +72,10 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 		
 		// Register the default resources
 		$frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");
+		
+		// Register default special object transformations
+		$frontendApi->resource()->registerSpecialObjectTransformer(DefaultSpecialObjectTransformer::class,
+			[DateTime::class, TypoLink::class, UriInterface::class, UriBuilder::class]);
 		
 		// Register default routes
 		$frontendApi->routing()

@@ -20,42 +20,16 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-use DateTime;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
-use LaborDigital\Typo3BetterApi\Link\TypoLink;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPreProcessorEvent;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
-use Neunerlei\Options\Options;
-use Neunerlei\TinyTimy\DateTimy;
-use Psr\Http\Message\UriInterface;
-use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
-use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 abstract class AbstractResourceTransformer extends TransformerAbstract {
-	use ResourceTransformerTrait;
+	use TransformerTrait;
 	use CommonServiceLocatorTrait;
-	
-	/**
-	 * Max number of tracked values that can be auto-transformed.
-	 * If this number is exceeded an exception will be thrown
-	 * @var int
-	 */
-	public static $maxAutoTransformDepth = 50;
-	
-	/**
-	 * The transformer configuration
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	protected $config;
-	
-	/**
-	 * Reference to the transformer factory object to create child transformers with
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	protected $transformerFactory;
 	
 	/**
 	 * Receives the value and should convert it into an array
@@ -69,38 +43,6 @@ abstract class AbstractResourceTransformer extends TransformerAbstract {
 	 * @see https://fractal.thephpleague.com/transformers/
 	 */
 	abstract protected function transformValue($value): array;
-	
-	/**
-	 * Is used by the transformer factory to inject the correct config array for the current transformation
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig $config
-	 *
-	 * @return $this
-	 */
-	public function setTransformerConfig(TransformerConfig $config) {
-		$this->config = $config;
-		return $this;
-	}
-	
-	/**
-	 * Returns the instance of the transformer's configuration object
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	public function getTransformerConfig(): TransformerConfig {
-		return $this->config;
-	}
-	
-	/**
-	 * Is used by the factory to inject itself into the instance
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory $factory
-	 *
-	 * @return $this
-	 */
-	public function setFactory(TransformerFactory $factory) {
-		$this->transformerFactory = $factory;
-		return $this;
-	}
 	
 	/**
 	 * Helper to create the "include" collection when building your own transformer
@@ -126,175 +68,6 @@ abstract class AbstractResourceTransformer extends TransformerAbstract {
 		return $this->item($value,
 			$this->transformerFactory->getTransformer()->getConcreteTransformer($value),
 			$this->transformerFactory->getConfigFor($value)->resourceType);
-	}
-	
-	/**
-	 * This helper can be used to automatically transform a certain value.
-	 * It will handle arrays recursively, convert datetime and link objects on the fly and also call
-	 * other transformers to convert complex objects.
-	 *
-	 * @param mixed $value   The value to transform
-	 * @param array $options Additional config options
-	 *                       - callNestedTransformer bool (TRUE): By default the method will automatically call other
-	 *                       transformers to convert complex objects. If you don't want that to happen, set this
-	 *                       argument to false. When doing so the method will simply return complex objects it could
-	 *                       not transform on it's own.
-	 *                       - allIncludes bool (FALSE): If this is set to true all children of the value
-	 *                       will be included in the transformed output. By default the auto transformer
-	 *                       will ignore includes.
-	 *
-	 * @return mixed
-	 * @throws \Throwable
-	 */
-	protected function autoTransform($value, array $options = []) {
-		// Prepare options
-		if (empty($options["@recursion"])) {
-			$options = Options::make($options, [
-				"@recursion"            => [
-					"default" => TRUE,
-				],
-				"callNestedTransformer" => [
-					"default" => TRUE,
-					"type"    => "bool",
-				],
-				"allIncludes"           => [
-					"default" => FALSE,
-					"type"    => "bool",
-				],
-			]);
-		}
-		
-		// Track values to avoid circular transformation that would lead to a never ending loop
-		$isTrackedValue = FALSE;
-		if (is_object($value) || is_array($value)) {
-			$isTrackedValue = TRUE;
-			if (in_array($value, AutoTransformContext::$path, TRUE) ||
-				count(AutoTransformContext::$path) > static::$maxAutoTransformDepth) {
-				$isCircular = TRUE;
-				// Check if a known array definition is indeed a circular reference
-				if (is_array($value)) {
-					$key = array_search($value, AutoTransformContext::$path);
-					if ($key !== FALSE) {
-						$tempKey = sha1(microtime(TRUE) . rand(0, 9999999));
-						$value[$tempKey] = TRUE;
-						$isCircular = AutoTransformContext::$path[$key][$tempKey] === TRUE;
-						unset($value[$tempKey]);
-					} else if (count(AutoTransformContext::$path) <= static::$maxAutoTransformDepth) {
-						$isCircular = FALSE;
-					}
-				}
-				if ($isCircular) {
-					// Try to use the auto-transformer to transform an object
-					// Which is already the last object in the list
-					// This probably means that someone created his own transformer class just to do
-					// custom includes or wants to have the scaffold entity data already transformed
-					// by the auto-transformer
-					if (
-						end(AutoTransformContext::$path) === $value &&
-						$this->config->transformerClass !== Transformer::class) {
-						$transformerClassBackup = $this->config->transformerClass;
-						try {
-							$this->config->transformerClass = Transformer::class;
-							$autoTransformer = $this->transformerFactory
-								->getTransformer($this->config->resourceType)
-								->getConcreteTransformer($value);
-							return $autoTransformer->transform($value);
-						} finally {
-							$this->config->transformerClass = $transformerClassBackup;
-						}
-					}
-					
-					// No, nothing we can do here...
-					throw TransformationException::makeNew("Found a circular transformation: " .
-						implode(" -> ", AutoTransformContext::$path), $value);
-				}
-			};
-			array_push(AutoTransformContext::$path, $value);
-		}
-		
-		try {
-			$result = (function ($value) use ($options) {
-				// Handle links in strings
-				if (!empty($value) && is_string($value) && !is_numeric($value))
-					$value = $this->transformTypoLinkStringReferences($value);
-				
-				// Handle arrays
-				if (is_array($value)) {
-					$result = [];
-					foreach ($value as $k => $v)
-						$result[$k] = $this->autoTransform($v, $options);
-					return $result;
-				}
-				
-				// Handle objects
-				if (is_object($value)) {
-					// Handle date objects
-					if ($value instanceof DateTime)
-						return (new DateTimy($value))->formatJs();
-					
-					// Handle link objects
-					if ($value instanceof TypoLink)
-						return $value->build();
-					if ($value instanceof UriInterface)
-						return (string)$value;
-					if ($value instanceof UriBuilder)
-						return $value->buildFrontendUri();
-					
-					// Make sure object storage objects end up as array and not as object...
-					if ($value instanceof ObjectStorage)
-						return $this->autoTransform(array_values($value->toArray()), $options);
-					
-					// Handle iterable objects
-					if (is_iterable($value)) {
-						$result = [];
-						/** @noinspection PhpWrongForeachArgumentTypeInspection */
-						foreach ($value as $k => $v)
-							$result[$k] = $this->autoTransform($v, $options);
-						return $result;
-					}
-					
-					// Handle remaining objects
-					if ($options["callNestedTransformer"]) {
-						if ($options["allIncludes"]) {
-							// Do the heavy lifting and load all includes...
-							$transformer = $this->transformerFactory->getTransformer()->getConcreteTransformer($value);
-							$result = $transformer->transform($value);
-							foreach ($transformer->getTransformerConfig()->includes as $k => $include)
-								$result[$k] = $this->autoTransform($include["getter"]($value), $options);
-							return $result;
-						}
-						return $this->transformerFactory->getTransformer()->transform($value);
-					}
-				}
-				
-				return $value;
-			})($value);
-			
-			// Done
-			return $result;
-		} finally {
-			if ($isTrackedValue) array_pop(AutoTransformContext::$path);
-		}
-	}
-	
-	/**
-	 * This internal helper is used to convert all typo3 link definitions into a real link, either
-	 * as a simple url or as parsed string containing <a> tags.
-	 *
-	 * @param string $input
-	 *
-	 * @return string
-	 */
-	protected function transformTypoLinkStringReferences(string $input): string {
-		// Ignore empty strings or numbers
-		if (empty($input) || is_numeric($input)) return $input;
-		// Check if the value is a simple url string
-		if (stripos($input, "t3://") === 0 && strip_tags($input) == $input) {
-			// Simple url handling
-			return $this->Links->getTypoLink($input);
-		} else if (!empty($input) && is_string($input) && stripos($input, "t3://") !== FALSE) {
-			return $this->getInstanceOf(RteContentParser::class)->parseContent($input);
-		} else return $input;
 	}
 	
 	/**

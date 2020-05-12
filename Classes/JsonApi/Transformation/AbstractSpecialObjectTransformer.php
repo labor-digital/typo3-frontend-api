@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 LABOR.digital
+ * Copyright 2020 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2019.08.13 at 14:56
+ * Last modified: 2020.05.11 at 23:17
  */
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-/**
- * Trait ResourceTransformerTrait
- * @package    LaborDigital\Typo3FrontendApi\JsonApi\Transformation
- *
- * @deprecated Will be removed in v10
- */
-trait ResourceTransformerTrait {
-	
+use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 
+abstract class AbstractSpecialObjectTransformer {
+	use TransformerTrait;
+	use CommonServiceLocatorTrait;
+	
+	/**
+	 * Receives the value and should convert it into a scalar value.
+	 * The result of this method should be either a string, an array or a number
+	 *
+	 * @param object $value The object to convert into a scalar value
+	 *
+	 * @return array|string|number|null
+	 */
+	abstract public function transformValue($value);
+	
 }
