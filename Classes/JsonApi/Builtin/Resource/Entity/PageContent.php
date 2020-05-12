@@ -20,12 +20,13 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
+use LaborDigital\Typo3BetterApi\Container\LazyServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3BetterApi\Page\PageService;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
 class PageContent implements SelfTransformingInterface {
-	use CommonServiceLocatorTrait;
+	use LazyServiceDependencyTrait;
 	
 	/**
 	 * The internal column list we use as data handler
@@ -65,7 +66,7 @@ class PageContent implements SelfTransformingInterface {
 	public function getContents(): ContentElementColumnList {
 		if (isset($this->columnList)) return $this->columnList;
 		return $this->columnList = $this->getInstanceOf(ContentElementColumnList::class,
-			[$this->Page->getPageContents($this->id)]);
+			[$this->getService(PageService::class)->getPageContents($this->id)]);
 	}
 	
 	/**

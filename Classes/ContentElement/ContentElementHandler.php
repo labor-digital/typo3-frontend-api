@@ -23,7 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\ContentElement;
 use GuzzleHttp\Psr7\ServerRequest;
 use LaborDigital\Typo3BetterApi\BackendPreview\BackendPreviewRendererContext;
 use LaborDigital\Typo3BetterApi\BackendPreview\BackendPreviewRendererInterface;
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementDataPostProcessorInterface;
@@ -48,14 +48,10 @@ use TYPO3\CMS\Core\SingletonInterface;
 /**
  * Class ContentElementHandler
  * @package LaborDigital\Typo3FrontendApi\ContentElements
- * @property ContentElementRepository                                             $Repository
- * @property \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $ConfigRepository
- * @property ResourceDataRepository                                               $ResourceRepository
- * @property TransformerFactory                                                   $TransformerFactory
  */
 class ContentElementHandler implements SingletonInterface, BackendPreviewRendererInterface {
-	use CommonServiceLocatorTrait;
 	use ResponseFactoryTrait;
+	use CommonServiceDependencyTrait;
 	
 	/**
 	 * Will be set by the content object renderer when the user element processes our callback
@@ -91,18 +87,6 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	protected $dataPostProcessors = [];
 	
 	/**
-	 * ContentElementHandler constructor.
-	 */
-	public function __construct() {
-		$this->addToServiceMap([
-			"Repository"         => ContentElementRepository::class,
-			"ConfigRepository"   => FrontendApiConfigRepository::class,
-			"ResourceRepository" => ResourceDataRepository::class,
-			"TransformerFactory" => TransformerFactory::class,
-		]);
-	}
-	
-	/**
 	 * This method is used as userFunc in the registered user content object in the typoScript.
 	 *
 	 * @param       $input
@@ -123,7 +107,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	public function renderBackendPreview(BackendPreviewRendererContext $context) {
 		$cType = Arrays::getPath($context->getRow(), ["CType"]);
 		if (empty($cType)) throw new ContentElementException("The data for a content element did not contain a cType!");
-		$config = $this->ConfigRepository->contentElement()->getContentElementConfig($cType);
+		$config = $this->ConfigRepository()->contentElement()->getContentElementConfig($cType);
 		return $this->handleCustom($context->getRow(), FALSE, $config, [
 			"context" => $context,
 		]);
@@ -138,8 +122,10 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	 * @param array $environment Additional data that will be passed to the controller context object
 	 *
 	 * @return string
+	 * @throws \HttpException
 	 * @throws \LaborDigital\Typo3FrontendApi\ContentElement\ContentElementException
 	 * @throws \LaborDigital\Typo3FrontendApi\ContentElement\SpaContentPreparedException
+	 * @throws \TYPO3\CMS\Core\Error\Http\StatusException
 	 */
 	public function handleCustom(array $row, bool $isFrontend, array $config, array $environment = []): string {
 		
@@ -153,7 +139,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 			throw new ContentElementException("The configuration for content element $cType did not contain a controller class!");
 		
 		// Allow filtering
-		$this->EventBus->dispatch(($e = new ContentElementPreProcessorEvent(
+		$this->EventBus()->dispatch(($e = new ContentElementPreProcessorEvent(
 			$cType, $row, $controllerClass, $request, $isFrontend, $config, $environment
 		)));
 		$cType = $e->getCType();
@@ -168,10 +154,10 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		$controller = $this->getInstanceOf($controllerClass);
 		
 		// Load the model
-		$model = $this->Repository->hydrateRow($row);
+		$model = $this->getService(ContentElementRepository::class)->hydrateRow($row);
 		
 		// Prepare css classes
-		$cssClasses = $this->ConfigRepository->contentElement()->getGlobalCssClasses();
+		$cssClasses = $this->ConfigRepository()->contentElement()->getGlobalCssClasses();
 		foreach ([
 					 ""                            => $config["cssClasses"],
 					 "frame frame--"               => $row["frame_class"],
@@ -197,7 +183,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		});
 		
 		// Allow filtering
-		$this->EventBus->dispatch(($e = new ContentElementAfterControllerFilterEvent(
+		$this->EventBus()->dispatch(($e = new ContentElementAfterControllerFilterEvent(
 			$result, $controller, $context, $isFrontend
 		)));
 		$result = $e->getResult();
@@ -209,20 +195,21 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		$element = $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_MANUAL, $model->getUid()]);
 		$element->useLoaderComponent = $context->useLoaderComponent();
 		$element->componentType = $context->getType();
-		$element->initialState = $this->ResourceRepository->findForInitialState($context->getInitialStateRequest());
+		$element->initialState = $this->getService(ResourceDataRepository::class)
+			->findForInitialState($context->getInitialStateRequest());
 		$element->data = $this->generateData($cType, $result, $context);
-		$element->languageCode = $this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
+		$element->languageCode = $this->TypoContext()->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
 		$element->cssClasses = $context->getCssClasses();
 		
 		// Allow filtering
-		$this->EventBus->dispatch(($e = new ContentElementPostProcessorEvent(
+		$this->EventBus()->dispatch(($e = new ContentElementPostProcessorEvent(
 			$element, $controller, $context, $isFrontend
 		)));
 		$element = $e->getElement();
 		
 		// Special SPA handling
 		if (static::$spaMode === TRUE) {
-			$this->EventBus->dispatch(($e = new ContentElementSpaEvent(
+			$this->EventBus()->dispatch(($e = new ContentElementSpaEvent(
 				$element, $controller, $context, $isFrontend
 			)));
 			if ($e->isKillHandler()) throw new SpaContentPreparedException($this->getResponse());
@@ -239,7 +226,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		if ($context->doesUseJsonWrap()) {
 			$jsonWrap = $context->getJsonWrap();
 			if (!is_string($jsonWrap)) $jsonWrap = "<div id=\"{{id}}\" data-typo-frontend-api-content-element=\"{{definitionAttr}}\">" .
-				($this->TypoContext->getEnvAspect()->isDev() ?
+				($this->TypoContext()->Env()->isDev() ?
 					PHP_EOL . "<script type=\"application/json\" data-comment=\"You only see this in development mode!\">" .
 					PHP_EOL . "{{definitionPretty}}" . PHP_EOL . "</script>" . PHP_EOL : "") . "</div>";
 			$result = $jsonWrap;
@@ -256,7 +243,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 			$result = json_encode($resultArray);
 		
 		// Allow filtering
-		$this->EventBus->dispatch(($e = new ContentElementAfterWrapFilterEvent(
+		$this->EventBus()->dispatch(($e = new ContentElementAfterWrapFilterEvent(
 			$result, $controller, $context, $isFrontend
 		)));
 		return $e->getResult();
@@ -268,7 +255,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	 */
 	protected function getOrMakeServerRequest(): ServerRequestInterface {
 		if (isset($this->request)) return $this->request;
-		$rootRequest = $this->TypoContext->getRequestAspect()->getRootRequest();
+		$rootRequest = $this->TypoContext()->Request()->getRootRequest();
 		if (empty($rootRequest)) $rootRequest = ServerRequest::fromGlobals();
 		return $this->request = $rootRequest;
 	}
@@ -285,7 +272,8 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	protected function generateData(string $cType, $data, ContentElementControllerContext $context): array {
 		// Prepare the data
 		if (is_null($data)) $data = [];
-		else $data = ContentElementDataTransformer::transformData($data, $context, $this->TransformerFactory);
+		else $data = ContentElementDataTransformer::transformData(
+			$data, $context, $this->getService(TransformerFactory::class));
 		
 		// Apply the data post processors
 		foreach ($this->getDataPostProcessorStack() as $processor) {
@@ -305,7 +293,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 	protected function getDataPostProcessorStack(): array {
 		if (!is_null($this->dataPostProcessors)) return $this->dataPostProcessors;
 		$this->dataPostProcessors = [];
-		foreach ($this->ConfigRepository->contentElement()->getDataPostProcessors() as $postProcessor) {
+		foreach ($this->ConfigRepository()->contentElement()->getDataPostProcessors() as $postProcessor) {
 			$i = $this->getInstanceOf($postProcessor);
 			if (!$i instanceof ContentElementDataPostProcessorInterface)
 				throw new FrontendApiException("The registered data post processor class $postProcessor does not implement the required interface: " . ContentElementDataPostProcessorInterface::class);
@@ -337,7 +325,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 		
 		try {
 			// Remap the existing tca using the content element map
-			$columnMap = $this->ConfigRepository->contentElement()->getVirtualColumnsFor($cType);
+			$columnMap = $this->ConfigRepository()->contentElement()->getVirtualColumnsFor($cType);
 			foreach ($columnMap as $target => $real) {
 				$config = Arrays::getPath($GLOBALS, ["TCA", "tt_content", "columns", $real], []);
 				$GLOBALS["TCA"]["tt_content"]["columns"][$target] = $config;
@@ -351,5 +339,13 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 			$revert();
 			throw $e;
 		}
+	}
+	
+	/**
+	 * Returns the instance of the API configuration repository
+	 * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+	 */
+	protected function ConfigRepository(): FrontendApiConfigRepository {
+		return $this->getService(FrontendApiConfigRepository::class);
 	}
 }
