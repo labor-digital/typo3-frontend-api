@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.14.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.13.0...v9.14.0) (2020-05-12)
+
+
+### Features
+
+* better implementation for special object transformation without registering them as resources ([10ed1e1](https://github.com/labor-digital/typo3-frontend-api/commit/10ed1e1ffaaa1997fbc68fa37d9cf993bcc9fb17))
+
 ## [9.13.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.12.0...v9.13.0) (2020-05-11)
 
 
