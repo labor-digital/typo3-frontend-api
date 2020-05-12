@@ -20,11 +20,8 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
-
 abstract class AbstractSpecialObjectTransformer {
 	use TransformerTrait;
-	use CommonServiceLocatorTrait;
 	
 	/**
 	 * Receives the value and should convert it into a scalar value.

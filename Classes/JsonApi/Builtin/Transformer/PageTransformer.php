@@ -61,7 +61,7 @@ class PageTransformer extends AbstractResourceTransformer {
 			"pageLayout"    => $value->getPageLayout(),
 			"rootLine"      => $value->getRootLine(),
 			"links"         => $value->getLinks(),
-			"isPreview"     => $this->Tsfe->getTsfe()->fePreview === 1,
+			"isPreview"     => $this->Tsfe()->getTsfe()->fePreview === 1,
 		];
 	}
 	

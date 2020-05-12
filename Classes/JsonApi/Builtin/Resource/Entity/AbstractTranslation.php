@@ -20,12 +20,12 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use Neunerlei\Arrays\Arrays;
 
 abstract class AbstractTranslation {
-	use CommonServiceLocatorTrait;
+	use CommonServiceDependencyTrait;
 	
 	/**
 	 * The identifier for the language this object represents
@@ -52,7 +52,7 @@ abstract class AbstractTranslation {
 	protected function getLabelTranslations(array $labels): array {
 		$translations = [];
 		if (!empty($labels)) {
-			$translator = $this->Translation;
+			$translator = $this->Translation();
 			foreach ($labels as $k => $label) {
 				$labelClean = trim($translator->translate($label));
 				// Convert %s sprintf formats to {0}... formats for js frameworks to cope with

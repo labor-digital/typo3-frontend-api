@@ -20,7 +20,6 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPreProcessorEvent;
 use League\Fractal\Resource\Collection;
@@ -29,7 +28,6 @@ use League\Fractal\TransformerAbstract;
 
 abstract class AbstractResourceTransformer extends TransformerAbstract {
 	use TransformerTrait;
-	use CommonServiceLocatorTrait;
 	
 	/**
 	 * Receives the value and should convert it into an array
@@ -80,7 +78,7 @@ abstract class AbstractResourceTransformer extends TransformerAbstract {
 	 */
 	final public function transform($value) {
 		// Enable additional processing
-		$this->EventBus->dispatch(($e = new ResourceTransformerPreProcessorEvent($value, $this->config)));
+		$this->EventBus()->dispatch(($e = new ResourceTransformerPreProcessorEvent($value, $this->config)));
 		$this->config = $e->getConfig();
 		$value = $e->getValue();
 		

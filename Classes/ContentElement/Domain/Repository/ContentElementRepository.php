@@ -20,7 +20,6 @@
 namespace LaborDigital\Typo3FrontendApi\ContentElement\Domain\Repository;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementException;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\DefaultContentElementModel;
@@ -32,7 +31,6 @@ use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 
 class ContentElementRepository {
-	use CommonServiceLocatorTrait;
 	
 	/**
 	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository

@@ -21,12 +21,17 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
 use Iterator;
+use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 trait TransformerTrait {
 	use CommonServiceLocatorTrait;
+	use CommonServiceDependencyTrait {
+		CommonServiceDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+		CommonServiceDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+	}
 	
 	/**
 	 * Max number of tracked values that can be auto-transformed.

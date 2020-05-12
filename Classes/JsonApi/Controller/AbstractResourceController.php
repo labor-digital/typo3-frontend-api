@@ -19,6 +19,7 @@
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Controller;
 
+use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurationInterface;
@@ -29,5 +30,9 @@ abstract class AbstractResourceController implements ResourceControllerInterface
 	use CommonServiceLocatorTrait;
 	use ResourceControllerQueryConstraintsTrait;
 	use ResourceTransformerTrait;
+	use CommonServiceDependencyTrait {
+		CommonServiceDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+		CommonServiceDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+	}
 	
 }

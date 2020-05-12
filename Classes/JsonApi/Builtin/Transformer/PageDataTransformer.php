@@ -71,9 +71,9 @@ class PageDataTransformer extends AbstractResourceTransformer {
 	 */
 	protected function getCleanCanonicalUrl(): string {
 		$requestBackup = $GLOBALS['TYPO3_REQUEST'];
-		$GLOBALS['TYPO3_REQUEST'] = $this->context->getRequestAspect()->getRootRequest()->withQueryParams([]);
+		$GLOBALS['TYPO3_REQUEST'] = $this->context->Request()->getRootRequest()->withQueryParams([]);
 		if (!class_exists(CanonicalGenerator::class))
-			return $this->Links->getLink()->build();
+			return $this->Links()->getLink()->build();
 		$canonicalTag = $this->getInstanceOf(CanonicalGenerator::class)->generate();
 		preg_match("~href=\"(.*?)\"~", $canonicalTag, $m);
 		$url = $m[1];
@@ -150,7 +150,7 @@ class PageDataTransformer extends AbstractResourceTransformer {
 			];
 		
 		// Allow filtering
-		$this->EventBus->dispatch(($e = new PageMetaTagsFilterEvent($tags, $value)));
+		$this->EventBus()->dispatch(($e = new PageMetaTagsFilterEvent($tags, $value)));
 		return $e->getTags();
 	}
 	

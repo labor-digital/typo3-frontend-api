@@ -118,8 +118,8 @@ class FileResourceTransformer extends AbstractResourceTransformer {
 					
 					// Advanced endpoint
 					$endpointPath = $this->ConfigRepository->tool()->get("imaging.options.endpointDirectoryPath");
-					$endpointUrl = Path::makeRelative($endpointPath, $this->TypoContext->getPathAspect()->getPublicPath());
-					$info["url"] = $this->Links->getHost() . "/" . $endpointUrl .
+					$endpointUrl = Path::makeRelative($endpointPath, $this->TypoContext()->Path()->getPublicPath());
+					$info["url"] = $this->Links()->getHost() . "/" . $endpointUrl .
 						"/imaging.php?file=" . urlencode($identifier);
 					$info["image"]["variants"] = array_keys($cropVariants);
 				} else {
@@ -129,7 +129,7 @@ class FileResourceTransformer extends AbstractResourceTransformer {
 					foreach ($imageInfo->getCropVariants() as $k => $conf) {
 						$processed = $this->falFileService->getResizedImage($file, ["crop" => $k]);
 						$variants[$k] = [
-							"url"    => $this->Links->getHost() . "/" .
+							"url"    => $this->Links()->getHost() . "/" .
 								$processed->getPublicUrl(FALSE) . "?hash=" . md5($processed->getSha1()),
 							"width"  => (int)$processed->getProperty("width"),
 							"height" => (int)$processed->getProperty("height"),

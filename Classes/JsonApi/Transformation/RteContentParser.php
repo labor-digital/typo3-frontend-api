@@ -23,9 +23,12 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
 use LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator;
+use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
+use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\FileSystem\Fs;
+use Throwable;
 use TYPO3\CMS\Core\SingletonInterface;
 
 class RteContentParser implements SingletonInterface {
@@ -41,6 +44,16 @@ class RteContentParser implements SingletonInterface {
 	protected $simulator;
 	
 	/**
+	 * @var \LaborDigital\Typo3BetterApi\Tsfe\TsfeService
+	 */
+	protected $tsfeService;
+	
+	/**
+	 * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
+	 */
+	protected $typoContext;
+	
+	/**
 	 * The prepared parser configuration or null if we don't have it loaded yet
 	 * @var array|null
 	 */
@@ -51,10 +64,15 @@ class RteContentParser implements SingletonInterface {
 	 *
 	 * @param \LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService    $typoScriptService
 	 * @param \LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator $simulator
+	 * @param \LaborDigital\Typo3BetterApi\Tsfe\TsfeService                $tsfeService
+	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext         $typoContext
 	 */
-	public function __construct(TypoScriptService $typoScriptService, EnvironmentSimulator $simulator) {
+	public function __construct(TypoScriptService $typoScriptService, EnvironmentSimulator $simulator,
+								TsfeService $tsfeService, TypoContext $typoContext) {
 		$this->typoScriptService = $typoScriptService;
 		$this->simulator = $simulator;
+		$this->tsfeService = $tsfeService;
+		$this->typoContext = $typoContext;
 	}
 	
 	/**
@@ -72,8 +90,7 @@ class RteContentParser implements SingletonInterface {
 			$this->preparedParserConfig = $this->loadParserConfig();
 		// Parse the string using the simulator
 		return (string)$this->simulator->runWithEnvironment(["ignoreIfFrontendExists"], function () use ($content) {
-			return $this->typoScriptService->Tsfe
-				->getContentObjectRenderer()->parseFunc($content, $this->preparedParserConfig);
+			return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, $this->preparedParserConfig);
 		});
 	}
 	
@@ -98,13 +115,13 @@ class RteContentParser implements SingletonInterface {
 		$constants = [];
 		foreach ($constantDefaults as $path => $default)
 			$constants["{\$$path}"] = $this->typoScriptService->getConstants($path, [
-				"pid"     => $this->simulator->TypoContext->getPidAspect()->getCurrentPid(),
+				"pid"     => $this->typoContext->Pid()->getCurrent(),
 				"default" => $default,
 			]);
 		
 		// Check if we can use the typo script shipped with fluid styled content
 		try {
-			$path = $this->simulator->TypoContext->getPathAspect()->typoPathToRealPath("EXT:fluid_styled_content/Configuration/TypoScript/Helper/ParseFunc.typoscript");
+			$path = $this->typoContext->Path()->typoPathToRealPath("EXT:fluid_styled_content/Configuration/TypoScript/Helper/ParseFunc.typoscript");
 			if (Fs::exists($path . "foo")) {
 				$content = Fs::readFile($path);
 				$content = str_replace(array_keys($constants), array_values($constants), $content);
@@ -112,7 +129,7 @@ class RteContentParser implements SingletonInterface {
 				$config = Arrays::getPath($ts, ["lib.", "parseFunc_RTE."]);
 				if (is_array($config)) return $config;
 			}
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 		}
 		
 		// Load the fallback file

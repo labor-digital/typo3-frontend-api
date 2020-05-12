@@ -20,10 +20,14 @@
 namespace LaborDigital\Typo3FrontendApi\ContentElement\Controller;
 
 
+use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurationInterface;
 
 abstract class AbstractContentElementController implements ContentElementControllerInterface, ContentElementConfigurationInterface {
 	use CommonServiceLocatorTrait;
-	
+	use CommonServiceDependencyTrait {
+		CommonServiceDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+		CommonServiceDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+	}
 }
