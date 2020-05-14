@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.0...v9.15.1) (2020-05-12)
+
+
+### Bug Fixes
+
+* **ContentElement:** pass http exceptions correctly to the error handler when thrown inside the content element handler ([6927b52](https://github.com/labor-digital/typo3-frontend-api/commit/6927b52ff509b1ecb7a6d035bdd311e87d274cf3))
+
 ## [9.15.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.14.0...v9.15.0) (2020-05-12)
 
 
