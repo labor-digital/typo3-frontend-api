@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.1...v9.15.2) (2020-05-14)
+
+
+### Bug Fixes
+
+* **ContentElement:** fix wrong event bus instantiation ([7cf08b7](https://github.com/labor-digital/typo3-frontend-api/commit/7cf08b77fe92a8e19bece0887c88d2cc9fffe20e))
+
 ### [9.15.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.0...v9.15.1) (2020-05-12)
 
 
