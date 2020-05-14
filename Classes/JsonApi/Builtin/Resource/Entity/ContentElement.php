@@ -24,6 +24,7 @@ use Closure;
 use InvalidArgumentException;
 use LaborDigital\Typo3BetterApi\Container\LazyServiceDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3BetterApi\Event\TypoEventBus;
 use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
@@ -31,7 +32,6 @@ use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler;
 use LaborDigital\Typo3FrontendApi\ContentElement\SpaContentPreparedException;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementSpaEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
-use Neunerlei\EventBus\EventBus;
 use Neunerlei\TinyTimy\DateTimy;
 
 class ContentElement implements SelfTransformingInterface {
@@ -228,7 +228,7 @@ class ContentElement implements SelfTransformingInterface {
 		// Register the handler
 		ContentElementHandler::$spaMode = TRUE;
 		if (!static::$listenerBound)
-			$this->getService(EventBus::class)
+			$this->getService(TypoEventBus::class)
 				->addListener(ContentElementSpaEvent::class, function (ContentElementSpaEvent $event) {
 					if (empty(static::$listener)) return;
 					call_user_func(static::$listener, $event);
