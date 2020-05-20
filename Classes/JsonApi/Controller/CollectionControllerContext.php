@@ -48,9 +48,15 @@ class CollectionControllerContext extends ResourceControllerContext {
 	 * It is used to find the page number of an element in a list. This is useful if you just have an id
 	 * of a collection item and want to show the results on its page.
 	 *
-	 * Once this function returns true the current page is used for the output
+	 * Once this function returns TRUE the current page is used for the output and the search is stopped.
 	 *
-	 * @param callable|null $pageFinder
+	 * @param callable|null $pageFinder The callback that is called for every element in the collection.
+	 *                                  It MUST return TRUE (This is the searched item) or FALSE (keep looking) and
+	 *                                  receives the following arguments:
+	 *                                  - $item (The current item in the list)
+	 *                                  - $page (The page number to which we have currently crawled - based on the set page size)
+	 *                                  - $itemOnPage (The offset of the item on the current page)
+	 *                                  - $itemsPerPage (The given page size to return)
 	 *
 	 * @return CollectionControllerContext
 	 */

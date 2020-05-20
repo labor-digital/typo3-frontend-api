@@ -20,8 +20,6 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Pagination;
 
 
-use LaborDigital\Typo3FrontendApi\FrontendApiException;
-use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
 use Traversable;
@@ -31,7 +29,7 @@ class Paginator {
 	
 	/**
 	 * The set of data we have to paginate
-	 * @var iterable
+	 * @var Traversable|iterable|\LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface
 	 */
 	protected $set;
 	
@@ -50,9 +48,9 @@ class Paginator {
 	/**
 	 * Paginator constructor.
 	 *
-	 * @param iterable $set
+	 * @param \Traversable $set
 	 */
-	public function __construct(iterable $set) {
+	public function __construct($set) {
 		$this->set = $set;
 	}
 	
@@ -130,10 +128,11 @@ class Paginator {
 	 */
 	public function getItemCount(): int {
 		if ($this->set instanceof QueryResultInterface) return $this->set->count();
+		if ($this->set instanceof SelfPaginatingInterface) return 999999999;
 		if (is_object($this->set) && method_exists($this->set, "count")) return $this->set->count();
 		if (is_array($this->set)) {
 			if (Arrays::isArrayList($this->set) || Arrays::isSequential($this->set)) return count($this->set);
-			throw new JsonApiException("Failed to paginate the given set, that is an array but neither an array list nor a sequential array!");
+			throw new PaginationException("Failed to paginate the given set, that is an array but neither an array list nor a sequential array!");
 		} else if ($this->set instanceof Traversable) return iterator_count($this->set);
 		return 1;
 	}
@@ -144,14 +143,22 @@ class Paginator {
 	 * @param int|null $suggestedPage
 	 *
 	 * @return int
+	 * @throws \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PaginationException
 	 */
 	protected function applyPageFinder(?int $suggestedPage): int {
-		if (!is_callable($this->pageFinder) || !is_iterable($this->set))
-			return empty($suggestedPage) ? 1 : $suggestedPage;
+		$suggestedPage = empty($suggestedPage) ? 1 : $suggestedPage;;
+		if (!is_callable($this->pageFinder)) return $suggestedPage;
+		$set = $this->set;
+		if ($set instanceof SelfPaginatingInterface) {
+			if (!$set instanceof PageFinderAwareSelfPaginationInterface)
+				throw new PaginationException("Your self-paginating set of type: " . get_class($set) . " tries to use the \"PageFinder\" without implementing the required interface: " . PageFinderAwareSelfPaginationInterface::class);
+			$set = $set->getAllItems();
+		}
+		if (!is_iterable($set)) return $suggestedPage;
 		$itemsPerPage = $this->pageSize;
 		$page = 1;
 		$itemOnPage = 0;
-		foreach ($this->set as $item) {
+		foreach ($set as $item) {
 			if (call_user_func($this->pageFinder, $item, $page, $itemOnPage, $itemsPerPage) === TRUE)
 				return $page;
 			if (++$itemOnPage >= $itemsPerPage) {
@@ -193,6 +200,17 @@ class Paginator {
 				->execute();
 			
 			$pagination->pageCount = $pagination->items->count();
+		} else if ($this->set instanceof SelfPaginatingInterface) {
+			$slice = [];
+			foreach ($this->set->getItemsFor($offset, $pagination->pageSize) as $item)
+				$slice[] = $item;
+			$pagination->items = $slice;
+			
+			// Recalculate the pagination values
+			$pagination->pageCount = count($slice);
+			$pagination->itemCount = $this->set->getItemCount();
+			$pagination->pages = max(ceil($pagination->itemCount / $pagination->pageSize), 1);
+			$pagination->page = max(min($pagination->pages, $pagination->page), 1);
 		} else if (is_array($this->set)) {
 			// Handle arrays
 			$pagination->items = array_slice($this->set, $offset, $pagination->pageSize);
@@ -210,7 +228,7 @@ class Paginator {
 			$pagination->items = $slice;
 			$pagination->pageCount = count($pagination->items);
 		} else {
-			throw new FrontendApiException("Could not paginate the given result set!");
+			throw new PaginationException("Failed to paginate the result set, as it has an unsupported type! Only QueryResults, arrays, iterables or objects which implement " . SelfPaginatingInterface::class . " are allowed");
 		}
 		
 		// Return scalar values

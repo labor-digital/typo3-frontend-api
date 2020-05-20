@@ -20,7 +20,9 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Controller;
 
 
+use LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 interface ResourceControllerInterface {
 	
@@ -45,7 +47,7 @@ interface ResourceControllerInterface {
 	 * @param \Psr\Http\Message\ServerRequestInterface                                      $request
 	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext $context
 	 *
-	 * @return mixed
+	 * @return array|iterable|QueryResultInterface|SelfPaginatingInterface
 	 */
 	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context);
 }
