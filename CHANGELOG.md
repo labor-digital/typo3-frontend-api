@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.16.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.2...v9.16.0) (2020-05-20)
+
+
+### Features
+
+* **Pagination:** implement "SelfPaginatingInterface" to allow better pagination of external API objects or generic data ([3a6e4a7](https://github.com/labor-digital/typo3-frontend-api/commit/3a6e4a727576271c10c65dd0aaa444a8e685ab9b))
+
 ### [9.15.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.1...v9.15.2) (2020-05-14)
 
 
