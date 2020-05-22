@@ -235,13 +235,6 @@ class ResourceDataRepository implements SingletonInterface {
 		
 		// Build object
 		return new LegacyResourceDataResult($data, $resourceType, $link, $query);
-		dbge($result->getResourceType(), $result->isSingle(), $result->getData(), $result->getDataNormalized());
-		return [
-			"data"         => $data,
-			"resourceType" => $resourceType,
-			"uri"          => (string)$link,
-			"query"        => $link->getQuery(),
-		];
 	}
 	
 	/**
