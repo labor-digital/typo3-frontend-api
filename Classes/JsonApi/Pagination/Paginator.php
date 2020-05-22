@@ -150,8 +150,8 @@ class Paginator {
 		if (!is_callable($this->pageFinder)) return $suggestedPage;
 		$set = $this->set;
 		if ($set instanceof SelfPaginatingInterface) {
-			if (!$set instanceof PageFinderAwareSelfPaginationInterface)
-				throw new PaginationException("Your self-paginating set of type: " . get_class($set) . " tries to use the \"PageFinder\" without implementing the required interface: " . PageFinderAwareSelfPaginationInterface::class);
+			if (!$set instanceof PageFinderAwareSelfPaginatingInterface)
+				throw new PaginationException("Your self-paginating set of type: " . get_class($set) . " tries to use the \"PageFinder\" without implementing the required interface: " . PageFinderAwareSelfPaginatingInterface::class);
 			$set = $set->getAllItems();
 		}
 		if (!is_iterable($set)) return $suggestedPage;

@@ -26,7 +26,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Pagination;
  *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Pagination
  */
-interface PageFinderAwareSelfPaginationInterface {
+interface PageFinderAwareSelfPaginatingInterface {
 	
 	/**
 	 * MUST return a list of ALL items on ALL pages to iterate.

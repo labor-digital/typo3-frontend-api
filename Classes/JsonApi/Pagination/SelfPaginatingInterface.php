@@ -29,7 +29,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Pagination;
  * also implements the PageFinderAwareSelfPaginationInterface
  *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Pagination
- * @see     \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PageFinderAwareSelfPaginationInterface
+ * @see     \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PageFinderAwareSelfPaginatingInterface
  */
 interface SelfPaginatingInterface {
 	
