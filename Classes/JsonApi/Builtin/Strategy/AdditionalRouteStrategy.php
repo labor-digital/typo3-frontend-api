@@ -76,8 +76,10 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy {
 		if ($attributes["asResource"] === FALSE) $manager->setSerializer(new ArraySerializer());
 		else if (is_string($attributes["asResource"])) $manager->setSerializer(new JsonApiSerializer());
 		
-		// Done
-		return $this->getResponse($route, $manager->createData($item)->toArray());
+		// Build the response
+		$response = $this->getResponse($route, $manager->createData($item)->toArray());
+		if ($attributes["asResource"] === FALSE) $response = $response->withHeader("Content-Type", "application/json");
+		return $response;
 	}
 	
 }
