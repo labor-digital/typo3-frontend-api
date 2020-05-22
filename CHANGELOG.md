@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.16.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.16.0...v9.16.1) (2020-05-22)
+
+
+### Bug Fixes
+
+* **Pagination:** rename PageFinderAwareSelfPaginationInterface ([b4b24b9](https://github.com/labor-digital/typo3-frontend-api/commit/b4b24b99db9bff0cc224607ccc445aa866c655ae))
+
 ## [9.16.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.15.2...v9.16.0) (2020-05-20)
 
 
