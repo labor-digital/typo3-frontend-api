@@ -30,6 +30,7 @@ use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\PostProcessing\ResourcePostProcessorInterface;
 use Neunerlei\Arrays\Arrays;
+use Neunerlei\Options\Options;
 use Neunerlei\PathUtil\Path;
 
 class ResourceConfigurator {
@@ -411,7 +412,68 @@ class ResourceConfigurator {
 		return $this;
 	}
 	
-	public function addAdditionalRoute(string $path, string $actionMethod, bool $handleAsCollection = FALSE, string $method = "GET"): RouteConfig {
+	/**
+	 * Registers an additional route below the current resource path.
+	 *
+	 * By default the systems expects you to return any kind of data as an array.
+	 * The data will be automatically transformed into a JSON object, with all contained resources
+	 * transformed using their registered transformers.
+	 *
+	 * It is also possible to return the result of a lookup done by the "ResourceDataRepository".
+	 * The gathered data will automatically rendered as JSON-API conform resource data.
+	 *
+	 * You can use the "asResource" option to enable the serialization as JSON-API conform set of data.
+	 * Note however that the script expects you to return the same type of resource your controller
+	 * handles by default.
+	 *
+	 * If you want to "simulate" another, or a "non-existent" resource type for auto-completes or filters
+	 * you can pass "asResource" => "NAME_OF_YOUR_RESOURCE" to override the expected resource type.
+	 * Keep in mind, that this will disable the "link" generation for the returned resources.
+	 *
+	 * By default the script expects you to return only a single resource, if you want to return
+	 * a collection of resource items instead, make sure to set the "asCollection" flag in your options as well.
+	 *
+	 * @param string     $path         The path to listen for (This path is relative to the group path of the resource)
+	 * @param string     $actionMethod The name of the method to map for this route. The action has to be
+	 *                                 the fully qualified name of a PUBLIC method of the controller class
+	 * @param bool|array $options      Additional options to apply for this route
+	 *                                 - method string (GET): The HTTP method this route should listen to. GET by default.
+	 *                                 Can be one of: "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"
+	 *                                 - asResource string|bool (FALSE): If set to TRUE the result of your action
+	 *                                 will be handled as items of the resource type of your controller.
+	 *                                 If you set "asResource" to a string, you can pass your own resource name
+	 *                                 that will be used as a type.
+	 *                                 - asCollection bool (FALSE): If set to TRUE the script will expect a collection
+	 *                                 of resource items to be returned instead of a single item.
+	 *
+	 * @param string|null deprecated $legacyMethod Will be removed in v10
+	 *
+	 * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RouteConfig
+	 * @throws \LaborDigital\Typo3FrontendApi\JsonApi\InvalidJsonApiConfigurationException
+	 *
+	 */
+	public function addAdditionalRoute(string $path, string $actionMethod, $options = FALSE, ?string $legacyMethod = NULL): RouteConfig {
+		
+		// Apply the options
+		if (is_bool($options)) $options = ["asCollection" => $options];
+		$options = Options::make($options, [
+			"method"       => [
+				"type"      => "string",
+				"preFilter" => function ($v) {
+					return is_string($v) ? strtoupper(trim($v)) : $v;
+				},
+				"values"    => ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+				"default"   => is_string($legacyMethod) ? $legacyMethod : "GET",
+			],
+			"asCollection" => [
+				"type"    => "bool",
+				"default" => FALSE,
+			],
+			"asResource"   => [
+				"type"    => ["bool", "string"],
+				"default" => FALSE,
+			],
+		]);
 		
 		// Validate action method
 		if (!method_exists($this->getControllerClass(), $actionMethod))
@@ -419,15 +481,16 @@ class ResourceConfigurator {
 		
 		// Prepare route
 		$path = trim(Path::unifySlashes($path), "/");
-		if (stripos($path, $this->config->resourceType . "/") !== FALSE)
-			$path = trim(substr($path, strlen($this->config->resourceType)));
+		if (stripos($path, $this->getResourceType() . "/") !== FALSE)
+			$path = trim(substr($path, strlen($this->getResourceType())));
 		
 		// Store the configuration
-		$route = RouteConfig::makeNew($method, $path, $this->getControllerClass(), $actionMethod);
-		$route->setName("json_api_additional_route_" . $this->getResourceType() . "-" . strtolower($method) . "-" . $path);
+		$route = RouteConfig::makeNew($options["method"], $path, $this->getControllerClass(), $actionMethod);
+		$route->setName("json_api_additional_route_" . $this->getResourceType() . "-" . strtolower($options["method"]) . "-" . $path);
 		$route->setStrategy(AdditionalRouteStrategy::class);
-		$route->setAttribute("resourceType", $this->config->resourceType);
-		$route->setAttribute("isCollection", $handleAsCollection);
+		$route->setAttribute("resourceType", $this->getResourceType());
+		$route->setAttribute("asCollection", $options["asCollection"]);
+		$route->setAttribute("asResource", $options["asResource"]);
 		$this->additionalRoutes[$route->getName()] = $route;
 		return $route;
 	}
@@ -440,6 +503,13 @@ class ResourceConfigurator {
 		return $this->additionalRoutes;
 	}
 	
+	/**
+	 * Removes a previously registered additional route
+	 *
+	 * @param string $routeOrRouteName Either the name or the registered path of the route to remove
+	 *
+	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurator
+	 */
 	public function removeAdditionalRoute(string $routeOrRouteName): ResourceConfigurator {
 		if (isset($this->additionalRoutes[$routeOrRouteName])) unset($this->additionalRoutes[$routeOrRouteName]);
 		else $this->additionalRoutes = array_filter($this->additionalRoutes, function (RouteConfig $v) use ($routeOrRouteName) {

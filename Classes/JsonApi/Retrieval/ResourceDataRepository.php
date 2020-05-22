@@ -24,18 +24,15 @@ use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\ApiRouter\ApiRouter;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
-use LaborDigital\Typo3FrontendApi\JsonApi\Normalizer\NormalizerInterface;
+use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Arrays\ArrayGeneratorException;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\PathUtil\Path;
 use TYPO3\CMS\Core\SingletonInterface;
+use WoohooLabs\Yang\JsonApi\Hydrator\ClassDocumentHydrator;
+use WoohooLabs\Yang\JsonApi\Schema\Document;
 
 class ResourceDataRepository implements SingletonInterface {
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Normalizer\NormalizerInterface
-	 */
-	protected $lazyNormalizer;
 	
 	/**
 	 * @var \LaborDigital\Typo3FrontendApi\ApiRouter\ApiRouter
@@ -55,17 +52,15 @@ class ResourceDataRepository implements SingletonInterface {
 	/**
 	 * ResourceDataRepository constructor.
 	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Normalizer\NormalizerInterface $lazyNormalizer
-	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                  $context
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
-	 * @param \LaborDigital\Typo3FrontendApi\ApiRouter\ApiRouter                    $router
+	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                 $context
+	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
+	 * @param \LaborDigital\Typo3FrontendApi\ApiRouter\ApiRouter                   $router
 	 */
-	public function __construct(NormalizerInterface $lazyNormalizer, TypoContext $context,
+	public function __construct(TypoContext $context,
 								FrontendApiConfigRepository $configRepository,
 								ApiRouter $router) {
 		
 		$this->context = $context;
-		$this->lazyNormalizer = $lazyNormalizer;
 		$this->configRepository = $configRepository;
 		$this->router = $router;
 	}
@@ -76,9 +71,9 @@ class ResourceDataRepository implements SingletonInterface {
 	 *
 	 * @param array|null $initialRequest The request that was given
 	 *
-	 * @return array|null
+	 * @return ResourceDataResult|null
 	 */
-	public function findForInitialState(?array $initialRequest): ?array {
+	public function findForInitialState(?array $initialRequest): ?ResourceDataResult {
 		if (empty($initialRequest)) return NULL;
 		if (empty($initialRequest["type"])) return NULL;
 		if ($initialRequest["type"] === "query") {
@@ -98,9 +93,9 @@ class ResourceDataRepository implements SingletonInterface {
 	 * @param int    $id           The uid of the entity to resolve
 	 * @param array  $query        A resource query to include related resources or select fields
 	 *
-	 * @return array
+	 * @return ResourceDataResult
 	 */
-	public function findResourceData(string $resourceType, int $id, ?array $query = NULL): array {
+	public function findResourceData(string $resourceType, int $id, ?array $query = NULL): ResourceDataResult {
 		unset($query["filter"]);
 		unset($query["sort"]);
 		return $this->handleRequest($resourceType . "/" . $id, $query, $resourceType);
@@ -112,9 +107,9 @@ class ResourceDataRepository implements SingletonInterface {
 	 * @param string $resourceType The type of entity to resolve
 	 * @param array  $query        A resource query to narrow the list of entities down
 	 *
-	 * @return array
+	 * @return ResourceDataResult|array
 	 */
-	public function findResourceCollectionData(string $resourceType, array $query = []): array {
+	public function findResourceCollectionData(string $resourceType, array $query = []): ResourceDataResult {
 		return $this->handleRequest($resourceType, $query, $resourceType);
 	}
 	
@@ -126,9 +121,9 @@ class ResourceDataRepository implements SingletonInterface {
 	 * @param array  $query        An optional resource query that depends on the implemented filters on the additional
 	 *                             route. Note that additional routes do not natively support pagination!
 	 *
-	 * @return array
+	 * @return ResourceDataResult|array
 	 */
-	public function findAdditionalRouteData(string $resourceType, string $uriFragment, array $query = []): array {
+	public function findAdditionalRouteData(string $resourceType, string $uriFragment, array $query = []): ResourceDataResult {
 		return $this->handleRequest($resourceType . "/" . ltrim($uriFragment, "/"), $query, $resourceType);
 	}
 	
@@ -138,9 +133,9 @@ class ResourceDataRepository implements SingletonInterface {
 	 *
 	 * @param string $uri
 	 *
-	 * @return array
+	 * @return ResourceDataResult|array
 	 */
-	public function findUriData(string $uri): array {
+	public function findUriData(string $uri): ResourceDataResult {
 		return $this->handleRequest($uri);
 	}
 	
@@ -151,9 +146,18 @@ class ResourceDataRepository implements SingletonInterface {
 	 * @param array $data
 	 *
 	 * @return array
+	 * @deprecated Will be removed in v10 use "woohoolabs/yang" instead!
 	 */
 	public function normalize(array $data): array {
-		return $this->lazyNormalizer->normalize($data);
+		// Check if the given data is a collection
+		if (isset($data["meta"]) && $data["meta"]["pagination"]) $isCollection = TRUE;
+		else $isCollection = isset($data["data"]) && isset($data["data"][0]) &&
+			is_array($data["data"][0]) && !isset($data["attributes"]);
+		$document = Document::fromArray($data);
+		$hydrator = new ClassDocumentHydrator();
+		if ($isCollection) $obj = $hydrator->hydrateCollection($document);
+		else $obj = $hydrator->hydrateSingleResource($document);
+		return \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($obj), TRUE);
 	}
 	
 	/**
@@ -164,10 +168,10 @@ class ResourceDataRepository implements SingletonInterface {
 	 * @param array|null  $query        The query object which should be added as query string
 	 * @param string|null $resourceType Optional resource type which is used for base uri mapping
 	 *
-	 * @return array
+	 * @return ResourceDataResult
 	 * @throws \LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException
 	 */
-	protected function handleRequest(string $uri, ?array $query = [], ?string $resourceType = NULL): array {
+	protected function handleRequest(string $uri, ?array $query = [], ?string $resourceType = NULL): ResourceDataResult {
 		// Unify the uri
 		$uri = "/" . trim(preg_replace("~(\\+|/+)~si", "/", $uri), "/");
 		
@@ -207,24 +211,31 @@ class ResourceDataRepository implements SingletonInterface {
 		if (empty($link->getScheme())) $link = $link->withScheme($pageLink->getScheme());
 		
 		// Generate the data
-		$response = $this->router->handleLink($link, "internal");
+		try {
+			$response = $this->router->handleLink($link, "internal");
+		} catch (NotFoundException $exception) {
+			throw new JsonApiException("Failed to retrieve the data for ($link): " . $exception->getMessage());
+		}
+		
 		if ($response->getStatusCode() !== 200) {
 			// Show the error when in dev mode
-			if ($this->context->getEnvAspect()->isDev()) {
+			if ($this->context->Env()->isDev()) {
 				echo (string)$response->getBody();
 				die;
 			}
 			throw new JsonApiException("Failed to retrieve the data for ($link): " . $response->getReasonPhrase());
 		}
-		$data = (string)$response->getBody();
 		
 		// Convert into an array if possible
 		try {
+			$data = (string)$response->getBody();
 			$data = Arrays::makeFromJson($data);
 		} catch (ArrayGeneratorException $e) {
 		}
 		
 		// Build object
+		return new LegacyResourceDataResult($data, $resourceType, $link, $query);
+		dbge($result->getResourceType(), $result->isSingle(), $result->getData(), $result->getDataNormalized());
 		return [
 			"data"         => $data,
 			"resourceType" => $resourceType,

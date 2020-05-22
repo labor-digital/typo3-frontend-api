@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy;
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\InvalidJsonApiConfigurationException;
+use LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataResult;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Route\Http\Exception\NotFoundException;
@@ -43,6 +44,10 @@ class ResourceStrategy extends AbstractResourceStrategy {
 		$controller = $route->getCallable($this->getContainer());
 		$id = $route->getVars()["id"];
 		$response = $controller($request, (is_numeric($id) ? (int)$id : $id), $context);
+		
+		// Pass through direct responses
+		if ($response instanceof ResourceDataResult)
+			return $this->getResponse($route, $response->getData(TRUE));
 		if ($response instanceof ResponseInterface)
 			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		

@@ -22,9 +22,11 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy;
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
+use LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataResult;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
+use League\Fractal\Serializer\JsonApiSerializer;
 use League\Route\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -37,34 +39,42 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy {
 	 */
 	public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface {
 		// Get the resource configuration
-		$context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
 		$routeConfig = $this->getRouteConfig($route);
 		
 		// Check if we have to handle a collection
-		$isCollection = (bool)$routeConfig->getAttributes()["isCollection"];
-		if ($isCollection) $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
+		$attributes = $routeConfig->getAttributes();
+		$asCollection = (bool)$attributes["asCollection"];
+		if ($asCollection) $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
+		else $context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
 		
 		// Run the controller
 		$controller = $route->getCallable($this->getContainer());
 		$response = $controller($request, $context, $route->getVars());
+		
+		// Pass through direct responses
 		if ($response instanceof ResponseInterface)
 			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+		if ($response instanceof ResourceDataResult)
+			return $this->getResponse($route, $response->getData(TRUE));
 		
 		// Unify the response
 		$response = $this->convertDbResponse($response);
-		if (!$isCollection && $response instanceof QueryResultInterface) $response = $response->getFirst();
+		if (!$asCollection && $response instanceof QueryResultInterface) $response = $response->getFirst();
 		
 		// Prepare the transformation
 		// IMPORTANT: NEVER - EVER - Set the $suggestedResourceType to the context's resource type. Otherwise the denied and allowed
 		// properties automatically apply for all "additional routes" and not only for the element's they should apply to.
 		$transformer = $this->transformerFactory->getTransformer();
-		if ($isCollection) $item = new Collection($response, $transformer, $context->getResourceType());
-		else $item = new Item($response, $transformer, $context->getResourceType());
+		$resourceType = $context->getResourceType();
+		if (is_string($attributes["asResource"])) $resourceType = $attributes["asResource"];
+		if ($asCollection) $item = new Collection($response, $transformer, $resourceType);
+		else $item = new Item($response, $transformer, $resourceType);
 		if (!empty($context->getMeta())) $item->setMeta($context->getMeta());
 		
 		// Make the manager
 		$manager = $this->getManager($request, $context->getResourceType(), $response);
-		$manager->setSerializer(new ArraySerializer());
+		if ($attributes["asResource"] === FALSE) $manager->setSerializer(new ArraySerializer());
+		else if (is_string($attributes["asResource"])) $manager->setSerializer(new JsonApiSerializer());
 		
 		// Done
 		return $this->getResponse($route, $manager->createData($item)->toArray());

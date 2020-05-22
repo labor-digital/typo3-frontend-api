@@ -21,6 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy;
 
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;
+use LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataResult;
 use League\Fractal\Resource\Collection;
 use League\Route\Route;
 use Psr\Http\Message\ResponseInterface;
@@ -42,6 +43,10 @@ class CollectionStrategy extends AbstractResourceStrategy {
 		// Run the controller
 		$controller = $route->getCallable($this->getContainer());
 		$response = $controller($request, $context);
+		
+		// Pass through direct responses
+		if ($response instanceof ResourceDataResult)
+			return $this->getResponse($route, $response->getData(TRUE));
 		if ($response instanceof ResponseInterface)
 			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		

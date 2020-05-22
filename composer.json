@@ -28,7 +28,8 @@
 		"laminas/laminas-httphandlerrunner": "^1.1",
 		"filp/whoops": "^2.5",
 		"league/fractal": "^0.18",
-		"rosell-dk/webp-convert": "^2.3"
+		"rosell-dk/webp-convert": "^2.3",
+		"woohoolabs/yang": "^2.3"
 	},
 	"autoload": {
 		"psr-4": {

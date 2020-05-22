@@ -19,6 +19,11 @@
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Normalizer;
 
+/**
+ * Interface NormalizerInterface
+ * @package    LaborDigital\Typo3FrontendApi\JsonApi\Normalizer
+ * @deprecated Will be removed in v10 use "woohoolabs/yang" instead!
+ */
 interface NormalizerInterface {
 	/**
 	 * Receives the serialized json api structure and normalizes it into a tree of structured data.
@@ -27,6 +32,7 @@ interface NormalizerInterface {
 	 * @param array|\stdClass $response
 	 *
 	 * @return array
+	 * @deprecated Will be removed in v10 use "woohoolabs/yang" instead!
 	 */
 	public function normalize($response);
 }

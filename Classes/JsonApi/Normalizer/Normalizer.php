@@ -23,6 +23,12 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Normalizer;
 use Neunerlei\Arrays\Arrays;
 use stdClass;
 
+/**
+ * Class Normalizer
+ * @package    LaborDigital\Typo3FrontendApi\JsonApi\Normalizer
+ *
+ * @deprecated Will be removed in v10 use "woohoolabs/yang" instead!
+ */
 class Normalizer implements NormalizerInterface {
 	
 	/**
@@ -32,6 +38,7 @@ class Normalizer implements NormalizerInterface {
 	 * @param array|\stdClass $response
 	 *
 	 * @return array
+	 * @deprecated Will be removed in v10 use "woohoolabs/yang" instead!
 	 */
 	public function normalize($response) {
 		
