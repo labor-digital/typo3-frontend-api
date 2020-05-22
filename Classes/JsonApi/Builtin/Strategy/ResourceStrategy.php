@@ -43,7 +43,8 @@ class ResourceStrategy extends AbstractResourceStrategy {
 		$controller = $route->getCallable($this->getContainer());
 		$id = $route->getVars()["id"];
 		$response = $controller($request, (is_numeric($id) ? (int)$id : $id), $context);
-		if ($response instanceof ResponseInterface) return $response;
+		if ($response instanceof ResponseInterface)
+			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		
 		// Unify the response
 		$response = $this->convertDbResponse($response);
@@ -72,7 +73,7 @@ class ResourceStrategy extends AbstractResourceStrategy {
 			$data = $manager->createData($item)->toArray();
 			$relationship = Arrays::getPath($data, ["data", "relationships", $propertyName], NULL);
 			if (empty($relationship)) throw new NotFoundException();
-			return $this->getResponse($relationship);
+			return $this->getResponse($route, $relationship);
 			
 		} else if (is_string($route->getVars()["related"])) {
 			// Handle the list of related objects
@@ -94,10 +95,10 @@ class ResourceStrategy extends AbstractResourceStrategy {
 				$this->paginateCollection($subItem, $request);
 			
 			// Done
-			return $this->getResponse($manager->createData($subItem)->toArray());
+			return $this->getResponse($route, $manager->createData($subItem)->toArray());
 		} else {
 			// Find the data of a resource
-			return $this->getResponse($manager->createData($item)->toArray());
+			return $this->getResponse($route, $manager->createData($item)->toArray());
 		}
 	}
 	

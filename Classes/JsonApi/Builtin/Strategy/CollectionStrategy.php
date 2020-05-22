@@ -42,7 +42,8 @@ class CollectionStrategy extends AbstractResourceStrategy {
 		// Run the controller
 		$controller = $route->getCallable($this->getContainer());
 		$response = $controller($request, $context);
-		if ($response instanceof ResponseInterface) return $response;
+		if ($response instanceof ResponseInterface)
+			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		
 		// Unify the response
 		$response = $this->convertDbResponse($response);
@@ -57,7 +58,7 @@ class CollectionStrategy extends AbstractResourceStrategy {
 		$manager = $this->getManager($request, $context->getResourceType(), $response);
 		
 		// Done
-		return $this->getResponse($manager->createData($collection)->toArray());
+		return $this->getResponse($route, $manager->createData($collection)->toArray());
 	}
 	
 }

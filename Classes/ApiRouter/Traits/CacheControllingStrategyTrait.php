@@ -38,8 +38,7 @@ trait CacheControllingStrategyTrait {
 	 */
 	protected function addInternalNoCacheHeaderIfRequired(Route $route, ResponseInterface $response): ResponseInterface {
 		$routeConfig = $this->getRouteConfig($route);
-		$attr = $routeConfig->getAttributes();
-		if ($attr["useCache"] === FALSE) return $response->withAddedHeader(CacheMiddleware::CACHE_CONTROL_HEADER, "off");
+		if (!$routeConfig->isUseCache()) return $response->withAddedHeader(CacheMiddleware::CACHE_CONTROL_HEADER, "off");
 		return $response;
 	}
 }

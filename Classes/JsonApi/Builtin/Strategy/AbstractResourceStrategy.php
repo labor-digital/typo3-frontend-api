@@ -20,6 +20,7 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy;
 
 use LaborDigital\Typo3BetterApi\Domain\BetterQuery\BetterQuery;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\CacheControllingStrategyTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\RouteConfigAwareTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
@@ -50,6 +51,7 @@ use function GuzzleHttp\Psr7\stream_for;
 abstract class AbstractResourceStrategy extends AbstractStrategy implements StrategyInterface, ContainerAwareInterface {
 	use ContainerAwareTrait;
 	use RouteConfigAwareTrait;
+	use CacheControllingStrategyTrait;
 	
 	/**
 	 * @var \Psr\Http\Message\ResponseFactoryInterface
@@ -254,10 +256,11 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
 	 *
 	 * @return \Psr\Http\Message\ResponseInterface
 	 */
-	protected function getResponse(array $data, int $code = 200): ResponseInterface {
+	protected function getResponse(Route $route, array $data, int $code = 200): ResponseInterface {
 		$response = $this->responseFactory->createResponse($code);
 		$response = $response->withHeader("Content-Type", "application/vnd.api+json");
 		$response = $response->withBody(stream_for(json_encode($data, JSON_PRETTY_PRINT)));
+		$response = $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		return $response;
 	}
 	

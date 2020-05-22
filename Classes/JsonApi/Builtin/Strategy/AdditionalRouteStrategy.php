@@ -47,7 +47,8 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy {
 		// Run the controller
 		$controller = $route->getCallable($this->getContainer());
 		$response = $controller($request, $context, $route->getVars());
-		if ($response instanceof ResponseInterface) return $response;
+		if ($response instanceof ResponseInterface)
+			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
 		
 		// Unify the response
 		$response = $this->convertDbResponse($response);
@@ -66,7 +67,7 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy {
 		$manager->setSerializer(new ArraySerializer());
 		
 		// Done
-		return $this->getResponse($manager->createData($item)->toArray());
+		return $this->getResponse($route, $manager->createData($item)->toArray());
 	}
 	
 }

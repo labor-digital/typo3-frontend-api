@@ -123,7 +123,6 @@ class RouteCollector {
 		$route->setMiddlewares($options["middlewares"]);
 		$route->setStrategy($options["strategy"]);
 		$route->setUseCache($options["useCache"]);
-		$route->setAttribute("useCache", $options["useCache"]);
 		if (!empty($options["name"])) $route->setName($options["name"]);
 		else if (!empty($this->groupBaseUri)) $route->setName($this->groupBaseUri . "-" . $route->getName());
 		
