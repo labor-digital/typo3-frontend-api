@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.17.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.16.1...v9.17.0) (2020-05-23)
+
+
+### Features
+
+* **JsonApi:** add better "additionalRoutes" and ResourceDataResult ([882eedb](https://github.com/labor-digital/typo3-frontend-api/commit/882eedb3d4b41155ee21d2b87c221b35b4786347))
+
+
+### Bug Fixes
+
+* **AdditionalRouteStrategy:** make sure the correct content-type is set ([02a4f37](https://github.com/labor-digital/typo3-frontend-api/commit/02a4f37c4051fc64f0565c2b86cd84b12710cef1))
+* make sure the cache disabling header is provided correctly to the cache middleware ([03fca97](https://github.com/labor-digital/typo3-frontend-api/commit/03fca9781a9993e9eab6d7cb89f249f656882a2d))
+* remove dev remnant ([bd6fa5f](https://github.com/labor-digital/typo3-frontend-api/commit/bd6fa5fa64b629ff9d36e615866d0aac1b188fe4))
+
 ### [9.16.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.16.0...v9.16.1) (2020-05-22)
 
 
