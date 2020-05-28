@@ -24,15 +24,22 @@ use LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\ExtConfig\Option\Table\TableConfigurationInterface;
 
-class TtContentOverrides implements TableConfigurationInterface {
-	public const VIRTUAL_COLUMN_FIELD = "frontend_api_virtual_columns";
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureTable(TcaTable $table, ExtConfigContext $context, bool $isOverride): void {
-		$table->getField(static::VIRTUAL_COLUMN_FIELD)
-			->applyPreset()->passThrough();
-	}
-	
+class TtContentOverrides implements TableConfigurationInterface
+{
+    public const VIRTUAL_COLUMN_FIELD    = "frontend_api_virtual_columns";
+    public const SWITCHABLE_ACTION_FIELD = 'frontend_api_ce_action';
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureTable(TcaTable $table, ExtConfigContext $context, bool $isOverride): void
+    {
+        $table->getField(static::VIRTUAL_COLUMN_FIELD)
+              ->applyPreset()->passThrough();
+        $table->getField(static::SWITCHABLE_ACTION_FIELD)
+              ->setLabel('frontendApi.t.tt_content.ceAction')
+              ->applyPreset()
+              ->passThrough();
+    }
+    
 }

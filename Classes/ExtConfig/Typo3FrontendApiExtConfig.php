@@ -44,59 +44,66 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 
-class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface {
-	/**
-	 * @inheritDoc
-	 */
-	public function configure(ExtConfigOptionList $configurator, ExtConfigContext $context) {
-		// Register new implementations
-		$configurator->core()
-			->registerImplementation(ResponseFactoryInterface::class, ResponseFactory::class);
-		
-		// Register table changes
-		$configurator->table()->registerTableOverride(TtContentOverrides::class, "tt_content");
-		
-		// Register our event handlers
-		$configurator->event()
-			->registerLazySubscriber(CacheMiddlewareEventHandler::class)
-			->registerLazySubscriber(ImagingEventHandler::class);
-		
-		// Register default middlewares
-		$frontendApi = $configurator->frontendApi();
-		$frontendApi
-			->middleware()
-			->registerGlobalMiddleware(ErrorHandlerMiddleware::class, ["middlewareStack" => "external"])
-			->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
-			->registerGlobalMiddleware(ApiRedirectMiddleware::class, ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
-			->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
-		
-		// Register the default resources
-		$frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");
-		
-		// Register default special object transformations
-		$frontendApi->resource()->registerSpecialObjectTransformer(DefaultSpecialObjectTransformer::class,
-			[DateTime::class, TypoLink::class, UriInterface::class, UriBuilder::class]);
-		
-		// Register default routes
-		$frontendApi->routing()
-			->registerRouteController(UpController::class)
-			->registerRouteController(SchedulerController::class);
-		
-		// Register typo middleware
-		$configurator->http()->registerMiddleware(ApiMiddlewareFork::class, "frontend", [
-			"after"  => [
-				RequestCollectorMiddleware::class,
-				"typo3/cms-frontend/base-redirect-resolver",
-			],
-			"before" => "typo3/cms-frontend/static-route-resolver",
-		]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function extendExtConfig(ExtConfigExtensionRegistry $extender, ExtConfigContext $context) {
-		$extender->registerOptionListEntry(FrontendApiOption::class);
-	}
-	
+class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface
+{
+    /**
+     * @inheritDoc
+     */
+    public function configure(ExtConfigOptionList $configurator, ExtConfigContext $context)
+    {
+        // Register translation
+        $configurator->translation()->registerContext('frontendApi');
+        
+        // Register new implementations
+        $configurator->core()
+                     ->registerImplementation(ResponseFactoryInterface::class, ResponseFactory::class);
+        
+        // Register table changes
+        $configurator->table()->registerTableOverride(TtContentOverrides::class, "tt_content");
+        
+        // Register our event handlers
+        $configurator->event()
+                     ->registerLazySubscriber(CacheMiddlewareEventHandler::class)
+                     ->registerLazySubscriber(ImagingEventHandler::class);
+        
+        // Register default middlewares
+        $frontendApi = $configurator->frontendApi();
+        $frontendApi
+            ->middleware()
+            ->registerGlobalMiddleware(ErrorHandlerMiddleware::class, ["middlewareStack" => "external"])
+            ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
+            ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
+                ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
+            ->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
+        
+        // Register the default resources
+        $frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");
+        
+        // Register default special object transformations
+        $frontendApi->resource()->registerSpecialObjectTransformer(DefaultSpecialObjectTransformer::class,
+            [DateTime::class, TypoLink::class, UriInterface::class, UriBuilder::class]);
+        
+        // Register default routes
+        $frontendApi->routing()
+                    ->registerRouteController(UpController::class)
+                    ->registerRouteController(SchedulerController::class);
+        
+        // Register typo middleware
+        $configurator->http()->registerMiddleware(ApiMiddlewareFork::class, "frontend", [
+            "after"  => [
+                RequestCollectorMiddleware::class,
+                "typo3/cms-frontend/base-redirect-resolver",
+            ],
+            "before" => "typo3/cms-frontend/static-route-resolver",
+        ]);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public static function extendExtConfig(ExtConfigExtensionRegistry $extender, ExtConfigContext $context)
+    {
+        $extender->registerOptionListEntry(FrontendApiOption::class);
+    }
+    
 }
