@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.18.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.17.1...v9.18.0) (2020-05-28)
+
+
+### Features
+
+* **ContentElement:** implement SwitchableContentElementActionTrait ([bfa7c6f](https://github.com/labor-digital/typo3-frontend-api/commit/bfa7c6fe7706d2d9a88af2be41494c7d3bfdcfe7))
+
+
+### Bug Fixes
+
+* **AbstractResourceStrategy:** make sure resource arrays get their counts calculated correctly ([640be76](https://github.com/labor-digital/typo3-frontend-api/commit/640be769cc825a1923c2f2133125deffa2ab5d12))
+
 ### [9.17.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.17.0...v9.17.1) (2020-05-27)
 
 
