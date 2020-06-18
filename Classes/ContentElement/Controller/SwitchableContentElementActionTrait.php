@@ -29,6 +29,7 @@ use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigException;
 use LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurator;
 use Neunerlei\Arrays\Arrays;
+use Neunerlei\Inflection\Inflector;
 
 /**
  * Trait SwitchableContentElementActionTrait
@@ -114,8 +115,12 @@ trait SwitchableContentElementActionTrait
         foreach ($methodNames as $methodName) {
             // Check if we have matching action method
             if (method_exists($this, $methodName)) {
+                // Simulate a plugin action
+                $typeParts      = explode('/', $context->getType());
+                $controllerName = end($typeParts);
                 // Update the type
-                $context->setType($context->getType() . '/' . ucfirst($selectedAction));
+                $context->setType($context->getType() . '/' . ucfirst($selectedAction) . "/" .
+                                  Inflector::toCamelCase($controllerName . "-" . $selectedAction));
                 
                 // Call the controller method
                 return $this->$methodName($context);
