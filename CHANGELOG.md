@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.0...v9.18.1) (2020-06-18)
+
+
+### Bug Fixes
+
+* **SwitchableContentElementActionTrait:** make the type compatible with extbase plugin definition ([7b74f5d](https://github.com/labor-digital/typo3-frontend-api/commit/7b74f5d0f51d59d5215c596f5cf7aa970a18e2b4))
+
 ## [9.18.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.17.1...v9.18.0) (2020-05-28)
 
 
