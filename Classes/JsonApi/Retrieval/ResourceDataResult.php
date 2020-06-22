@@ -116,7 +116,7 @@ class ResourceDataResult implements SelfTransformingInterface
      */
     public function getMeta(): array
     {
-        return isset($this->data["meta"]) ? $this->data["meta"] : [];
+        return $this->data["meta"] ?? [];
     }
     
     /**
@@ -126,7 +126,7 @@ class ResourceDataResult implements SelfTransformingInterface
      */
     public function getLinks(): array
     {
-        return isset($this->data["links"]) ? $this->data["links"] : [];
+        return $this->data["links"] ?? [];
     }
     
     /**
@@ -150,8 +150,7 @@ class ResourceDataResult implements SelfTransformingInterface
             return true;
         }
         
-        return isset($this->data["data"]) && isset($this->data["data"][0])
-               && is_array($this->data["data"][0])
+        return isset($this->data["data"][0]) && is_array($this->data["data"][0])
                && ! isset($this->data["attributes"]);
     }
     
@@ -162,11 +161,10 @@ class ResourceDataResult implements SelfTransformingInterface
     public function getResourceType(): ?string
     {
         if ($this->isSingle()) {
-            if (isset($this->data["data"]) && isset($this->data["data"]["type"])) {
+            if (isset($this->data["data"]["type"])) {
                 return $this->data["data"]["type"];
             }
-        } elseif (isset($this->data["data"]) && isset($this->data["data"][0]) && isset($this->data["data"][0])
-                  && isset($this->data["data"][0]["type"])) {
+        } elseif (isset($this->data["data"][0]["type"])) {
             return $this->data["data"][0]["type"];
         }
         
@@ -214,7 +212,7 @@ class ResourceDataResult implements SelfTransformingInterface
             "data"         => $this->data,
             "resourceType" => $this->getResourceType(),
             "uri"          => (string)$this->getUri(),
-            "query"        => $this->getUri()->getQuery(),
+            "query"        => $this->getQuery(),
         ];
     }
     
