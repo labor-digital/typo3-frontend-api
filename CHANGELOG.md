@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.1...v9.18.2) (2020-06-22)
+
+
+### Bug Fixes
+
+* **ResourceDataResult:** make sure query in array result is not a string ([f4e80ee](https://github.com/labor-digital/typo3-frontend-api/commit/f4e80ee865b6c0ec8d138a60ec3d7a0daf62868e))
+
 ### [9.18.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.0...v9.18.1) (2020-06-18)
 
 
