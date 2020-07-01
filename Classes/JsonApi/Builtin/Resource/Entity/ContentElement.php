@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -96,7 +97,7 @@ class ContentElement implements SelfTransformingInterface
      *
      * @var ContentElementColumnList|null
      */
-    public $children = null;
+    public $children;
     
     /**
      * By default all components will show the "loader" static component when you are
@@ -145,16 +146,17 @@ class ContentElement implements SelfTransformingInterface
     /**
      * ContentElement constructor.
      *
-     * @param   int          $type    The type of content element to render -> Use one of the TYPE_ constants
-     * @param   null         $source  The source to gather the content with:
-     *                                If $type = TYPE_TT_CONTENT OR $type = TYPE_MANUAL the uid of the tt_content
-     *                                record to render If $type = TYPE_TYPO_SCRIPT the TypoScript Object path to render
-     * @param   TypoContext  $context
+     * @param   int              $type    The type of content element to render -> Use one of the TYPE_ constants
+     * @param   null|int|string  $source  The source to gather the content with:
+     *                                    If $type = TYPE_TT_CONTENT OR $type = TYPE_MANUAL the uid of the tt_content
+     *                                    record to render If $type = TYPE_TYPO_SCRIPT the TypoScript Object path to
+     *                                    render
+     * @param   TypoContext      $context
      */
     public function __construct(int $type, $source, TypoContext $context)
     {
         $this->uid          = is_numeric($source) ? (int)$source
-            : md5(microtime(true) . rand(0, 10) . random_bytes(10));
+            : md5(microtime(true) . random_int(0, 10) . random_bytes(10));
         $this->languageCode = $context->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
         $this->type         = $type;
         $this->source       = $source;
@@ -225,7 +227,7 @@ class ContentElement implements SelfTransformingInterface
      */
     protected function asArrayChildrenRecursive(?ContentElementColumnList $children): array
     {
-        if (empty($children)) {
+        if ($children === null) {
             return [];
         }
         
@@ -242,6 +244,10 @@ class ContentElement implements SelfTransformingInterface
      */
     protected function populateMyself(Closure $generator): void
     {
+        // Store backups
+        $listenerBackup = static::$listener;
+        $spaModeBackup  = ContentElementHandler::$spaMode;
+        
         // Prepare the spa event handler
         static::$listener = function (ContentElementSpaEvent $event) {
             foreach (get_object_vars($event->getElement()) as $k => $v) {
@@ -254,7 +260,7 @@ class ContentElement implements SelfTransformingInterface
         ContentElementHandler::$spaMode = true;
         if (! static::$listenerBound) {
             $this->getService(TypoEventBus::class)
-                 ->addListener(ContentElementSpaEvent::class, function (ContentElementSpaEvent $event) {
+                 ->addListener(ContentElementSpaEvent::class, static function (ContentElementSpaEvent $event) {
                      if (empty(static::$listener)) {
                          return;
                      }
@@ -269,7 +275,7 @@ class ContentElement implements SelfTransformingInterface
         
         // Render the content element using the generator function
         try {
-            $this->data          = call_user_func($generator);
+            $this->data          = $generator();
             $this->componentType = "html";
         } catch (SpaContentPreparedException $e) {
             // This is expected...
@@ -279,8 +285,8 @@ class ContentElement implements SelfTransformingInterface
         $tsfe->cObjectDepthCounter = $cObjectDepthCounterBackup;
         
         // Unbind the handler
-        static::$listener               = null;
-        ContentElementHandler::$spaMode = false;
+        static::$listener               = $listenerBackup;
+        ContentElementHandler::$spaMode = $spaModeBackup;
     }
     
     /**
@@ -291,10 +297,10 @@ class ContentElement implements SelfTransformingInterface
      * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
      * @deprecated removed in v10 use the __construct method instead
      */
-    public static function makeInstance(?int $uid = null): ContentElement
+    public static function makeInstance(?int $uid = null): self
     {
         return TypoContainer::getInstance()
-                            ->get(ContentElement::class, ["args" => [ContentElement::TYPE_TT_CONTENT, $uid]]);
+                            ->get(__CLASS__, ["args" => [static::TYPE_TT_CONTENT, $uid]]);
     }
     
     /**
@@ -306,10 +312,10 @@ class ContentElement implements SelfTransformingInterface
      * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
      * @deprecated removed in v10 use the __construct method instead
      */
-    public static function makeInstanceElementWithAutomaticPopulation(int $uid): ContentElement
+    public static function makeInstanceElementWithAutomaticPopulation(int $uid): self
     {
         return TypoContainer::getInstance()
-                            ->get(ContentElement::class, ["args" => [ContentElement::TYPE_TT_CONTENT, $uid]]);
+                            ->get(__CLASS__, ["args" => [static::TYPE_TT_CONTENT, $uid]]);
     }
     
     /**
@@ -321,13 +327,13 @@ class ContentElement implements SelfTransformingInterface
      *
      * @param   string  $typoScriptObjectPath
      *
-     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement*
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
      * @deprecated removed in v10 use the __construct method instead
      */
-    public static function makeInstanceWithTypoScriptPopulation(string $typoScriptObjectPath): ContentElement
+    public static function makeInstanceWithTypoScriptPopulation(string $typoScriptObjectPath): self
     {
-        return TypoContainer::getInstance()->get(ContentElement::class, [
-            "args" => [ContentElement::TYPE_TYPO_SCRIPT, $typoScriptObjectPath],
+        return TypoContainer::getInstance()->get(__CLASS__, [
+            "args" => [static::TYPE_TYPO_SCRIPT, $typoScriptObjectPath],
         ]);
     }
 }
