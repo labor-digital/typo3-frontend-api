@@ -36,7 +36,7 @@ class Transformer extends AbstractResourceTransformer
         } elseif ($this->config->isScalar) {
             // Handle scalar
             $result = [
-                "id"    => md5(microtime(true)),
+                "id"    => md5((string)microtime(true)),
                 "value" => $value,
             ];
         } elseif ($this->config->isNull) {
@@ -52,7 +52,7 @@ class Transformer extends AbstractResourceTransformer
             $transformer->setFactory($this->transformerFactory);
             $transformer->setTransformerConfig($this->config);
             $result = [
-                "id"    => md5(microtime(true)),
+                "id"    => md5((string)microtime(true)),
                 "value" => $transformer->transformValue($value),
             ];
         } else {

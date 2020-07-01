@@ -362,7 +362,7 @@ class TransformerConfigGenerator implements SingletonInterface
             $config->idGetter = $config->attributes["uid"];
         } else {
             $config->idGetter = static function () {
-                return md5(microtime(true));
+                return md5((string)microtime(true));
             };
         }
     }
