@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.2...v9.18.3) (2020-07-01)
+
+
+### Bug Fixes
+
+* **ContentElement:** make sure nested content element rendering does not break the SPA mode ([e9f25f7](https://github.com/labor-digital/typo3-frontend-api/commit/e9f25f7ece2b3ff34b9bac1bfdaab113602086b0))
+* **TransformerConfigGenerator:** make sure simple extbase model properties are handled correctly ([c2e5403](https://github.com/labor-digital/typo3-frontend-api/commit/c2e54031139c754da9f353c2e20602715b59444d))
+
 ### [9.18.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.1...v9.18.2) (2020-06-22)
 
 
