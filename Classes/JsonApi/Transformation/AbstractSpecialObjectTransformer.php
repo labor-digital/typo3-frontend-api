@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -20,17 +21,18 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-abstract class AbstractSpecialObjectTransformer {
-	use TransformerTrait;
-	
-	/**
-	 * Receives the value and should convert it into a scalar value.
-	 * The result of this method should be either a string, an array or a number
-	 *
-	 * @param object $value The object to convert into a scalar value
-	 *
-	 * @return array|string|number|null
-	 */
-	abstract public function transformValue($value);
-	
+abstract class AbstractSpecialObjectTransformer
+{
+    use TransformerTrait;
+    
+    /**
+     * Receives the value and should convert it into a scalar value.
+     * The result of this method should be either a string, an array or a number
+     *
+     * @param   object  $value  The object to convert into a scalar value
+     *
+     * @return array|string|number|null
+     */
+    abstract public function transformValue($value);
+    
 }

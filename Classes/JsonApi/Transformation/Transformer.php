@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,76 +21,87 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-class Transformer extends AbstractResourceTransformer {
-	
-	/**
-	 * @inheritDoc
-	 */
-	protected function transformValue($value): array {
-		// Select handling type
-		if ($this->config->isArray) {
-			// Handle array
-			$result = $this->autoTransform($value);
-		} else if ($this->config->isScalar) {
-			// Handle scalar
-			$result = [
-				"id"    => md5(microtime(TRUE)),
-				"value" => $value,
-			];
-		} else if ($this->config->isNull) {
-			$result = ["id" => NULL];
-		} else if ($this->config->isSelfTransforming && $value instanceof SelfTransformingInterface) {
-			$result = $value->asArray();
-			if ($value instanceof HybridSelfTransformingInterface)
-				$result = $this->autoTransform($value);
-		} else if ($this->config->specialObjectTransformerClass !== NULL) {
-			/** @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer $transformer */
-			$transformer = $this->getInstanceOf($this->config->specialObjectTransformerClass);
-			$transformer->setFactory($this->transformerFactory);
-			$transformer->setTransformerConfig($this->config);
-			$result = [
-				"id"    => md5(microtime(TRUE)),
-				"value" => $transformer->transformValue($value),
-			];
-		} else {
-			// Handle objects
-			$this->setAvailableIncludes(array_keys($this->config->includes));
-			$result = [
-				"id" => call_user_func($this->config->idGetter, $value),
-			];
-			
-			// Transform the attributes
-			foreach ($this->config->attributes as $k => $getterClosure)
-				$result[$k] = $this->autoTransform(call_user_func($getterClosure, $value));
-		}
-		
-		// Done
-		return $result;
-	}
-	
-	/**
-	 * Magic method to automatically handle the include method calls
-	 *
-	 * @param $name
-	 * @param $arguments
-	 *
-	 * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item|null|\League\Fractal\Resource\NullResource
-	 */
-	public function __call($name, $arguments) {
-		// Check if this is a registered property
-		$property = lcfirst(substr($name, 7));
-		if (!isset($this->config->includes[$property])) return $this->null();
-		$value = $arguments[0];
-		
-		// Load the config and the data
-		$config = $this->config->includes[$property];
-		$data = call_user_func($this->config->includes[$property]["getter"], $value);
-		
-		// Run the transformer
-		if (empty($data)) return $this->null();
-		$childConfig = $this->transformerFactory->getConfigFor($data);
-		$childTransformer = $this->transformerFactory->getTransformer();
-		if ($config["isCollection"]) return $this->collection($data, $childTransformer, $childConfig->resourceType);
-		return $this->item($data, $childTransformer, $childConfig->resourceType);
-	}
+class Transformer extends AbstractResourceTransformer
+{
+    
+    /**
+     * @inheritDoc
+     */
+    protected function transformValue($value): array
+    {
+        // Select handling type
+        if ($this->config->isArray) {
+            // Handle array
+            $result = $this->autoTransform($value);
+        } elseif ($this->config->isScalar) {
+            // Handle scalar
+            $result = [
+                "id"    => md5(microtime(true)),
+                "value" => $value,
+            ];
+        } elseif ($this->config->isNull) {
+            $result = ["id" => null];
+        } elseif ($this->config->isSelfTransforming && $value instanceof SelfTransformingInterface) {
+            $result = $value->asArray();
+            if ($value instanceof HybridSelfTransformingInterface) {
+                $result = $this->autoTransform($value);
+            }
+        } elseif ($this->config->specialObjectTransformerClass !== null) {
+            /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer $transformer */
+            $transformer = $this->getInstanceOf($this->config->specialObjectTransformerClass);
+            $transformer->setFactory($this->transformerFactory);
+            $transformer->setTransformerConfig($this->config);
+            $result = [
+                "id"    => md5(microtime(true)),
+                "value" => $transformer->transformValue($value),
+            ];
+        } else {
+            // Handle objects
+            $this->setAvailableIncludes(array_keys($this->config->includes));
+            $result = [
+                "id" => call_user_func($this->config->idGetter, $value),
+            ];
+            
+            // Transform the attributes
+            foreach ($this->config->attributes as $k => $getterClosure) {
+                $result[$k] = $this->autoTransform($getterClosure($value));
+            }
+        }
+        
+        // Done
+        return $result;
+    }
+    
+    /**
+     * Magic method to automatically handle the include method calls
+     *
+     * @param $name
+     * @param $arguments
+     *
+     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item|null|\League\Fractal\Resource\NullResource
+     */
+    public function __call($name, $arguments)
+    {
+        // Check if this is a registered property
+        $property = lcfirst(substr($name, 7));
+        if (! isset($this->config->includes[$property])) {
+            return $this->null();
+        }
+        $value = $arguments[0];
+        // Load the config and the data
+        $config = $this->config->includes[$property];
+        $data   = call_user_func($this->config->includes[$property]["getter"], $value);
+        
+        // Run the transformer
+        if (empty($data)) {
+            return $this->null();
+        }
+        $childConfig      = $this->transformerFactory->getConfigFor($data);
+        $childTransformer = $this->transformerFactory->getTransformer();
+        if ($config["isCollection"]) {
+            return $this->collection($data, $childTransformer, $childConfig->resourceType);
+        }
+        
+        return $this->item($data, $childTransformer, $childConfig->resourceType);
+    }
 }
