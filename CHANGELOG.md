@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.3...v9.18.4) (2020-07-01)
+
+
+### Bug Fixes
+
+* **Transformer:** fix type mismatch for md5 ([6ac12a7](https://github.com/labor-digital/typo3-frontend-api/commit/6ac12a7bca4a829609a8cb1bb6d4598da9b27282))
+
 ### [9.18.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.2...v9.18.3) (2020-07-01)
 
 
