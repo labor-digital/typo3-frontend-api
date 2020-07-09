@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.5](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.4...v9.18.5) (2020-07-09)
+
+
+### Bug Fixes
+
+* **Transformer:** pass $result to autoTransform() when using HybridSelfTransformingInterface ([6837acd](https://github.com/labor-digital/typo3-frontend-api/commit/6837acdf6f0f4c05dc712113ed5b34b80e159876))
+
 ### [9.18.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.3...v9.18.4) (2020-07-01)
 
 
