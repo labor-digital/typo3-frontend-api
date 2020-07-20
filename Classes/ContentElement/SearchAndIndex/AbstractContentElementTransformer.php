@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,60 +21,68 @@
 namespace LaborDigital\Typo3FrontendApi\ContentElement\SearchAndIndex;
 
 
+use LaborDigital\T3SAI\Builtin\Transformer\Page\ContentElement\AbstractContentElementTransformer as AbstractContentElementTransformerAlias;
+use LaborDigital\T3SAI\Indexer\IndexerContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface;
-use LaborDigital\Typo3SearchAndIndex\IndexGenerator\ContentElement\ContentElementTransformerInterface;
-use LaborDigital\Typo3SearchAndIndex\IndexGenerator\IndexGeneratorContext;
 
-abstract class AbstractContentElementTransformer implements ContentElementTransformerInterface, ContentElementControllerInterface {
-	
-	/**
-	 * @var ContentElementHandler
-	 */
-	protected $contentElementHandler;
-	
-	/**
-	 * Inject the element handler using extBase
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler $contentElementHandler
-	 */
-	public function injectContentElementHandler(ContentElementHandler $contentElementHandler) {
-		$this->contentElementHandler = $contentElementHandler;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function convert(array $row, IndexGeneratorContext $context): string {
-		$config = $context->TypoScript->get(["tt_content", $row["CType"]], []);
-		$config["controllerClass"] = static::class;
-		return $this->contentElementHandler->handleCustom($row, TRUE, $config);
-	}
-	
-	/**
-	 * Receives the content element context as the default controller would and should be used to generate a useful,
-	 * searchable content string we can add to the search index table.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext $context
-	 *
-	 * @return string
-	 */
-	abstract protected function convertElement(ContentElementControllerContext $context): string;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function handle(ContentElementControllerContext $context) {
-		return $this->convertElement($context);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function handleBackend(ContentElementControllerContext $context): string {
-		return $this->handle($context);
-	}
-	
-	
+
+abstract class AbstractContentElementTransformer
+    extends AbstractContentElementTransformerAlias
+    implements ContentElementControllerInterface
+{
+    
+    /**
+     * @var ContentElementHandler
+     */
+    protected $contentElementHandler;
+    
+    /**
+     * Inject the element handler using extBase
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler  $contentElementHandler
+     */
+    public function injectContentElementHandler(ContentElementHandler $contentElementHandler)
+    {
+        $this->contentElementHandler = $contentElementHandler;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function convert(array $row, IndexerContext $context): string
+    {
+        $config                    = $this->TypoContext()->Config()
+                                          ->getTypoScriptValue(['tt_content', $row['CType']], []);
+        $config['controllerClass'] = static::class;
+        
+        return $this->contentElementHandler->handleCustom($row, true, $config);
+    }
+    
+    /**
+     * Receives the content element context as the default controller would and should be used to generate a useful,
+     * searchable content string we can add to the search index table.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext  $context
+     *
+     * @return string
+     */
+    abstract protected function convertElement(ContentElementControllerContext $context): string;
+    
+    /**
+     * @inheritDoc
+     */
+    public function handle(ContentElementControllerContext $context)
+    {
+        return $this->convertElement($context);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function handleBackend(ContentElementControllerContext $context): string
+    {
+        return $this->handle($context);
+    }
 }

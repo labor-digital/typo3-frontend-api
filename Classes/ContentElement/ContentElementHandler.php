@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -23,7 +24,7 @@ namespace LaborDigital\Typo3FrontendApi\ContentElement;
 use GuzzleHttp\Psr7\ServerRequest;
 use LaborDigital\Typo3BetterApi\BackendPreview\BackendPreviewRendererContext;
 use LaborDigital\Typo3BetterApi\BackendPreview\BackendPreviewRendererInterface;
-use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementDataPostProcessorInterface;
@@ -53,7 +54,7 @@ use TYPO3\CMS\Core\SingletonInterface;
 class ContentElementHandler implements SingletonInterface, BackendPreviewRendererInterface
 {
     use ResponseFactoryTrait;
-    use CommonServiceDependencyTrait;
+    use CommonDependencyTrait;
     
     /**
      * Will be set by the content object renderer when the user element processes our callback
@@ -99,7 +100,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
      *
      * @return string
      */
-    public function handleFrontend($input, array $config)
+    public function handleFrontend($input, array $config): string
     {
         return $this->handleCustom($this->cObj->data, true, $config, [
             "contentObjectRenderer" => $this->cObj,
@@ -116,7 +117,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         if (empty($cType)) {
             throw new ContentElementException("The data for a content element did not contain a cType!");
         }
-        $config = $this->ConfigRepository()->contentElement()->getContentElementConfig($cType);
+        $config = $this->ConfigRepository()->contentElement()->getContentElementConfig((string)$cType);
         
         return $this->handleCustom($context->getRow(), false, $config, [
             "context" => $context,
@@ -152,7 +153,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         
         // Allow filtering
         $this->EventBus()->dispatch(($e = new ContentElementPreProcessorEvent(
-            $cType, $row, $controllerClass, $request, $isFrontend, $config, $environment
+            (string)$cType, $row, (string)$controllerClass, $request, $isFrontend, $config, $environment
         )));
         $cType           = $e->getCType();
         $row             = $e->getRow();
@@ -166,7 +167,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $controller = $this->getInstanceOf($controllerClass);
         
         // Load the model
-        $model = $this->getService(ContentElementRepository::class)->hydrateRow($row);
+        $model = $this->getSingletonOf(ContentElementRepository::class)->hydrateRow($row);
         
         // Prepare css classes
         $cssClasses = $this->ConfigRepository()->contentElement()->getGlobalCssClasses();
@@ -180,7 +181,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         ) {
             if (! empty($field)) {
                 $cssClasses = Arrays::attach($cssClasses,
-                    array_map(function ($v) use ($prefix) {
+                    array_map(static function ($v) use ($prefix) {
                         return $prefix . $v;
                     }, Arrays::makeFromStringList($field))
                 );
@@ -200,10 +201,11 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         ]);
         
         // Remap the virtual TCA columns
-        $result = $this->handleVirtualColumnTcaRewrite($cType, function () use ($isFrontend, $controller, $context) {
-            // Run the controller
-            return $isFrontend ? $controller->handle($context) : $controller->handleBackend($context);
-        });
+        $result = $this->handleVirtualColumnTcaRewrite($cType,
+            static function () use ($isFrontend, $controller, $context) {
+                // Run the controller
+                return $isFrontend ? $controller->handle($context) : $controller->handleBackend($context);
+            });
         
         // Allow filtering
         $this->EventBus()->dispatch(($e = new ContentElementAfterControllerFilterEvent(
@@ -222,7 +224,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $element->useLoaderComponent = $context->useLoaderComponent();
         $element->componentType      = $context->getType();
         if ($context->getInitialStateRequest() !== null) {
-            $element->initialState = $this->getService(ResourceDataRepository::class)
+            $element->initialState = $this->getSingletonOf(ResourceDataRepository::class)
                                           ->findForInitialState($context->getInitialStateRequest());
         }
         $element->data         = $this->generateData($cType, $result, $context);
@@ -269,18 +271,18 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
             $result = $jsonWrap;
             if (stripos($result, "{{definitionPretty}}") !== false) {
                 $result = str_replace("{{definitionPretty}}",
-                    json_encode($resultArray, JSON_PRETTY_PRINT), $result);
+                    json_encode($resultArray, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT), $result);
             }
             if (stripos($result, "{{definitionAttr}}") !== false) {
                 $result = str_replace("{{definitionAttr}}",
-                    htmlentities(json_encode($resultArray)), $result);
+                    htmlentities(json_encode($resultArray, JSON_THROW_ON_ERROR)), $result);
             }
             if (stripos($result, "{{id}}") !== false) {
                 $result = str_replace("{{id}}",
                     "content-element-" . $model->getUid() . "-" . Inflector::toFile($context->getType()), $result);
             }
         } else {
-            $result = json_encode($resultArray);
+            $result = json_encode($resultArray, JSON_THROW_ON_ERROR);
         }
         
         // Allow filtering
@@ -302,7 +304,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
             return $this->request;
         }
         $rootRequest = $this->TypoContext()->Request()->getRootRequest();
-        if (empty($rootRequest)) {
+        if ($rootRequest === null) {
             $rootRequest = ServerRequest::fromGlobals();
         }
         
@@ -325,7 +327,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
             $data = [];
         } else {
             $data = ContentElementDataTransformer::transformData(
-                $data, $context, $this->getService(TransformerFactory::class));
+                $data, $context, $this->getSingletonOf(TransformerFactory::class));
         }
         
         // Apply the data post processors
@@ -380,9 +382,10 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
     protected function handleVirtualColumnTcaRewrite(string $cType, callable $wrapper)
     {
         // Store the original tca and prepare the reverting function
-        $originalTca = serialize(Arrays::getPath($GLOBALS, ["TCA", "tt_content", "columns"], []));
-        $revert      = function () use ($originalTca) {
-            $GLOBALS["TCA"]["tt_content"]["columns"] = unserialize($originalTca);
+        $originalTca = json_encode(
+            Arrays::getPath($GLOBALS, ["TCA", "tt_content", "columns"], []), JSON_THROW_ON_ERROR);
+        $revert      = static function () use ($originalTca) {
+            $GLOBALS["TCA"]["tt_content"]["columns"] = json_decode($originalTca, true, 512, JSON_THROW_ON_ERROR);
         };
         
         try {
@@ -395,7 +398,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
             }
             
             // Run the real code
-            $result = call_user_func($wrapper);
+            $result = $wrapper();
             $revert();
             
             return $result;
@@ -412,6 +415,6 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
      */
     protected function ConfigRepository(): FrontendApiConfigRepository
     {
-        return $this->getService(FrontendApiConfigRepository::class);
+        return $this->getSingletonOf(FrontendApiConfigRepository::class);
     }
 }

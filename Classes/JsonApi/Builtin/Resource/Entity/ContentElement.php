@@ -23,7 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 use Closure;
 use InvalidArgumentException;
-use LaborDigital\Typo3BetterApi\Container\LazyServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\ContainerAwareTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\Event\TypoEventBus;
 use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
@@ -37,7 +37,7 @@ use Neunerlei\TinyTimy\DateTimy;
 
 class ContentElement implements SelfTransformingInterface
 {
-    use LazyServiceDependencyTrait;
+    use ContainerAwareTrait;
     
     public const TYPE_TT_CONTENT  = 0;
     public const TYPE_TYPO_SCRIPT = 1;
@@ -173,48 +173,48 @@ class ContentElement implements SelfTransformingInterface
             switch ($this->type) {
                 case static::TYPE_TT_CONTENT:
                     if (! is_numeric($this->source)) {
-                        throw new InvalidArgumentException("The given \$source argument has to be a numeric uid of a tt_content record!");
+                        throw new InvalidArgumentException('The given $source argument has to be a numeric uid of a tt_content record!');
                     }
                     
                     // Render the content element based on the uid
                     $this->populateMyself(function () {
-                        return $this->getService(TypoScriptService::class)->renderContentObject("RECORDS", [
-                            "tables"       => "tt_content",
-                            "source"       => $this->uid,
-                            "dontCheckPid" => 1,
+                        return $this->getSingletonOf(TypoScriptService::class)->renderContentObject('RECORDS', [
+                            'tables'       => 'tt_content',
+                            'source'       => $this->uid,
+                            'dontCheckPid' => 1,
                         ]);
                     });
                     break;
                 case static::TYPE_TYPO_SCRIPT:
                     if (! is_string($this->source) || empty($this->source)) {
-                        throw new InvalidArgumentException("The given \$source argument has to be the TypoScript selector of an object to render!");
+                        throw new InvalidArgumentException('The given $source argument has to be the TypoScript selector of an object to render!');
                     }
                     
                     // Render the content element based on the given object path
                     $this->populateMyself(function () {
-                        return $this->getService(TypoScriptService::class)->renderContentObjectWith($this->source);
+                        return $this->getSingletonOf(TypoScriptService::class)->renderContentObjectWith($this->source);
                     });
                     break;
                 case static::TYPE_MANUAL:
                     // Don't do anything...
                     break;
                 default:
-                    throw new InvalidArgumentException("Invalid \$type given. Refer to the TYPE_ constants of this object!");
+                    throw new InvalidArgumentException('Invalid $type given. Refer to the TYPE_ constants of this object!');
             }
         }
         
         return array_merge([
-            "type"               => "contentElement",
-            "id"                 => $this->uid,
-            "componentType"      => $this->componentType,
-            "initialState"       => $this->initialState instanceof SelfTransformingInterface ?
+            'type'               => 'contentElement',
+            'id'                 => $this->uid,
+            'componentType'      => $this->componentType,
+            'initialState'       => $this->initialState instanceof SelfTransformingInterface ?
                 $this->initialState->asArray() : $this->initialState,
-            "data"               => $this->data,
-            "languageCode"       => $this->languageCode,
-            "children"           => $this->asArrayChildrenRecursive($this->children),
-            "useLoaderComponent" => $this->useLoaderComponent,
-            "generated"          => (new DateTimy())->formatJs(),
-            "cssClasses"         => $this->cssClasses,
+            'data'               => $this->data,
+            'languageCode'       => $this->languageCode,
+            'children'           => $this->asArrayChildrenRecursive($this->children),
+            'useLoaderComponent' => $this->useLoaderComponent,
+            'generated'          => (new DateTimy())->formatJs(),
+            'cssClasses'         => $this->cssClasses,
         ], $this->additionalAttributes);
     }
     
@@ -259,7 +259,7 @@ class ContentElement implements SelfTransformingInterface
         // Register the handler
         ContentElementHandler::$spaMode = true;
         if (! static::$listenerBound) {
-            $this->getService(TypoEventBus::class)
+            $this->getSingletonOf(TypoEventBus::class)
                  ->addListener(ContentElementSpaEvent::class, static function (ContentElementSpaEvent $event) {
                      if (empty(static::$listener)) {
                          return;
@@ -270,13 +270,13 @@ class ContentElement implements SelfTransformingInterface
         static::$listenerBound = true;
         
         // Render the element
-        $tsfe                      = $this->getService(TsfeService::class)->getTsfe();
+        $tsfe                      = $this->getSingletonOf(TsfeService::class)->getTsfe();
         $cObjectDepthCounterBackup = $tsfe->cObjectDepthCounter;
         
         // Render the content element using the generator function
         try {
             $this->data          = $generator();
-            $this->componentType = "html";
+            $this->componentType = 'html';
         } catch (SpaContentPreparedException $e) {
             // This is expected...
         }
@@ -300,7 +300,7 @@ class ContentElement implements SelfTransformingInterface
     public static function makeInstance(?int $uid = null): self
     {
         return TypoContainer::getInstance()
-                            ->get(__CLASS__, ["args" => [static::TYPE_TT_CONTENT, $uid]]);
+                            ->get(__CLASS__, ['args' => [static::TYPE_TT_CONTENT, $uid]]);
     }
     
     /**
@@ -315,7 +315,7 @@ class ContentElement implements SelfTransformingInterface
     public static function makeInstanceElementWithAutomaticPopulation(int $uid): self
     {
         return TypoContainer::getInstance()
-                            ->get(__CLASS__, ["args" => [static::TYPE_TT_CONTENT, $uid]]);
+                            ->get(__CLASS__, ['args' => [static::TYPE_TT_CONTENT, $uid]]);
     }
     
     /**
@@ -333,7 +333,7 @@ class ContentElement implements SelfTransformingInterface
     public static function makeInstanceWithTypoScriptPopulation(string $typoScriptObjectPath): self
     {
         return TypoContainer::getInstance()->get(__CLASS__, [
-            "args" => [static::TYPE_TYPO_SCRIPT, $typoScriptObjectPath],
+            'args' => [static::TYPE_TYPO_SCRIPT, $typoScriptObjectPath],
         ]);
     }
 }

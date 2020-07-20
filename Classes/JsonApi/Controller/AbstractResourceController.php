@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -19,20 +20,21 @@
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Controller;
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurationInterface;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\ResourceTransformerTrait;
 
-abstract class AbstractResourceController implements ResourceControllerInterface, ResourceConfigurationInterface {
-	use ResponseFactoryTrait;
-	use CommonServiceLocatorTrait;
-	use ResourceControllerQueryConstraintsTrait;
-	use ResourceTransformerTrait;
-	use CommonServiceDependencyTrait {
-		CommonServiceDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
-		CommonServiceDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
-	}
-	
+abstract class AbstractResourceController implements ResourceControllerInterface, ResourceConfigurationInterface
+{
+    use ResponseFactoryTrait;
+    use CommonServiceLocatorTrait;
+    use ResourceControllerQueryConstraintsTrait;
+    use ResourceTransformerTrait;
+    use CommonDependencyTrait {
+        CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+        CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+    }
+    
 }

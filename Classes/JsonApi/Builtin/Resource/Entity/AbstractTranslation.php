@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,66 +21,72 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use Neunerlei\Arrays\Arrays;
 
-abstract class AbstractTranslation {
-	use CommonServiceDependencyTrait;
-	
-	/**
-	 * The identifier for the language this object represents
-	 * @var mixed
-	 */
-	protected $languageId;
-	
-	/**
-	 * AbstractTranslation constructor.
-	 *
-	 * @param mixed $languageId Either the sys language uid or the two char iso code of a language
-	 */
-	public function __construct($languageId) {
-		$this->languageId = $languageId;
-	}
-	
-	/**
-	 * Internal logic to translate the list of given labels and return a flattened array of all translations
-	 *
-	 * @param array $labels
-	 *
-	 * @return array
-	 */
-	protected function getLabelTranslations(array $labels): array {
-		$translations = [];
-		if (!empty($labels)) {
-			$translator = $this->Translation();
-			foreach ($labels as $k => $label) {
-				$labelClean = trim($translator->translate($label));
-				// Convert %s sprintf formats to {0}... formats for js frameworks to cope with
-				// @todo evaluate if this will cause issues ?
-				$c = 0;
-				$labelClean = preg_replace_callback("~%s~si", function () use (&$c) {
-					return "{" . $c++ . "}";
-				}, $labelClean);
-				$translations[$k] = $labelClean;
-			}
-		}
-		
-		
-		// Finalize the translations
-		$translations = Arrays::unflatten($translations);
-		return $translations;
-	}
-	
-	/**
-	 * Factory method to create a new instance of myself
-	 *
-	 * @param $languageId
-	 *
-	 * @return PageTranslation|HybridTranslation
-	 * @deprecated removed in v10 use the __construct method instead
-	 */
-	public static function makeInstance($languageId): AbstractTranslation {
-		return TypoContainer::getInstance()->get(static::class, ["args" => [$languageId]]);
-	}
+abstract class AbstractTranslation
+{
+    use CommonDependencyTrait;
+    
+    /**
+     * The identifier for the language this object represents
+     *
+     * @var mixed
+     */
+    protected $languageId;
+    
+    /**
+     * AbstractTranslation constructor.
+     *
+     * @param   mixed  $languageId  Either the sys language uid or the two char iso code of a language
+     */
+    public function __construct($languageId)
+    {
+        $this->languageId = $languageId;
+    }
+    
+    /**
+     * Internal logic to translate the list of given labels and return a flattened array of all translations
+     *
+     * @param   array  $labels
+     *
+     * @return array
+     */
+    protected function getLabelTranslations(array $labels): array
+    {
+        $translations = [];
+        if (! empty($labels)) {
+            $translator = $this->Translation();
+            foreach ($labels as $k => $label) {
+                $labelClean = trim($translator->translate($label));
+                // Convert %s sprintf formats to {0}... formats for js frameworks to cope with
+                // @todo evaluate if this will cause issues ?
+                $c                = 0;
+                $labelClean       = preg_replace_callback('~%s~si', function () use (&$c) {
+                    return '{' . $c++ . '}';
+                }, $labelClean);
+                $translations[$k] = $labelClean;
+            }
+        }
+        
+        
+        // Finalize the translations
+        $translations = Arrays::unflatten($translations);
+        
+        return $translations;
+    }
+    
+    /**
+     * Factory method to create a new instance of myself
+     *
+     * @param $languageId
+     *
+     * @return PageTranslation|HybridTranslation
+     * @deprecated removed in v10 use the __construct method instead
+     */
+    public static function makeInstance($languageId): AbstractTranslation
+    {
+        return TypoContainer::getInstance()->get(static::class, ['args' => [$languageId]]);
+    }
 }

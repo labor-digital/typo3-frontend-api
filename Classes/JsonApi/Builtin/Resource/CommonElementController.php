@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -30,42 +31,50 @@ use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
 
-class CommonElementController extends AbstractResourceController {
-	use SiteConfigAwareTrait;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->getResourceRoute()->setPath("/{layout}/{id}");
-		$configurator->addClass(CommonElement::class);
-		$configurator->setPageSize(0);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context) {
-		$elements = $this->getCurrentSiteConfig()->commonElements;
-		$layout = $context->getParams()["layout"];
-		// Fallback to default if the layout does not exist
-		if (!isset($elements[$layout])) $layout = "default";
-		$key = (string)$context->getParams()["id"];
-		if (!isset($elements[$layout]) || !isset($elements[$layout][$key]))
-			throw new NotFoundException("There is no common object with the given key: " . $key);
-		return $this->getInstanceOf(CommonElement::class, [$layout, $key]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		// Get the allowed keys
-		$requestedKeys = Arrays::makeFromStringList(Arrays::getPath($context->getQuery()->getFilters(), "key", ""));
-		$layout = $context->getQuery()->get("layout", "default");
-		
-		// Generate the collection
-		return $this->getCommonElements($layout, $requestedKeys);
-	}
-	
+class CommonElementController extends AbstractResourceController
+{
+    use SiteConfigAwareTrait;
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->getResourceRoute()->setPath('/{layout}/{id}');
+        $configurator->addClass(CommonElement::class);
+        $configurator->setPageSize(0);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context)
+    {
+        $elements = $this->getCurrentSiteConfig()->commonElements;
+        $layout   = $context->getParams()['layout'];
+        // Fallback to default if the layout does not exist
+        if (! isset($elements[$layout])) {
+            $layout = 'default';
+        }
+        $key = (string)$context->getParams()['id'];
+        if (! isset($elements[$layout]) || ! isset($elements[$layout][$key])) {
+            throw new NotFoundException('There is no common object with the given key: ' . $key);
+        }
+        
+        return $this->getInstanceOf(CommonElement::class, [$layout, $key]);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        // Get the allowed keys
+        $requestedKeys = Arrays::makeFromStringList(Arrays::getPath($context->getQuery()->getFilters(), 'key', ''));
+        $layout        = (string)$context->getQuery()->get('layout', 'default');
+        
+        // Generate the collection
+        return $this->getCommonElements($layout, $requestedKeys);
+    }
+    
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,64 +21,75 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
-use LaborDigital\Typo3BetterApi\Container\LazyServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\ContainerAwareTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\Page\PageService;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
-class PageContent implements SelfTransformingInterface {
-	use LazyServiceDependencyTrait;
-	
-	/**
-	 * The internal column list we use as data handler
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
-	 */
-	protected $columnList;
-	
-	/**
-	 * The page id we hold the layout data for
-	 * @var int
-	 */
-	protected $id;
-	
-	/**
-	 * PageContent constructor.
-	 *
-	 * @param int $id The pid of the page to gather the contents for
-	 */
-	public function __construct(int $id) {
-		$this->id = $id;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function asArray(): array {
-		return [
-			"id"       => $this->id,
-			"children" => $this->getContents()->asArray(),
-		];
-	}
-	
-	/**
-	 * Returns the contents as object representation
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
-	 */
-	public function getContents(): ContentElementColumnList {
-		if (isset($this->columnList)) return $this->columnList;
-		return $this->columnList = $this->getInstanceOf(ContentElementColumnList::class,
-			[$this->getService(PageService::class)->getPageContents($this->id)]);
-	}
-	
-	/**
-	 * Factory method to create a new instance of myself
-	 *
-	 * @param int $id
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageContent
-	 * @deprecated removed in v10 use the __construct method instead
-	 */
-	public static function makeInstance(int $id): PageContent {
-		return TypoContainer::getInstance()->get(static::class, ["args" => [$id]]);
-	}
+class PageContent implements SelfTransformingInterface
+{
+    use ContainerAwareTrait;
+    
+    /**
+     * The internal column list we use as data handler
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
+     */
+    protected $columnList;
+    
+    /**
+     * The page id we hold the layout data for
+     *
+     * @var int
+     */
+    protected $id;
+    
+    /**
+     * PageContent constructor.
+     *
+     * @param   int  $id  The pid of the page to gather the contents for
+     */
+    public function __construct(int $id)
+    {
+        $this->id = $id;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        return [
+            'id'       => $this->id,
+            'children' => $this->getContents()->asArray(),
+        ];
+    }
+    
+    /**
+     * Returns the contents as object representation
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
+     */
+    public function getContents(): ContentElementColumnList
+    {
+        if (isset($this->columnList)) {
+            return $this->columnList;
+        }
+        
+        return $this->columnList = $this->getInstanceOf(ContentElementColumnList::class,
+            [$this->getSingletonOf(PageService::class)->getPageContents($this->id)]);
+    }
+    
+    /**
+     * Factory method to create a new instance of myself
+     *
+     * @param   int  $id
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageContent
+     * @deprecated removed in v10 use the __construct method instead
+     */
+    public static function makeInstance(int $id): PageContent
+    {
+        return TypoContainer::getInstance()->get(static::class, ['args' => [$id]]);
+    }
 }

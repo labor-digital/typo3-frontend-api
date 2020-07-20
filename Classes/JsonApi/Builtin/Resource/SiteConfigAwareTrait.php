@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -34,35 +35,44 @@ use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig;
  * @property FrontendApiConfigRepository $ConfigRepository
  * @see     \LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait
  */
-trait SiteConfigAwareTrait {
-	use CommonServiceLocatorTrait;
-	protected $serviceMap = ["ConfigRepository" => FrontendApiConfigRepository::class];
-	
-	/**
-	 * Returns the site configuration either for the current site or the global site if no specific site config was
-	 * found.
-	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
-	 */
-	protected function getCurrentSiteConfig(): SiteConfig {
-		return $this->ConfigRepository->site()->getCurrentSiteConfig();
-	}
-	
-	/**
-	 * Generates the list of all page objects for this site.
-	 *
-	 * @param string $layout        The layout key to find the elements for
-	 * @param array  $requestedKeys A list of keys that is used to filter the page objects
-	 *
-	 * @return array
-	 */
-	protected function getCommonElements(string $layout, array $requestedKeys = []): array {
-		$collection = [];
-		$elementList = $this->ConfigRepository->site()->getCurrentSiteConfig()->commonElements;
-		if (empty($elementList[$layout])) $layout = "default";
-		foreach ($elementList[$layout] as $key => $foo) {
-			if (!empty($requestedKeys) && !in_array($key, $requestedKeys)) continue;
-			$collection[] = $this->getInstanceOf(CommonElement::class, [$layout, $key]);
-		}
-		return $collection;
-	}
+trait SiteConfigAwareTrait
+{
+    use CommonServiceLocatorTrait;
+    protected $serviceMap = ["ConfigRepository" => FrontendApiConfigRepository::class];
+    
+    /**
+     * Returns the site configuration either for the current site or the global site if no specific site config was
+     * found.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
+     */
+    protected function getCurrentSiteConfig(): SiteConfig
+    {
+        return $this->ConfigRepository->site()->getCurrentSiteConfig();
+    }
+    
+    /**
+     * Generates the list of all page objects for this site.
+     *
+     * @param   string  $layout         The layout key to find the elements for
+     * @param   array   $requestedKeys  A list of keys that is used to filter the page objects
+     *
+     * @return array
+     */
+    protected function getCommonElements(string $layout, array $requestedKeys = []): array
+    {
+        $collection  = [];
+        $elementList = $this->ConfigRepository->site()->getCurrentSiteConfig()->commonElements;
+        if (empty($elementList[$layout])) {
+            $layout = "default";
+        }
+        foreach ($elementList[$layout] as $key => $foo) {
+            if (! empty($requestedKeys) && ! in_array($key, $requestedKeys)) {
+                continue;
+            }
+            $collection[] = $this->getInstanceOf(CommonElement::class, [$layout, $key]);
+        }
+        
+        return $collection;
+    }
 }

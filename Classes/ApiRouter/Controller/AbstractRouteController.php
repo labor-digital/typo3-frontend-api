@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,15 +21,16 @@
 namespace LaborDigital\Typo3FrontendApi\ApiRouter\Controller;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceDependencyTrait;
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 
-abstract class AbstractRouteController implements RouteControllerInterface {
-	use CommonServiceLocatorTrait;
-	use ResponseFactoryTrait;
-	use CommonServiceDependencyTrait {
-		CommonServiceDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
-		CommonServiceDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
-	}
+abstract class AbstractRouteController implements RouteControllerInterface
+{
+    use CommonServiceLocatorTrait;
+    use ResponseFactoryTrait;
+    use CommonDependencyTrait {
+        CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+        CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+    }
 }

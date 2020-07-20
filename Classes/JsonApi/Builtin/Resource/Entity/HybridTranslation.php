@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,54 +21,58 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
+use LaborDigital\Typo3BetterApi\Cache\GeneralCache;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
-class HybridTranslation extends AbstractTranslation implements SelfTransformingInterface {
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
-	 */
-	protected $configRepository;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function __construct($languageId, FrontendApiConfigRepository $configRepository) {
-		parent::__construct($languageId);
-		$this->configRepository = $configRepository;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function asArray(): array {
-		return $this->Simulator->runWithEnvironment(["language" => $this->languageId, "fallbackLanguage" => TRUE], function () {
-			// Cache the labels for better performance
-			$languageKey = $this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
-			$translationFiles = $this->configRepository->hybridApp()->getTranslationFiles();
-			$cacheKey = "hybrid-translation-" . $languageKey . \GuzzleHttp\json_encode($translationFiles);
-			if (!$this->GeneralCache->has($cacheKey)) {
-				// Build the label list by using the registered files
-				$labels = [];
-				foreach ($translationFiles as $file) {
-					$labelsLocal = $this->Translation->getAllKeysInFile($file);
-					$labels = array_merge($labels, $labelsLocal);
-				}
-				
-				// Translate the labels and store them to the cache
-				$translations = $this->getLabelTranslations($labels);
-				$this->GeneralCache->set($cacheKey, $translations);
-			} else {
-				// Load translations from cache
-				$translations = $this->GeneralCache->get($cacheKey);
-			}
-			
-			// Finish up entity
-			return [
-				"id"      => $languageKey,
-				"message" => $translations,
-			];
-		});
-	}
+class HybridTranslation extends AbstractTranslation implements SelfTransformingInterface
+{
+    
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     */
+    protected $configRepository;
+    
+    /**
+     * @inheritDoc
+     */
+    public function __construct($languageId, FrontendApiConfigRepository $configRepository)
+    {
+        parent::__construct($languageId);
+        $this->configRepository = $configRepository;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        return $this->Simulator()->runWithEnvironment(['language' => $this->languageId, 'fallbackLanguage' => true], function () {
+            // Cache the labels for better performance
+            $languageKey      = $this->TypoContext()->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
+            $translationFiles = $this->configRepository->hybridApp()->getTranslationFiles();
+            $cacheKey         = 'hybrid-translation-' . $languageKey . \GuzzleHttp\json_encode($translationFiles);
+            if (! $this->getSingletonOf(GeneralCache::class)->has($cacheKey)) {
+                // Build the label list by using the registered files
+                $labels = [];
+                foreach ($translationFiles as $file) {
+                    $labels[] = $this->Translation()->getAllKeysInFile($file);
+                }
+                $labels = array_merge([], ...$labels);
+                
+                // Translate the labels and store them to the cache
+                $translations = $this->getLabelTranslations($labels);
+                $this->getSingletonOf(GeneralCache::class)->set($cacheKey, $translations);
+            } else {
+                // Load translations from cache
+                $translations = $this->getSingletonOf(GeneralCache::class)->get($cacheKey);
+            }
+            
+            // Finish up entity
+            return [
+                'id'      => $languageKey,
+                'message' => $translations,
+            ];
+        });
+    }
 }

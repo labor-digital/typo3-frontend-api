@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -29,28 +30,32 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-class PagePidConfigController extends AbstractResourceController {
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->addClass(PagePidConfig::class);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return $this->Simulator->runWithEnvironment(["pid" => $id], function () use ($id) {
-			return $this->getInstanceOf(PagePidConfig::class, [$id]);
-		});
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
+class PagePidConfigController extends AbstractResourceController
+{
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->addClass(PagePidConfig::class);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        return $this->Simulator()->runWithEnvironment(['pid' => $id], function () use ($id) {
+            return $this->getInstanceOf(PagePidConfig::class, [$id]);
+        });
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+    
 }

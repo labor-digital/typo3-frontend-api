@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,41 +21,45 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
+use LaborDigital\Typo3BetterApi\Cache\GeneralCache;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
 /**
  * Class PageTranslation
+ *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Model
  */
-class PageTranslation extends AbstractTranslation implements SelfTransformingInterface {
-	use SiteConfigAwareTrait;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function asArray(): array {
-		return $this->Simulator->runWithEnvironment(["language" => $this->languageId, "fallbackLanguage" => TRUE], function () {
-			$siteConfig = $this->getCurrentSiteConfig();
-			
-			// Cache the labels for better performance
-			$languageKey = $this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
-			$cacheKey = "page-translation-" . $languageKey . $siteConfig->siteIdentifier .
-				\GuzzleHttp\json_encode($siteConfig->translationLabels);
-			if (!$this->GeneralCache->has($cacheKey)) {
-				$translations = $this->getLabelTranslations($siteConfig->translationLabels);
-				$this->GeneralCache->set($cacheKey, $translations);
-			} else {
-				// Load translations from cache
-				$translations = $this->GeneralCache->get($cacheKey);
-			}
-			
-			// Finish up entity
-			return [
-				"id"      => $languageKey,
-				"message" => $translations,
-			];
-		});
-	}
-	
+class PageTranslation extends AbstractTranslation implements SelfTransformingInterface
+{
+    use SiteConfigAwareTrait;
+    
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        return $this->Simulator()->runWithEnvironment(['language' => $this->languageId, 'fallbackLanguage' => true], function () {
+            $siteConfig = $this->getCurrentSiteConfig();
+            
+            // Cache the labels for better performance
+            $languageKey = $this->TypoContext()->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
+            $cacheKey    = 'page-translation-' . $languageKey . $siteConfig->siteIdentifier .
+                           \GuzzleHttp\json_encode($siteConfig->translationLabels);
+            if (! $this->getSingletonOf(GeneralCache::class)->has($cacheKey)) {
+                $translations = $this->getLabelTranslations($siteConfig->translationLabels);
+                $this->getSingletonOf(GeneralCache::class)->set($cacheKey, $translations);
+            } else {
+                // Load translations from cache
+                $translations = $this->getSingletonOf(GeneralCache::class)->get($cacheKey);
+            }
+            
+            // Finish up entity
+            return [
+                'id'      => $languageKey,
+                'message' => $translations,
+            ];
+        });
+    }
+    
 }

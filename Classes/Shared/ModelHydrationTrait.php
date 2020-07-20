@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -38,45 +39,51 @@ use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
  * @property EnvironmentSimulator $Simulator
  *
  */
-trait ModelHydrationTrait {
-	
-	/**
-	 * This helper leverages the extBase data mapper to create a new entity class for a given row.
-	 *
-	 * @param string $modelClass The name of the class to use as entity
-	 * @param string $tableName  The table name of the $row
-	 * @param array  $row        The row to map to the model class
-	 *
-	 * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
-	 * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
-	 */
-	protected function hydrateModelObject(string $modelClass, string $tableName, array $row): AbstractEntity {
-		if (!class_exists($modelClass))
-			throw new FrontendApiException("The given model class $modelClass does not exist!");
-		if (!in_array(AbstractEntity::class, class_parents($modelClass)))
-			throw new FrontendApiException("The given model class $modelClass does not extend the AbstractEntity class!");
-		
-		// Make sure we have a frontend instance
-		return $this->Simulator->runWithEnvironment(["ignoreIfFrontendExists"], function () use ($modelClass, $tableName, $row) {
-			// Add a dummy config for this table
-			$tmpl = $this->Tsfe->getTsfe()->tmpl;
-			$path = ["config.", "tx_extbase.", "persistence.", "classes.", $modelClass . ".", "mapping.", "tableName"];
-			$defaultValue = Arrays::getPath($tmpl->setup, $path);
-			$tmpl->setup = Arrays::setPath($tmpl->setup, $path, $tableName);
-			
-			// Perform the mapping
-			/** @var DataMapper $mapper */
-			$mapper = $this->getInstanceOf(DataMapper::class);
-			$mapper->injectDataMapFactory($this->getInstanceOf(CachelessDataMapFactory::class));
-			$mapped = $mapper->map($modelClass, [$row]);
-			$mapped = reset($mapped);
-			
-			// Restore dummy config
-			if ($defaultValue !== NULL) $tmpl->setup = Arrays::setPath($tmpl->setup, $path, $defaultValue);
-			$tmpl->setup = Arrays::removePath($tmpl->setup, $path);
-			
-			// Done
-			return $mapped;
-		});
-	}
+trait ModelHydrationTrait
+{
+    
+    /**
+     * This helper leverages the extBase data mapper to create a new entity class for a given row.
+     *
+     * @param   string  $modelClass  The name of the class to use as entity
+     * @param   string  $tableName   The table name of the $row
+     * @param   array   $row         The row to map to the model class
+     *
+     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
+     * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
+     */
+    protected function hydrateModelObject(string $modelClass, string $tableName, array $row): AbstractEntity
+    {
+        if (! class_exists($modelClass)) {
+            throw new FrontendApiException('The given model class $modelClass does not exist!');
+        }
+        if (! in_array(AbstractEntity::class, class_parents($modelClass), true)) {
+            throw new FrontendApiException('The given model class $modelClass does not extend the AbstractEntity class!');
+        }
+        
+        // Make sure we have a frontend instance
+        return $this->Simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($modelClass, $tableName, $row) {
+            // Add a dummy config for this table
+            $tmpl         = $this->Tsfe->getTsfe()->tmpl;
+            $path         = ['config.', 'tx_extbase.', 'persistence.', 'classes.', $modelClass . '.', 'mapping.', 'tableName'];
+            $defaultValue = Arrays::getPath($tmpl->setup, $path);
+            $tmpl->setup  = Arrays::setPath($tmpl->setup, $path, $tableName);
+            
+            // Perform the mapping
+            /** @var DataMapper $mapper */
+            $mapper = $this->getInstanceOf(DataMapper::class);
+            $mapper->injectDataMapFactory($this->getInstanceOf(CachelessDataMapFactory::class));
+            $mapped = $mapper->map($modelClass, [$row]);
+            $mapped = reset($mapped);
+            
+            // Restore dummy config
+            if ($defaultValue !== null) {
+                $tmpl->setup = Arrays::setPath($tmpl->setup, $path, $defaultValue);
+            }
+            $tmpl->setup = Arrays::removePath($tmpl->setup, $path);
+            
+            // Done
+            return $mapped;
+        });
+    }
 }
