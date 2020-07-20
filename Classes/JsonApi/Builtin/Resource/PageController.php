@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,7 +21,6 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource;
 
 
-use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\NotImplementedException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page;
@@ -36,70 +36,78 @@ use League\Route\Http\Exception\BadRequestException;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
 
-class PageController extends AbstractResourceController {
-	use CommonServiceLocatorTrait;
-	use ModelHydrationTrait;
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository
-	 */
-	protected $repository;
-	
-	/**
-	 * PageController constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository $repository
-	 */
-	public function __construct(ResourceDataRepository $repository) {
-		$this->repository = $repository;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->setTransformerClass(PageTransformer::class);
-		$configurator->addClass(Page::class);
-		$configurator->addAdditionalRoute("/bySlug", "bySlugAction")->setStrategy(ResourceStrategy::class);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		// Extract filters
-		$loadedLanguageCodes = Arrays::makeFromStringList($context->getQuery()->get("loadedLanguageCodes", ""));
-		$currentLayout = $context->getQuery()->get("currentLayout", "");
-		$refreshCommon = Arrays::makeFromStringList($context->getQuery()->get("refreshCommon", ""));
-		
-		// Get the additional
-		return Page::makeInstance($id, $currentLayout, $loadedLanguageCodes, $refreshCommon);
-	}
-	
-	/**
-	 * The main entry point for page requests.
-	 * It receives a frontend slug as "slug" parameter and renders the page data for it.
-	 *
-	 * @param \Psr\Http\Message\ServerRequestInterface                                    $request
-	 * @param                                                                             $foo
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext $context
-	 *
-	 * @return mixed
-	 * @throws \League\Route\Http\Exception\BadRequestException
-	 */
-	public function bySlugAction(ServerRequestInterface $request, $foo, ResourceControllerContext $context) {
-		// Get the slug from the query
-		$slug = $context->getQuery()->get("slug");
-		if (empty($slug)) throw new BadRequestException("This endpoint expects a slug parameter!");
-		
-		// Handle the request by the default method
-		return $this->resourceAction($request, $this->Tsfe->getTsfe()->id, $context);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
+class PageController extends AbstractResourceController
+{
+    use ModelHydrationTrait;
+    
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository
+     */
+    protected $repository;
+    
+    /**
+     * PageController constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository  $repository
+     */
+    public function __construct(ResourceDataRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->setTransformerClass(PageTransformer::class);
+        $configurator->addClass(Page::class);
+        $configurator->addAdditionalRoute('/bySlug', 'bySlugAction')->setStrategy(ResourceStrategy::class);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        // Extract filters
+        $loadedLanguageCodes = Arrays::makeFromStringList($context->getQuery()->get('loadedLanguageCodes', ''));
+        $currentLayout       = $context->getQuery()->get('currentLayout', '');
+        $refreshCommon       = Arrays::makeFromStringList($context->getQuery()->get('refreshCommon', ''));
+        
+        // Get the additional
+        return $this->Container()->getWithoutDi(
+            Page::class, [$id, (string)$currentLayout, $loadedLanguageCodes, $refreshCommon]);
+    }
+    
+    /**
+     * The main entry point for page requests.
+     * It receives a frontend slug as "slug" parameter and renders the page data for it.
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface                                     $request
+     * @param                                                                                $foo
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext  $context
+     *
+     * @return mixed
+     * @throws \League\Route\Http\Exception\BadRequestException
+     */
+    public function bySlugAction(ServerRequestInterface $request, $foo, ResourceControllerContext $context)
+    {
+        // Get the slug from the query
+        $slug = $context->getQuery()->get('slug');
+        if (empty($slug)) {
+            throw new BadRequestException('This endpoint expects a slug parameter!');
+        }
+        
+        // Handle the request by the default method
+        return $this->resourceAction($request, (int)$this->Tsfe()->getTsfe()->id, $context);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
 }

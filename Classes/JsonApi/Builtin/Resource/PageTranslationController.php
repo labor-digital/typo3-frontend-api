@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -28,31 +29,37 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-class PageTranslationController extends AbstractResourceController {
-	use SiteConfigAwareTrait;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->getResourceRoute()->setPath("/{id}");
-		$configurator->addClass(PageTranslation::class);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context) {
-		return $this->getInstanceOf(PageTranslation::class, [$id]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		$languages = [];
-		foreach ($this->ConfigRepository->site()->getSite()->getLanguages() as $language)
-			$languages[] = $this->getInstanceOf(PageTranslation::class, [$language]);
-		return $languages;
-	}
+class PageTranslationController extends AbstractResourceController
+{
+    use SiteConfigAwareTrait;
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->getResourceRoute()->setPath('/{id}');
+        $configurator->addClass(PageTranslation::class);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context)
+    {
+        return $this->getInstanceOf(PageTranslation::class, [$id]);
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        $languages = [];
+        foreach ($this->ConfigRepository()->site()->getSite()->getLanguages() as $language) {
+            $languages[] = $this->getInstanceOf(PageTranslation::class, [$language]);
+        }
+        
+        return $languages;
+    }
 }

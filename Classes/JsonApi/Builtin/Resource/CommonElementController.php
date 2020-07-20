@@ -33,7 +33,9 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class CommonElementController extends AbstractResourceController
 {
-    use SiteConfigAwareTrait;
+    use SiteConfigAwareTrait {
+        SiteConfigAwareTrait::setLocalSingleton as setLocalSingletonInternal;
+    }
     
     /**
      * @inheritDoc

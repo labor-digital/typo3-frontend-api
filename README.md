@@ -13,7 +13,7 @@ but you can also use powerful template-less content elements that utilize the Be
 ## Requirements
 
 - TYPO3 v9
-- TYPO3 - Better API
+- [TYPO3 - Better API](https://github.com/labor-digital/typo3-better-api)
 - Installation using Composer
 
 ## Installation
@@ -22,6 +22,8 @@ Install this package using composer:
 ```
 composer require labor-digital/typo3-frontend-api
 ```
+
+After that, you can activate the extension in the Extensions-Manager of your TYPO3 installation
 
 ## Documentation
 The documentation can be found [here](https://typo3-frontend-api.labor.tools).

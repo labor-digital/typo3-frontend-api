@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource;
 
 
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\CommonElement;
@@ -29,16 +30,26 @@ use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig;
 /**
  * Trait SiteConfigAwareTrait
  *
- * This trait requires your object to use the CommonServiceLocatorTrait!
- *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource
- * @property FrontendApiConfigRepository $ConfigRepository
  * @see     \LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait
  */
 trait SiteConfigAwareTrait
 {
     use CommonServiceLocatorTrait;
-    protected $serviceMap = ["ConfigRepository" => FrontendApiConfigRepository::class];
+    use CommonDependencyTrait {
+        CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
+        CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
+    }
+    
+    /**
+     * Returns the instance of the config repository
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     */
+    protected function ConfigRepository(): FrontendApiConfigRepository
+    {
+        return $this->getSingletonOf(FrontendApiConfigRepository::class);
+    }
     
     /**
      * Returns the site configuration either for the current site or the global site if no specific site config was
@@ -48,7 +59,7 @@ trait SiteConfigAwareTrait
      */
     protected function getCurrentSiteConfig(): SiteConfig
     {
-        return $this->ConfigRepository->site()->getCurrentSiteConfig();
+        return $this->ConfigRepository()->site()->getCurrentSiteConfig();
     }
     
     /**
@@ -62,15 +73,15 @@ trait SiteConfigAwareTrait
     protected function getCommonElements(string $layout, array $requestedKeys = []): array
     {
         $collection  = [];
-        $elementList = $this->ConfigRepository->site()->getCurrentSiteConfig()->commonElements;
+        $elementList = $this->ConfigRepository()->site()->getCurrentSiteConfig()->commonElements;
         if (empty($elementList[$layout])) {
-            $layout = "default";
+            $layout = 'default';
         }
         foreach ($elementList[$layout] as $key => $foo) {
-            if (! empty($requestedKeys) && ! in_array($key, $requestedKeys)) {
+            if (! empty($requestedKeys) && ! in_array($key, $requestedKeys, true)) {
                 continue;
             }
-            $collection[] = $this->getInstanceOf(CommonElement::class, [$layout, $key]);
+            $collection[] = $this->Container()->getWithoutDi(CommonElement::class, [$layout, $key]);
         }
         
         return $collection;
