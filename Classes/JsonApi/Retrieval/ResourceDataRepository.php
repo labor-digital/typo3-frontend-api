@@ -294,10 +294,10 @@ class ResourceDataRepository implements SingletonInterface
                 return $this->formatResourceQuery($value, $key);
             }
             if (empty($value)) {
-                return urlencode($key);
+                return urlencode((string)$key);
             }
             
-            return urlencode($key) . "=" . urlencode($value);
+            return urlencode((string)$key) . "=" . urlencode((string)$value);
         };
         
         foreach ($query as $k => $v) {
