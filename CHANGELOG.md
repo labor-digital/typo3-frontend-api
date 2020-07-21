@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.19.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.5...v9.19.0) (2020-07-21)
+
+
+### Features
+
+* make more code type save + resolve deprecated dependencies ([857c9f2](https://github.com/labor-digital/typo3-frontend-api/commit/857c9f243f8022cc96235bb5623288d77ed22a74))
+
+
+### Bug Fixes
+
+* code cleanup + replace deprecated code ([99b3e35](https://github.com/labor-digital/typo3-frontend-api/commit/99b3e3500ddf34dbd88cf2fb3f2ba1b53ad8c279))
+* fix doc dependencies ([e9b9afa](https://github.com/labor-digital/typo3-frontend-api/commit/e9b9afa83f98e861fc232cc513760b10a306b8c6))
+
 ### [9.18.5](https://github.com/labor-digital/typo3-frontend-api/compare/v9.18.4...v9.18.5) (2020-07-09)
 
 
