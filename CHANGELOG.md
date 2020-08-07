@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.19.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.19.1...v9.19.2) (2020-08-07)
+
+
+### Bug Fixes
+
+* **ContentElement:** make sure the list label renderer of content elements gets the correct field row ([021a26b](https://github.com/labor-digital/typo3-frontend-api/commit/021a26ba721f46dda59bb53ebf736aeab3e2e72e))
+
 ### [9.19.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.19.0...v9.19.1) (2020-07-21)
 
 
