@@ -36,6 +36,7 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\ErrorHandler\Erro
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\RedirectHandler\ApiRedirectMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\ResponseFactory;
+use LaborDigital\Typo3FrontendApi\ContentElement\BackendListLabelFilterEventHandler;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingEventHandler;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer\DefaultSpecialObjectTransformer;
@@ -53,19 +54,19 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
     {
         // Register translation
         $configurator->translation()->registerContext('frontendApi');
-        
+
         // Register new implementations
         $configurator->core()
                      ->registerImplementation(ResponseFactoryInterface::class, ResponseFactory::class);
-        
+
         // Register table changes
         $configurator->table()->registerTableOverride(TtContentOverrides::class, "tt_content");
-        
+
         // Register our event handlers
         $configurator->event()
                      ->registerLazySubscriber(CacheMiddlewareEventHandler::class)
                      ->registerLazySubscriber(ImagingEventHandler::class);
-        
+
         // Register default middlewares
         $frontendApi = $configurator->frontendApi();
         $frontendApi
@@ -75,19 +76,19 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
             ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
                 ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
             ->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
-        
+
         // Register the default resources
         $frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");
-        
+
         // Register default special object transformations
         $frontendApi->resource()->registerSpecialObjectTransformer(DefaultSpecialObjectTransformer::class,
             [DateTime::class, TypoLink::class, UriInterface::class, UriBuilder::class]);
-        
+
         // Register default routes
         $frontendApi->routing()
                     ->registerRouteController(UpController::class)
                     ->registerRouteController(SchedulerController::class);
-        
+
         // Register typo middleware
         $configurator->http()->registerMiddleware(ApiMiddlewareFork::class, "frontend", [
             "after"  => [
@@ -97,7 +98,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
             "before" => "typo3/cms-frontend/static-route-resolver",
         ]);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -105,5 +106,5 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
     {
         $extender->registerOptionListEntry(FrontendApiOption::class);
     }
-    
+
 }
