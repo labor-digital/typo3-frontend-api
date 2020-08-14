@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.20.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.0...v9.20.1) (2020-08-14)
+
+
+### Bug Fixes
+
+* **ContentElementControllerContext:** make sure cssClasses are returned as numeric array ([19d2e31](https://github.com/labor-digital/typo3-frontend-api/commit/19d2e312fa0b332d6e86bf39c3ffc5ab3e4726d6))
+* **ResourceDataRepository:** fixe type incompatibility in formatResourceQuery() ([f41b454](https://github.com/labor-digital/typo3-frontend-api/commit/f41b4541eaf7c298c89afe145e8a6d5b57c774e3))
+
 ## [9.20.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.19.2...v9.20.0) (2020-08-14)
 
 
