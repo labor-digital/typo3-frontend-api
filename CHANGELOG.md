@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.20.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.1...v9.20.2) (2020-08-14)
+
+
+### Bug Fixes
+
+* **VirtualColumnEventHandler:** fix type incompatibility ([1a83514](https://github.com/labor-digital/typo3-frontend-api/commit/1a8351493ecec789167537eef6efe591753fdd6d))
+
 ### [9.20.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.0...v9.20.1) (2020-08-14)
 
 
