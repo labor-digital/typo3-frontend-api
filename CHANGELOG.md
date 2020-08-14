@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.20.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.19.2...v9.20.0) (2020-08-14)
+
+
+### Features
+
+* **SwitchableContentElementActionTrait:** add option to retrieve the label for the currently selected action ([f490ee1](https://github.com/labor-digital/typo3-frontend-api/commit/f490ee124dc266b88cfc5905102cede16421803a))
+
 ### [9.19.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.19.1...v9.19.2) (2020-08-07)
 
 
