@@ -97,7 +97,7 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
         // Load the virtual values from the database
         $this->currentVirtualValues = [];
         $id                         = $context->getUid();
-        if (substr($id, 0, 3) !== 'NEW' && (((int)$id) . '') === $id . '') {
+        if ((((int)$id) . '') === $id . '' && strpos((string)$id, 'NEW') !== 0) {
             // Update existing record
             /** @var \LaborDigital\Typo3BetterApi\Event\Events\DataHandlerSaveFilterEvent $event */
             $event         = $context->getEvent();
@@ -200,6 +200,7 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
             // Add the values to the storage slot
             $row[TtContentOverrides::VIRTUAL_COLUMN_FIELD] = json_encode($virtualFieldArray);
         }
+
         // Remove all virtual columns from the field array
         $allVirtualColumns = $this->configRepository->contentElement()->getAllVirtualColumns();
         $row               = array_diff_key($row, $allVirtualColumns);
