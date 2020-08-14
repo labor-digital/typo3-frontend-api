@@ -35,22 +35,22 @@ use WoohooLabs\Yang\JsonApi\Schema\Document;
 
 class ResourceDataRepository implements SingletonInterface
 {
-    
+
     /**
      * @var \LaborDigital\Typo3FrontendApi\ApiRouter\ApiRouter
      */
     protected $router;
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
      */
     protected $context;
-    
+
     /**
      * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
      */
     protected $configRepository;
-    
+
     /**
      * ResourceDataRepository constructor.
      *
@@ -67,7 +67,7 @@ class ResourceDataRepository implements SingletonInterface
         $this->configRepository = $configRepository;
         $this->router           = $router;
     }
-    
+
     /**
      * Mostly for internal use. It handles the preconfigured requests that are defined in the
      * ComponentElementConfigurator class and maps them to the correct repository methods.
@@ -88,17 +88,17 @@ class ResourceDataRepository implements SingletonInterface
             if (is_numeric($initialRequest["uri"])) {
                 return $this->findResourceData($initialRequest["resourceType"], (int)$initialRequest["uri"], $initialRequest["query"]);
             }
-            
+
             if (empty($initialRequest["uri"])) {
                 return $this->findResourceCollectionData($initialRequest["resourceType"], $initialRequest["query"]);
             }
-            
+
             return $this->findAdditionalRouteData($initialRequest["resourceType"], $initialRequest["uri"], $initialRequest["query"]);
         }
-        
+
         return $this->findUriData($initialRequest["uri"]);
     }
-    
+
     /**
      * Finds the data for a single entity
      *
@@ -111,10 +111,10 @@ class ResourceDataRepository implements SingletonInterface
     public function findResourceData(string $resourceType, int $id, ?array $query = null): ResourceDataResult
     {
         unset($query["filter"], $query["sort"]);
-        
+
         return $this->handleRequest($resourceType . "/" . $id, $query, $resourceType);
     }
-    
+
     /**
      * Finds the data for a collection of entities
      *
@@ -127,7 +127,7 @@ class ResourceDataRepository implements SingletonInterface
     {
         return $this->handleRequest($resourceType, $query, $resourceType);
     }
-    
+
     /**
      * Finds the data for "additional routes" that are registered on a certain resource type.
      *
@@ -142,7 +142,7 @@ class ResourceDataRepository implements SingletonInterface
     {
         return $this->handleRequest($resourceType . "/" . ltrim($uriFragment, "/"), $query, $resourceType);
     }
-    
+
     /**
      * For the purists out there. Finds the data of some uri.
      * Note that only uris inside the scope of the frontend API router may be resolved using this method.
@@ -155,7 +155,7 @@ class ResourceDataRepository implements SingletonInterface
     {
         return $this->handleRequest($uri);
     }
-    
+
     /**
      * Can be used to re-normalize a json-api response object into a list of entities.
      * The main entity type will have it's relations resolved into a single data array.
@@ -180,10 +180,10 @@ class ResourceDataRepository implements SingletonInterface
         } else {
             $obj = $hydrator->hydrateSingleResource($document);
         }
-        
+
         return \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($obj), true);
     }
-    
+
     /**
      * Is used to submit a request to the router which will then respond (hopefully) with a json object.
      * This method will parse the json and return it as result data.
@@ -199,14 +199,14 @@ class ResourceDataRepository implements SingletonInterface
     {
         // Unify the uri
         $uri = "/" . trim(preg_replace("~(\\+|/+)~", "/", $uri), "/");
-        
+
         // Build the query fragment
         $queryString = "";
         if (! empty($query)) {
             $queryString = $this->formatResourceQuery($query);
             $queryString = (empty($queryString) ? "" : "?" . $queryString);
         }
-        
+
         // Build a resource uri if required
         if (! empty($resourceType)) {
             // Read base url
@@ -216,7 +216,7 @@ class ResourceDataRepository implements SingletonInterface
             if (stripos($uri, $baseUri . "/") === false) {
                 $uri = $baseUri . $uri;
             }
-            
+
             // Read root uri part
             $rootUriPart = "/" . $this->configRepository->routing()->getRootUriPart();
             if (stripos($uri, $rootUriPart . "/") === false) {
@@ -232,10 +232,10 @@ class ResourceDataRepository implements SingletonInterface
                 $resourceType = $m[1];
             }
         }
-        
+
         // Merge uri with query
         $uri .= $queryString;
-        
+
         // Add host and scheme to link
         $pageLink = Path::makeUri(true);
         $link     = Path::makeUri($uri);
@@ -245,14 +245,14 @@ class ResourceDataRepository implements SingletonInterface
         if (empty($link->getScheme())) {
             $link = $link->withScheme($pageLink->getScheme());
         }
-        
+
         // Generate the data
         try {
             $response = $this->router->handleLink($link, "internal");
         } catch (NotFoundException $exception) {
             throw new JsonApiException("Failed to retrieve the data for ($link): " . $exception->getMessage());
         }
-        
+
         if ($response->getStatusCode() !== 200) {
             // Show the error when in dev mode
             if ($this->context->Env()->isDev()) {
@@ -261,7 +261,7 @@ class ResourceDataRepository implements SingletonInterface
             }
             throw new JsonApiException("Failed to retrieve the data for ($link): " . $response->getReasonPhrase());
         }
-        
+
         // Convert into an array if possible
         try {
             $data = (string)$response->getBody();
@@ -269,11 +269,11 @@ class ResourceDataRepository implements SingletonInterface
         } catch (ArrayGeneratorException $e) {
             $data = [];
         }
-        
+
         // Build object
         return new LegacyResourceDataResult($data, $resourceType, $link, $query);
     }
-    
+
     /**
      * Is used to convert the given query object into a valid url query string
      *
@@ -288,18 +288,18 @@ class ResourceDataRepository implements SingletonInterface
             return "";
         }
         $output = [];
-        
+
         $formatString = function ($key, $value): string {
             if (is_array($value)) {
-                return $this->formatResourceQuery($value, $key);
+                return $this->formatResourceQuery($value, (string)$key);
             }
             if (empty($value)) {
                 return urlencode((string)$key);
             }
-            
+
             return urlencode((string)$key) . "=" . urlencode((string)$value);
         };
-        
+
         foreach ($query as $k => $v) {
             if (! empty($prefix)) {
                 $k = $prefix . "[" . $k . "]";
@@ -313,7 +313,7 @@ class ResourceDataRepository implements SingletonInterface
             }
             $output[] = $pair;
         }
-        
+
         return implode("&", $output);
     }
 }
