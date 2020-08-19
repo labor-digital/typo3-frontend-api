@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.20.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.3...v9.20.4) (2020-08-19)
+
+
+### Bug Fixes
+
+* **ContentElementControllerContext:** fix type issue in ltrim() ([9fc8b7c](https://github.com/labor-digital/typo3-frontend-api/commit/9fc8b7c732b14315471dda7dc3799fdf742508c6))
+
 ### [9.20.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.2...v9.20.3) (2020-08-14)
 
 ### [9.20.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.1...v9.20.2) (2020-08-14)
