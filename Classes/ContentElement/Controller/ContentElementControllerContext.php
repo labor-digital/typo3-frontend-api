@@ -253,7 +253,7 @@ class ContentElementControllerContext
     {
         // Check if an id was given
         if (isset($query['id'])) {
-            $additionalUriFragment = rtrim($query['id'] . '/' . ltrim($additionalUriFragment, '/ '), '/ ');
+            $additionalUriFragment = rtrim($query['id'] . '/' . ltrim((string)$additionalUriFragment, '/ '), '/ ');
             unset($query['id']);
         }
 
