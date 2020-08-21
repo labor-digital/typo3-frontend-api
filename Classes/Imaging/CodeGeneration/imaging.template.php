@@ -132,7 +132,7 @@ class ImagingHandler
         }
 
         // Check if the file exists now
-        if (! is_file($request->redirectInfoPath) || ! is_file($request->redirectHashPath)) {
+        if (is_file($request->redirectInfoPath)) {
             $this->executeRedirect($request);
         }
 
@@ -250,11 +250,14 @@ class ImagingHandler
     {
         // Check if we are able to handle via a webp file
         $redirectInfoPath = $request->redirectInfoPath;
-        if ($request->acceptsWebP && file_exists($redirectInfoPath . '-webp')) {
+        if ($request->acceptsWebP && is_file($redirectInfoPath . '-webp')) {
             $redirectInfoPath .= '-webp';
         }
 
-        $redirectTarget = file_get_contents($redirectInfoPath);
+        $redirectTarget = @file_get_contents($redirectInfoPath);
+        if (! $redirectTarget) {
+            $this->error(404);
+        }
         if ($redirectTarget[0] === '/') {
             $redirectTarget = FRONTEND_API_IMAGING_HOST . $redirectTarget;
         }

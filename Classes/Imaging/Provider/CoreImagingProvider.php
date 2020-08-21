@@ -85,7 +85,11 @@ class CoreImagingProvider extends AbstractImagingProvider
         }
 
         // Dump the redirect file
-        $realUrl               = '/' . $processed->getPublicUrl(false);
+        $realUrl = $processed->getPublicUrl(false);
+        /** @noinspection BypassedUrlValidationInspection */
+        if (! filter_var($realUrl, FILTER_VALIDATE_URL)) {
+            $realUrl = '/' . $realUrl;
+        }
         $this->defaultRedirect = $realUrl;
 
         // Handle web-p generation
@@ -140,8 +144,12 @@ class CoreImagingProvider extends AbstractImagingProvider
                 Fs::remove($tmpFile);
             }
 
-            // Dump the redirect file
-            $realUrl            = '/' . $processedWebp->getPublicUrl(false);
+            // Prepare webp redirect
+            $realUrl = $processedWebp->getPublicUrl(false);
+            /** @noinspection BypassedUrlValidationInspection */
+            if (! filter_var($realUrl, FILTER_VALIDATE_URL)) {
+                $realUrl = '/' . $realUrl;
+            }
             $this->webPRedirect = $realUrl;
         }
     }

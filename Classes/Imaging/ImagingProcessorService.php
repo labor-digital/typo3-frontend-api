@@ -165,6 +165,7 @@ class ImagingProcessorService
         if (! $provider instanceof ImagingProviderInterface) {
             throw new ImagingException('The provider does not implement the required interface!');
         }
+
         $provider->process($definition, $fileInfo, $context);
 
         // Allow post processing
