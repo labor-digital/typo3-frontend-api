@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.21.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.4...v9.21.0) (2020-08-21)
+
+
+### Features
+
+* make code PSR-2 compliant ([d3acea3](https://github.com/labor-digital/typo3-frontend-api/commit/d3acea336f1562c27b71e51a823ca59827bb1471))
+* refactor imaging entry point into a class + clean up the imaging codebase ([e5c8336](https://github.com/labor-digital/typo3-frontend-api/commit/e5c83363f0d8e39be21d1f524cfeb3911301d710))
+
 ### [9.20.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.3...v9.20.4) (2020-08-19)
 
 
