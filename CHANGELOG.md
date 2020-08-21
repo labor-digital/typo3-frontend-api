@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.21.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.21.0...v9.21.1) (2020-08-21)
+
+
+### Bug Fixes
+
+* **Imaging:** make sure imaging works with other FAL drivers as well ([95e9f36](https://github.com/labor-digital/typo3-frontend-api/commit/95e9f369278e3c96824a0b3bf11ec5e8a50ef85d))
+
 ## [9.21.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.20.4...v9.21.0) (2020-08-21)
 
 
