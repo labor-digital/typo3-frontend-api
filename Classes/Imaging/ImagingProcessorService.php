@@ -81,9 +81,9 @@ class ImagingProcessorService
     public function process(ImagingContext $context)
     {
         // Prepare the definition
-        $definitions = $this->configRepository->tool()->get("imaging.definitions", []);
+        $definitions = $this->configRepository->tool()->get('imaging.definitions', []);
         if (! isset($definitions[$context->getDefinitionKey()])) {
-            throw new ImagingException("Invalid definition key given", 400);
+            throw new ImagingException('Invalid definition key given', 400);
         }
         $definition = $definitions[$context->getDefinitionKey()];
 
@@ -93,31 +93,30 @@ class ImagingProcessorService
                 if (empty($v)) {
                     continue;
                 }
-                if (! in_array($k, ["width", "height", "maxWidth", "maxHeight", "minWidth", "minHeight"])) {
+                if (! in_array($k, ['width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight'])) {
                     continue;
                 }
-                $definition[$k] = preg_replace_callback("~[0-9.,]+~si", function ($m) {
-                    $v = floatval(str_replace(",", ".", $m[0]));
+                $definition[$k] = preg_replace_callback('~[0-9.,]+~si', function ($m) {
+                    $v = (float)str_replace(',', '.', $m[0]);
 
-                    return ($v * 2) . "";
+                    return ($v * 2) . '';
                 }, $v);
             }
         }
 
         // Resolve the file / file reference based on the id
         try {
-            $fileOrReference = $context->getType() === "reference"
+            $fileOrReference = $context->getType() === 'reference'
                 ? $this->falFileService->getFileReference($context->getUid())
-                :
-                $this->falFileService->getFile($context->getUid());
+                : $this->falFileService->getFile($context->getUid());
         } catch (ResourceDoesNotExistException $e) {
         }
         if (empty($fileOrReference)) {
-            throw new ImagingException("File was not found in FAL", 404);
+            throw new ImagingException('File was not found in FAL', 404);
         }
         $fileInfo = $this->falFileService->getFileInfo($fileOrReference);
         if (! $fileInfo->isImage()) {
-            throw new ImagingException("The requested file is not an image", 404);
+            throw new ImagingException('The requested file is not an image', 404);
         }
 
         // Validate the hash
@@ -126,6 +125,7 @@ class ImagingProcessorService
             $realHash  = md5($fileInfo->getHash() . \GuzzleHttp\json_encode($fileInfo->getImageInfo()->getCropVariants()));
 
             // If the hashes do match -> a new crop was created or the image changed -> flush the directory
+            /** @noinspection HashTimingAttacksInspection */
             if ($givenHash === $realHash) {
                 $dirName = dirname($context->getRedirectHashPath());
                 Fs::flushDirectory($dirName);
@@ -142,28 +142,28 @@ class ImagingProcessorService
 
         // Select the best matching crop variant
         $cropVariants = $fileInfo->getImageInfo()->getCropVariants();
-        if (isset($definition["crop"]) && isset($cropVariants[$definition["crop"]])) {
-            $crop = $definition["crop"];
+        if (isset($definition['crop']) && isset($cropVariants[$definition['crop']])) {
+            $crop = $definition['crop'];
         } else {
-            $crop = isset($cropVariants["default"]) ? "default" : null;
+            $crop = isset($cropVariants['default']) ? 'default' : null;
         }
         if (! empty($context->getCrop())) {
             $givenCrop = $context->getCrop();
-            if ($givenCrop === "none") {
+            if ($givenCrop === 'none') {
                 $crop = false;
             } elseif (isset($cropVariants[$givenCrop])) {
                 $crop = $givenCrop;
             }
         }
-        if (! is_null($crop)) {
-            $definition["crop"] = $crop;
+        if ($crop !== null) {
+            $definition['crop'] = $crop;
         }
 
         // Create and execute the provider
-        $providerClass = $this->configRepository->tool()->get("imaging.options.imagingProvider");
+        $providerClass = $this->configRepository->tool()->get('imaging.options.imagingProvider');
         $provider      = $this->container->get($providerClass);
         if (! $provider instanceof ImagingProviderInterface) {
-            throw new ImagingException("The provider does not implement the required interface!");
+            throw new ImagingException('The provider does not implement the required interface!');
         }
         $provider->process($definition, $fileInfo, $context);
 
@@ -177,7 +177,7 @@ class ImagingProcessorService
         Fs::writeFile($context->getRedirectPath(), $defaultRedirect);
         $webPRedirect = $e->getWebPRedirect();
         if (! empty($webPRedirect)) {
-            Fs::writeFile($context->getRedirectPath() . "-webp", $webPRedirect);
+            Fs::writeFile($context->getRedirectPath() . '-webp', $webPRedirect);
         }
     }
 }

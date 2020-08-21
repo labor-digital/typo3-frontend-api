@@ -56,8 +56,8 @@ class ImagingEventHandler implements LazyEventSubscriberInterface
      */
     public static function subscribeToEvents(EventSubscriptionInterface $subscription)
     {
-        $subscription->subscribe(CacheClearedEvent::class, "__onClear");
-        $subscription->subscribe(TcaCompletelyLoadedEvent::class, "__compileEndpoint");
+        $subscription->subscribe(CacheClearedEvent::class, '__onClear');
+        $subscription->subscribe(TcaCompletelyLoadedEvent::class, '__compileEndpoint');
     }
 
     /**
@@ -75,10 +75,10 @@ class ImagingEventHandler implements LazyEventSubscriberInterface
      */
     public function __onClear(CacheClearedEvent $event)
     {
-        if ($event->getGroup() !== "all") {
+        if ($event->getGroup() !== 'all') {
             return;
         }
-        $dir = $this->configRepository->tool()->get("imaging.options.redirectDirectoryPath", "");
+        $dir = $this->configRepository->tool()->get('imaging.options.redirectDirectoryPath', '');
         if (is_dir($dir)) {
             Fs::flushDirectory($dir);
         }

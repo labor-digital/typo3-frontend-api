@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -20,84 +21,27 @@
 namespace LaborDigital\Typo3FrontendApi\Imaging;
 
 
+use ImagingRequest;
+
 class ImagingContext
 {
 
     /**
-     * The type of the file we should resolve via it's uid Either: "reference" or "file"
+     * The imaging request object
      *
-     * @var string
+     * @var \ImagingRequest
      */
-    protected $type;
-
-    /**
-     * The uid of the file or file reference we should serve
-     *
-     * @var int
-     */
-    protected $uid;
-
-    /**
-     * The unique hash for the image and variants
-     *
-     * @var string
-     */
-    protected $redirectHashPath;
-
-    /**
-     * The path to the file where the redirect information is stored
-     *
-     * @var string
-     */
-    protected $redirectPath;
-
-    /**
-     * The definition key for the resizing of the image
-     *
-     * @var string
-     */
-    protected $definition;
-
-    /**
-     * Optional crop variant to crop the image to while resizing it
-     *
-     * @var string|null
-     */
-    protected $crop;
-
-    /**
-     * True if a x2 version for retina displays is requested
-     *
-     * @var bool
-     */
-    protected $isX2;
+    protected $request;
 
     /**
      * ImagingContext constructor.
      *
-     * @param   string       $type
-     * @param   int          $uid
-     * @param   string       $redirectPath
-     * @param   string       $definition
-     * @param   string|null  $crop
-     * @param   bool         $isX2
+     * @param   \ImagingRequest  $request
      */
     public function __construct(
-        string $type,
-        int $uid,
-        string $redirectPath,
-        string $redirectHashPath,
-        string $definition,
-        ?string $crop,
-        bool $isX2
+        ImagingRequest $request
     ) {
-        $this->type             = $type;
-        $this->uid              = $uid;
-        $this->redirectPath     = $redirectPath;
-        $this->redirectHashPath = $redirectHashPath;
-        $this->definition       = $definition;
-        $this->crop             = $crop;
-        $this->isX2             = $isX2;
+        $this->request = $request;
     }
 
     /**
@@ -107,7 +51,7 @@ class ImagingContext
      */
     public function isReference(): bool
     {
-        return $this->type === "reference";
+        return $this->request->type === 'reference';
     }
 
     /**
@@ -127,7 +71,7 @@ class ImagingContext
      */
     public function getType(): string
     {
-        return $this->type;
+        return $this->request->type;
     }
 
     /**
@@ -137,7 +81,7 @@ class ImagingContext
      */
     public function getUid(): int
     {
-        return $this->uid;
+        return $this->request->uid;
     }
 
     /**
@@ -147,7 +91,7 @@ class ImagingContext
      */
     public function getRedirectPath(): string
     {
-        return $this->redirectPath;
+        return $this->request->redirectInfoPath;
     }
 
     /**
@@ -155,7 +99,7 @@ class ImagingContext
      */
     public function getRedirectHashPath(): string
     {
-        return $this->redirectHashPath;
+        return $this->request->redirectHashPath;
     }
 
     /**
@@ -165,7 +109,7 @@ class ImagingContext
      */
     public function getDefinitionKey(): string
     {
-        return $this->definition;
+        return $this->request->definition;
     }
 
     /**
@@ -175,7 +119,7 @@ class ImagingContext
      */
     public function getCrop(): ?string
     {
-        return $this->crop;
+        return $this->request->crop;
     }
 
     /**
@@ -185,6 +129,16 @@ class ImagingContext
      */
     public function isX2(): bool
     {
-        return $this->isX2;
+        return $this->request->isX2;
+    }
+
+    /**
+     * Returns the raw request object
+     *
+     * @return \ImagingRequest
+     */
+    public function getRequest(): ImagingRequest
+    {
+        return $this->request;
     }
 }

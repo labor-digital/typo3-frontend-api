@@ -67,28 +67,28 @@ class ImagingEndpointGenerator
     public function generate(): void
     {
         // Ignore if the imaging endpoint is disabled
-        if (empty($this->configRepository->tool()->get("imaging", false))) {
+        if (empty($this->configRepository->tool()->get('imaging', false))) {
             return;
         }
 
         // Gather the relevant variables
         $hostname     = $this->linkService->getHost();
-        $varDir       = $this->configRepository->tool()->get("imaging.options.redirectDirectoryPath");
-        $vendorDir    = $this->context->getPathAspect()->getVendorPath();
-        $endpointPath = $this->configRepository->tool()->get("imaging.options.endpointDirectoryPath");
+        $varDir       = $this->configRepository->tool()->get('imaging.options.redirectDirectoryPath');
+        $vendorDir    = $this->context->Path()->getVendorPath();
+        $endpointPath = $this->configRepository->tool()->get('imaging.options.endpointDirectoryPath');
 
         // Calculate entry point depth
-        $endpointPathRelative = Path::makeRelative($endpointPath, $this->context->getPathAspect()->getPublicPath());
-        $endpointPathParts    = array_filter(explode("/", $endpointPathRelative));
+        $endpointPathRelative = Path::makeRelative($endpointPath, $this->context->Path()->getPublicPath());
+        $endpointPathParts    = array_filter(explode('/', $endpointPathRelative));
         $entryPointDepth      = count($endpointPathParts);
 
         // Load the template and apply the placeholders
-        $tpl = Fs::readFile(__DIR__ . "/imaging.template.php");
-        $tpl = str_replace(["@@FAI_HOST@@", "@@FAI_REDIRECT_DIR@@", "@@FAI_VENDOR_DIR@@", "@@FAI_EPD@@"],
+        $tpl = Fs::readFile(__DIR__ . '/imaging.template.php');
+        $tpl = str_replace(['@@FAI_HOST@@', '@@FAI_REDIRECT_DIR@@', '@@FAI_VENDOR_DIR@@', '@@FAI_EPD@@'],
             [$hostname, $varDir, $vendorDir, $entryPointDepth], $tpl);
 
         // Write the endpoint file at the configured location
-        $endpointPath = Path::join($endpointPath, "imaging.php");
+        $endpointPath = Path::join($endpointPath, 'imaging.php');
         Fs::writeFile($endpointPath, $tpl);
     }
 }

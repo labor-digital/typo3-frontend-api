@@ -80,59 +80,58 @@ class CoreImagingProvider extends AbstractImagingProvider
         // Process the file
         $fileOrReference = $fileInfo->isFileReference() ? $fileInfo->getFileReference() : $fileInfo->getFile();
         $processed       = $this->falFileService->getResizedImage($fileOrReference, $definition);
+        if (! $processed->exists()) {
+            throw new ImagingException('File was not found on the file system', 404);
+        }
 
         // Dump the redirect file
-        $realUrl               = "/" . $processed->getPublicUrl(false);
+        $realUrl               = '/' . $processed->getPublicUrl(false);
         $this->defaultRedirect = $realUrl;
 
         // Handle web-p generation
-        if (in_array(strtolower($processed->getExtension()), ["png", "webp", "jpg", "jpeg"])) {
+        if (in_array(strtolower($processed->getExtension()), ['png', 'webp', 'jpg', 'jpeg'])) {
             // Create a new processed file for the webp storage
             try {
-                $definition["hash"] = $processed->getSha1();
+                $definition['hash'] = $processed->getSha1();
             } catch (InvalidHashException $exception) {
-                // The file was not found on the harddrive
-                throw new ImagingException("File was not found on the file system", 404);
+                // The file was not found on the hard drive
+                throw new ImagingException('File was not found on the file system', 404);
             }
-            $definition["asWebP"] = true;
+            $definition['asWebP'] = true;
             $processedWebp        = $this->fileRepository->findOneByOriginalFileAndTaskTypeAndConfiguration(
                 $fileInfo->getFile(), ProcessedFile::CONTEXT_IMAGECROPSCALEMASK, $definition);
 
             // Generate the new webp image and store it as processed file
             if ($processedWebp->isNew()) {
                 // Set executable directories based on TYPO3 config
-                $processor = Arrays::getPath($GLOBALS, "TYPO3_CONF_VARS.GFX.processor");
+                $processor = Arrays::getPath($GLOBALS, 'TYPO3_CONF_VARS.GFX.processor');
                 if (! empty($processor)) {
-                    if ($processor === "ImageMagick") {
-                        if (! defined("WEBPCONVERT_IMAGEMAGICK_PATH")) {
-                            define("WEBPCONVERT_IMAGEMAGICK_PATH",
-                                Arrays::getPath($GLOBALS, "TYPO3_CONF_VARS.GFX.processor_path") . "convert");
+                    if ($processor === 'ImageMagick') {
+                        if (! defined('WEBPCONVERT_IMAGEMAGICK_PATH')) {
+                            define('WEBPCONVERT_IMAGEMAGICK_PATH',
+                                Arrays::getPath($GLOBALS, 'TYPO3_CONF_VARS.GFX.processor_path') . 'convert');
                         }
-                    } elseif ($processor === "GraphicsMagick") {
-                        if (! defined("WEBPCONVERT_GRAPHICSMAGICK_PATH")) {
-                            define("WEBPCONVERT_GRAPHICSMAGICK_PATH",
-                                Arrays::getPath($GLOBALS, "TYPO3_CONF_VARS.GFX.processor_path") . "gm");
+                    } elseif ($processor === 'GraphicsMagick') {
+                        if (! defined('WEBPCONVERT_GRAPHICSMAGICK_PATH')) {
+                            define('WEBPCONVERT_GRAPHICSMAGICK_PATH',
+                                Arrays::getPath($GLOBALS, 'TYPO3_CONF_VARS.GFX.processor_path') . 'gm');
                         }
                     }
                 }
 
                 // Generate the webp version of the file
-                $tmpFile = sys_get_temp_dir() . "/" . md5($processed->getIdentifier()) . "." . $processed->getExtension();
+                $tmpFile = sys_get_temp_dir() . '/' . md5($processed->getIdentifier()) . '.' . $processed->getExtension();
                 Fs::writeFile($tmpFile, $processed->getContents());
-                $tmpFileOut = $tmpFile . ".webp";
+                $tmpFileOut = $tmpFile . '.webp';
                 WebPConvert::convert($tmpFile, $tmpFileOut,
-                    $this->configRepository->tool()->get("imaging.options.webPConverterOptions", []));
+                    $this->configRepository->tool()->get('imaging.options.webPConverterOptions', []));
 
                 // Inherit the required properties from the parent
                 $props = $processed->getProperties();
-                unset($props["uid"]);
-                unset($props["tstamp"]);
-                unset($props["crdate"]);
-                unset($props["configuration"]);
-                unset($props["name"]);
-                unset($props["identifier"]);
+                unset($props['uid'], $props['tstamp'], $props['crdate'],
+                    $props['configuration'], $props['name'], $props['identifier']);
                 $processedWebp->updateProperties($props);
-                $processedWebp->setName($processed->getName() . ".webp");
+                $processedWebp->setName($processed->getName() . '.webp');
                 $processedWebp->updateWithLocalFile($tmpFileOut);
 
                 // Add the file to the database
@@ -142,7 +141,7 @@ class CoreImagingProvider extends AbstractImagingProvider
             }
 
             // Dump the redirect file
-            $realUrl            = "/" . $processedWebp->getPublicUrl(false);
+            $realUrl            = '/' . $processedWebp->getPublicUrl(false);
             $this->webPRedirect = $realUrl;
         }
     }

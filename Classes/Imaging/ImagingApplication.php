@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -25,12 +26,6 @@ use TYPO3\CMS\Core\Core\ApplicationInterface;
 
 class ImagingApplication implements ApplicationInterface
 {
-
-    /**
-     * @var \LaborDigital\Typo3FrontendApi\Imaging\ImagingContext
-     */
-    protected $context;
-
     /**
      * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
      */
@@ -44,13 +39,11 @@ class ImagingApplication implements ApplicationInterface
     /**
      * ImagingApplication constructor.
      *
-     * @param   \LaborDigital\Typo3FrontendApi\Imaging\ImagingContext           $context
      * @param   \LaborDigital\Typo3BetterApi\TypoContext\TypoContext            $typoContext
      * @param   \LaborDigital\Typo3FrontendApi\Imaging\ImagingProcessorService  $imagingService
      */
-    public function __construct(ImagingContext $context, TypoContext $typoContext, ImagingProcessorService $imagingService)
+    public function __construct(TypoContext $typoContext, ImagingProcessorService $imagingService)
     {
-        $this->context        = $context;
         $this->typoContext    = $typoContext;
         $this->imagingService = $imagingService;
     }
@@ -60,19 +53,23 @@ class ImagingApplication implements ApplicationInterface
      */
     public function run(callable $execute = null)
     {
+        if ($execute === null) {
+            return;
+        }
+
         try {
-            $this->imagingService->process($this->context);
+            $this->imagingService->process($execute());
         } catch (Throwable $e) {
             if ($e->getCode() === 400) {
-                $this->handleError(400, "Bad Request", $e->getMessage());
+                $this->handleError(400, 'Bad Request', $e->getMessage());
             }
             if ($e->getCode() === 404) {
-                $this->handleError(404, "Not Found", $e->getMessage());
+                $this->handleError(404, 'Not Found', $e->getMessage());
             }
-            if ($this->typoContext->Env()->isDev()) {
+            if (FRONTEND_API_IMAGING_SHOW_ERRORS || $this->typoContext->Env()->isDev()) {
                 throw $e;
             }
-            $this->handleError(500, "Internal Server Error");
+            $this->handleError(500, 'Internal Server Error');
         }
     }
 
@@ -85,7 +82,7 @@ class ImagingApplication implements ApplicationInterface
      */
     protected function handleError(int $code, string $httpString, ?string $message = null): void
     {
-        header("HTTP/1.0 $code $httpString");
+        header('HTTP/1.0 ' . $code . ' ' . $httpString);
         http_response_code($code);
         die(empty($message) ? $httpString : $message);
     }
