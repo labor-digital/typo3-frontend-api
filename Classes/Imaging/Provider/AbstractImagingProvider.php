@@ -27,29 +27,32 @@ namespace LaborDigital\Typo3FrontendApi\Imaging\Provider;
  *
  * @package LaborDigital\Typo3FrontendApi\Imaging\Provider
  */
-abstract class AbstractImagingProvider implements ImagingProviderInterface {
-	/**
-	 * @var string
-	 */
-	protected $defaultRedirect;
-	
-	/**
-	 * @var string|null;
-	 */
-	protected $webPRedirect;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function getDefaultRedirect(): string {
-		return $this->defaultRedirect;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function getWebPRedirect(): ?string {
-		return $this->webPRedirect;
-	}
-	
+abstract class AbstractImagingProvider implements ImagingProviderInterface
+{
+    /**
+     * @var string
+     */
+    protected $defaultRedirect;
+
+    /**
+     * @var string|null;
+     */
+    protected $webPRedirect;
+
+    /**
+     * @inheritDoc
+     */
+    public function getDefaultRedirect(): string
+    {
+        return $this->defaultRedirect;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getWebPRedirect(): ?string
+    {
+        return $this->webPRedirect;
+    }
+
 }

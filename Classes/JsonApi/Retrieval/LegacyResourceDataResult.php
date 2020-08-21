@@ -20,49 +20,60 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Retrieval;
 
 
+use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
+
 /**
  * Class LegacyResourceDataResult
  *
  * @package    LaborDigital\Typo3FrontendApi\JsonApi\Retrieval
  * @deprecated Temporary, legacy adapter to transition from arrays to the ResourceDataResult objects. Will be removed in v10
  */
-class LegacyResourceDataResult extends ResourceDataResult implements \ArrayAccess, \IteratorAggregate {
-	protected $legacyStorage = [];
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function getIterator() {
-		return new \ArrayIterator($this->asArray());
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function asArray(): array {
-		$array = parent::asArray();
-		return array_merge($array, $this->legacyStorage);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function offsetGet($offset) {
-		return $this->asArray()[$offset];
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function offsetSet($offset, $value) {
-		$this->legacyStorage[$offset] = $value;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function offsetUnset($offset) {
-		unset($this->legacyStorage[$offset]);
-	}
-	
+class LegacyResourceDataResult extends ResourceDataResult implements ArrayAccess, IteratorAggregate
+{
+    protected $legacyStorage = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->asArray());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        $array = parent::asArray();
+
+        return array_merge($array, $this->legacyStorage);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetGet($offset)
+    {
+        return $this->asArray()[$offset];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->legacyStorage[$offset] = $value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->legacyStorage[$offset]);
+    }
+
 }

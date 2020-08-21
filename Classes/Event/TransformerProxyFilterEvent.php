@@ -33,75 +33,88 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class TransformerProxyFilterEvent {
-	/**
-	 * The generated proxy instance
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy
-	 */
-	protected $proxy;
-	
-	/**
-	 * The suggested resource type we should generate the configuration
-	 * for. Is only used if the resource type would otherwise be resolved into
-	 * an "auto"... something
-	 * @var string|null
-	 */
-	protected $suggestedResourceType;
-	
-	/**
-	 * The factory instance that was used to generate the proxy
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	protected $factory;
-	
-	/**
-	 * TransformerProxyFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy   $proxy
-	 * @param string|null                                                              $suggestedResourceType
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory $factory
-	 */
-	public function __construct(TransformerProxy $proxy, ?string $suggestedResourceType, TransformerFactory $factory) {
-		$this->proxy = $proxy;
-		$this->suggestedResourceType = $suggestedResourceType;
-		$this->factory = $factory;
-	}
-	
-	/**
-	 * Returns the suggested resource type we should generate the configuration for
-	 * @return string
-	 */
-	public function getSuggestedResourceType(): ?string {
-		return $this->suggestedResourceType;
-	}
-	
-	/**
-	 * Return the factory instance that was used to generate the proxy
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	public function getFactory(): TransformerFactory {
-		return $this->factory;
-	}
-	
-	/**
-	 * Returns the generated proxy instance
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy
-	 */
-	public function getProxy(): TransformerProxy {
-		return $this->proxy;
-	}
-	
-	/**
-	 * Replaces the generated proxy instance
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy $proxy
-	 *
-	 * @return TransformerProxyFilterEvent
-	 */
-	public function setProxy(TransformerProxy $proxy): TransformerProxyFilterEvent {
-		$this->proxy = $proxy;
-		return $this;
-	}
-	
-	
+class TransformerProxyFilterEvent
+{
+    /**
+     * The generated proxy instance
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy
+     */
+    protected $proxy;
+
+    /**
+     * The suggested resource type we should generate the configuration
+     * for. Is only used if the resource type would otherwise be resolved into
+     * an "auto"... something
+     *
+     * @var string|null
+     */
+    protected $suggestedResourceType;
+
+    /**
+     * The factory instance that was used to generate the proxy
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    protected $factory;
+
+    /**
+     * TransformerProxyFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy    $proxy
+     * @param   string|null                                                               $suggestedResourceType
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory  $factory
+     */
+    public function __construct(TransformerProxy $proxy, ?string $suggestedResourceType, TransformerFactory $factory)
+    {
+        $this->proxy                 = $proxy;
+        $this->suggestedResourceType = $suggestedResourceType;
+        $this->factory               = $factory;
+    }
+
+    /**
+     * Returns the suggested resource type we should generate the configuration for
+     *
+     * @return string
+     */
+    public function getSuggestedResourceType(): ?string
+    {
+        return $this->suggestedResourceType;
+    }
+
+    /**
+     * Return the factory instance that was used to generate the proxy
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    public function getFactory(): TransformerFactory
+    {
+        return $this->factory;
+    }
+
+    /**
+     * Returns the generated proxy instance
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy
+     */
+    public function getProxy(): TransformerProxy
+    {
+        return $this->proxy;
+    }
+
+    /**
+     * Replaces the generated proxy instance
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerProxy  $proxy
+     *
+     * @return TransformerProxyFilterEvent
+     */
+    public function setProxy(TransformerProxy $proxy): TransformerProxyFilterEvent
+    {
+        $this->proxy = $proxy;
+
+        return $this;
+    }
+
+
 }

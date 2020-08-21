@@ -29,58 +29,68 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class PageRootLineFilterEvent {
-	
-	/**
-	 * The page object that currently tries to resolve it's root line
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
-	 */
-	protected $page;
-	
-	/**
-	 * The raw root line array TYPO3 responded for this page
-	 * @var array
-	 */
-	protected $rootLine;
-	
-	/**
-	 * PageRootLineFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page $page
-	 * @param array                                                               $rootLine
-	 */
-	public function __construct(Page $page, array $rootLine) {
-		$this->page = $page;
-		$this->rootLine = $rootLine;
-	}
-	
-	/**
-	 * Returns the page object that currently tries to resolve it's root line
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
-	 */
-	public function getPage(): Page {
-		return $this->page;
-	}
-	
-	/**
-	 * Returns the raw root line array TYPO3 responded for this page
-	 * @return array
-	 */
-	public function getRootLine(): array {
-		return $this->rootLine;
-	}
-	
-	/**
-	 * Updates the raw root line array TYPO3 responded for this page
-	 *
-	 * @param array $rootLine
-	 *
-	 * @return PageRootLineFilterEvent
-	 */
-	public function setRootLine(array $rootLine): PageRootLineFilterEvent {
-		$this->rootLine = $rootLine;
-		return $this;
-	}
-	
-	
+class PageRootLineFilterEvent
+{
+
+    /**
+     * The page object that currently tries to resolve it's root line
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
+     */
+    protected $page;
+
+    /**
+     * The raw root line array TYPO3 responded for this page
+     *
+     * @var array
+     */
+    protected $rootLine;
+
+    /**
+     * PageRootLineFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page  $page
+     * @param   array                                                                $rootLine
+     */
+    public function __construct(Page $page, array $rootLine)
+    {
+        $this->page     = $page;
+        $this->rootLine = $rootLine;
+    }
+
+    /**
+     * Returns the page object that currently tries to resolve it's root line
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
+     */
+    public function getPage(): Page
+    {
+        return $this->page;
+    }
+
+    /**
+     * Returns the raw root line array TYPO3 responded for this page
+     *
+     * @return array
+     */
+    public function getRootLine(): array
+    {
+        return $this->rootLine;
+    }
+
+    /**
+     * Updates the raw root line array TYPO3 responded for this page
+     *
+     * @param   array  $rootLine
+     *
+     * @return PageRootLineFilterEvent
+     */
+    public function setRootLine(array $rootLine): PageRootLineFilterEvent
+    {
+        $this->rootLine = $rootLine;
+
+        return $this;
+    }
+
+
 }

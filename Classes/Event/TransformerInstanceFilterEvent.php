@@ -33,88 +33,107 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class TransformerInstanceFilterEvent {
-	/**
-	 * The configuration that was generated for the transformer
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	protected $config;
-	
-	/**
-	 * The transformer instance that was created
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer
-	 */
-	protected $transformer;
-	
-	/**
-	 * The value that should be transformed
-	 * @var mixed
-	 */
-	protected $value;
-	
-	/**
-	 * The factory instance that created the transformer instance
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	protected $factory;
-	
-	/**
-	 * TransformerInstanceFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig           $config
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer $transformer
-	 * @param                                                                                   $value
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory          $factory
-	 */
-	public function __construct(TransformerConfig $config, AbstractResourceTransformer $transformer,
-								$value, TransformerFactory $factory) {
-		$this->config = $config;
-		$this->transformer = $transformer;
-		$this->value = $value;
-		$this->factory = $factory;
-	}
-	
-	/**
-	 * Returns the configuration that was generated for the transformer
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	public function getConfig(): TransformerConfig {
-		return $this->config;
-	}
-	
-	/**
-	 * Returns the value that should be transformed
-	 * @return mixed
-	 */
-	public function getValue() {
-		return $this->value;
-	}
-	
-	/**
-	 * Returns the factory instance that created the transformer instance
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	public function getFactory(): TransformerFactory {
-		return $this->factory;
-	}
-	
-	/**
-	 * Returns the transformer instance that was created
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer
-	 */
-	public function getTransformer(): AbstractResourceTransformer {
-		return $this->transformer;
-	}
-	
-	/**
-	 * Replaces the transformer instance that was created
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer $transformer
-	 *
-	 * @return TransformerInstanceFilterEvent
-	 */
-	public function setTransformer(AbstractResourceTransformer $transformer): TransformerInstanceFilterEvent {
-		$this->transformer = $transformer;
-		return $this;
-	}
+class TransformerInstanceFilterEvent
+{
+    /**
+     * The configuration that was generated for the transformer
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    protected $config;
+
+    /**
+     * The transformer instance that was created
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer
+     */
+    protected $transformer;
+
+    /**
+     * The value that should be transformed
+     *
+     * @var mixed
+     */
+    protected $value;
+
+    /**
+     * The factory instance that created the transformer instance
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    protected $factory;
+
+    /**
+     * TransformerInstanceFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig            $config
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer  $transformer
+     * @param                                                                                      $value
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory           $factory
+     */
+    public function __construct(
+        TransformerConfig $config,
+        AbstractResourceTransformer $transformer,
+        $value,
+        TransformerFactory $factory
+    ) {
+        $this->config      = $config;
+        $this->transformer = $transformer;
+        $this->value       = $value;
+        $this->factory     = $factory;
+    }
+
+    /**
+     * Returns the configuration that was generated for the transformer
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    public function getConfig(): TransformerConfig
+    {
+        return $this->config;
+    }
+
+    /**
+     * Returns the value that should be transformed
+     *
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Returns the factory instance that created the transformer instance
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    public function getFactory(): TransformerFactory
+    {
+        return $this->factory;
+    }
+
+    /**
+     * Returns the transformer instance that was created
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer
+     */
+    public function getTransformer(): AbstractResourceTransformer
+    {
+        return $this->transformer;
+    }
+
+    /**
+     * Replaces the transformer instance that was created
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer  $transformer
+     *
+     * @return TransformerInstanceFilterEvent
+     */
+    public function setTransformer(AbstractResourceTransformer $transformer): TransformerInstanceFilterEvent
+    {
+        $this->transformer = $transformer;
+
+        return $this;
+    }
 }

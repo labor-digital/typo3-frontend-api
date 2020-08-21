@@ -33,47 +33,54 @@ use LaborDigital\Typo3FrontendApi\Event\Traits\ContentElementFilterTrait;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementAfterControllerFilterEvent {
-	use ContentElementFilterTrait;
-	
-	/**
-	 * The result that was returned by the controller action
-	 * @var mixed
-	 */
-	protected $result;
-	
-	/**
-	 * ContentElementAfterControllerFilterEvent constructor.
-	 *
-	 * @param mixed                             $result
-	 * @param ContentElementControllerInterface $controller
-	 * @param ContentElementControllerContext   $context
-	 * @param bool                              $isFrontend
-	 */
-	public function __construct($result, ContentElementControllerInterface $controller, ContentElementControllerContext $context, bool $isFrontend) {
-		$this->result = $result;
-		$this->controller = $controller;
-		$this->context = $context;
-		$this->isFrontend = $isFrontend;
-	}
-	
-	/**
-	 * Returns the result that was returned by the controller action
-	 * @return mixed
-	 */
-	public function getResult() {
-		return $this->result;
-	}
-	
-	/**
-	 * Used to update the result that will be post processed and returned to the client
-	 *
-	 * @param mixed $result
-	 *
-	 * @return ContentElementAfterControllerFilterEvent
-	 */
-	public function setResult($result) {
-		$this->result = $result;
-		return $this;
-	}
+class ContentElementAfterControllerFilterEvent
+{
+    use ContentElementFilterTrait;
+
+    /**
+     * The result that was returned by the controller action
+     *
+     * @var mixed
+     */
+    protected $result;
+
+    /**
+     * ContentElementAfterControllerFilterEvent constructor.
+     *
+     * @param   mixed                              $result
+     * @param   ContentElementControllerInterface  $controller
+     * @param   ContentElementControllerContext    $context
+     * @param   bool                               $isFrontend
+     */
+    public function __construct($result, ContentElementControllerInterface $controller, ContentElementControllerContext $context, bool $isFrontend)
+    {
+        $this->result     = $result;
+        $this->controller = $controller;
+        $this->context    = $context;
+        $this->isFrontend = $isFrontend;
+    }
+
+    /**
+     * Returns the result that was returned by the controller action
+     *
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * Used to update the result that will be post processed and returned to the client
+     *
+     * @param   mixed  $result
+     *
+     * @return ContentElementAfterControllerFilterEvent
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
+
+        return $this;
+    }
 }

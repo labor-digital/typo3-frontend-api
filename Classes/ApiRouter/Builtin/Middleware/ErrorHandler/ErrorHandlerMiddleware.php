@@ -27,12 +27,12 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 class ErrorHandlerMiddleware implements MiddlewareInterface {
-	
+
 	/**
 	 * @var \LaborDigital\Typo3FrontendApi\Whoops\ErrorHandler
 	 */
 	protected $handler;
-	
+
 	/**
 	 * Middleware constructor.
 	 *
@@ -41,7 +41,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface {
 	public function __construct(ErrorHandler $handler) {
 		$this->handler = $handler;
 	}
-	
+
 	/**
 	 * @inheritDoc
 	 */
@@ -52,4 +52,3 @@ class ErrorHandlerMiddleware implements MiddlewareInterface {
 	}
 }
 
-;

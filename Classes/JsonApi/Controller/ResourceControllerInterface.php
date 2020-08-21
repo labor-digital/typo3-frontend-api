@@ -24,30 +24,31 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
-interface ResourceControllerInterface {
-	
-	/**
-	 * Should handle the lookup of a single resource from the repository and return the result.
-	 * The result may be an array, any iterable (including ObjectStorage) or any DB result / query object
-	 * The transformation will be handled automatically.
-	 *
-	 * @param \Psr\Http\Message\ServerRequestInterface                                    $request
-	 * @param int                                                                         $id
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext $context
-	 *
-	 * @return mixed
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context);
-	
-	/**
-	 * Should handle the lookup of a resource collection from the repository and return the result.
-	 * The result may be an array, any iterable (including ObjectStorage) or any DB result / query object
-	 * The transformation will be handled automatically.
-	 *
-	 * @param \Psr\Http\Message\ServerRequestInterface                                      $request
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext $context
-	 *
-	 * @return array|iterable|QueryResultInterface|SelfPaginatingInterface
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context);
+interface ResourceControllerInterface
+{
+
+    /**
+     * Should handle the lookup of a single resource from the repository and return the result.
+     * The result may be an array, any iterable (including ObjectStorage) or any DB result / query object
+     * The transformation will be handled automatically.
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface                                     $request
+     * @param   int                                                                          $id
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext  $context
+     *
+     * @return mixed
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context);
+
+    /**
+     * Should handle the lookup of a resource collection from the repository and return the result.
+     * The result may be an array, any iterable (including ObjectStorage) or any DB result / query object
+     * The transformation will be handled automatically.
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface                                       $request
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext  $context
+     *
+     * @return array|iterable|QueryResultInterface|SelfPaginatingInterface
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context);
 }

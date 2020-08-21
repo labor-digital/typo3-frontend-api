@@ -30,49 +30,54 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
 
-class SysCategoryController extends AbstractResourceController {
-	
-	/**
-	 * @var \TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository
-	 */
-	protected $categoryRepository;
-	
-	/**
-	 * SysCategoryController constructor.
-	 *
-	 * @param \TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository $categoryRepository
-	 */
-	public function __construct(CategoryRepository $categoryRepository) {
-		$this->categoryRepository = $categoryRepository;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->addClass(Category::class);
-		$configurator->setAllowedProperties(["title", "description"]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return $this->categoryRepository->findByUid($id);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		$wrap = BetterRepository::getWrapper($this->categoryRepository);
-		$query = $wrap->getQuery();
-		
-		
-		// Add default filters and sorting
-		$query = $this->addFilterConstraint($query, $context, ["pid"], []);
-		
-		// Done
-		return $query;
-	}
+class SysCategoryController extends AbstractResourceController
+{
+
+    /**
+     * @var \TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository
+     */
+    protected $categoryRepository;
+
+    /**
+     * SysCategoryController constructor.
+     *
+     * @param   \TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository  $categoryRepository
+     */
+    public function __construct(CategoryRepository $categoryRepository)
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->addClass(Category::class);
+        $configurator->setAllowedProperties(["title", "description"]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        return $this->categoryRepository->findByUid($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        $wrap  = BetterRepository::getWrapper($this->categoryRepository);
+        $query = $wrap->getQuery();
+
+
+        // Add default filters and sorting
+        $query = $this->addFilterConstraint($query, $context, ["pid"], []);
+
+        // Done
+        return $query;
+    }
 }

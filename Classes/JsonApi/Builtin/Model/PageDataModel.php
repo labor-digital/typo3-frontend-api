@@ -22,137 +22,156 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Model;
 
 use LaborDigital\Typo3BetterApi\Domain\Model\BetterEntity;
 
-class PageDataModel extends BetterEntity {
-	
-	/**
-	 * @var string
-	 */
-	protected $title;
-	
-	/**
-	 * @var string
-	 */
-	protected $navTitle;
-	
-	/**
-	 * @var string
-	 */
-	protected $slug;
-	
-	/**
-	 * @var string
-	 */
-	protected $seoTitle;
-	
-	/**
-	 * @var bool
-	 */
-	protected $noFollow;
-	
-	/**
-	 * @var bool
-	 */
-	protected $noIndex;
-	
-	/**
-	 * @return string
-	 */
-	public function getTitle(): string {
-		return (string)$this->title;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getNavTitle(): string {
-		return $this->navTitle;
-	}
-	
-	/**
-	 * @param string $navTitle
-	 *
-	 * @return PageDataModel
-	 */
-	public function setNavTitle(string $navTitle): PageDataModel {
-		$this->navTitle = $navTitle;
-		return $this;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getSlug(): string {
-		return $this->slug;
-	}
-	
-	/**
-	 * @param string $slug
-	 *
-	 * @return PageDataModel
-	 */
-	public function setSlug(string $slug): PageDataModel {
-		$this->slug = $slug;
-		return $this;
-	}
-	
-	/**
-	 * @param string $title
-	 *
-	 * @return PageDataModel
-	 */
-	public function setTitle(string $title): PageDataModel {
-		$this->title = $title;
-		return $this;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getSeoTitle(): string {
-		return (string)$this->seoTitle;
-	}
-	
-	/**
-	 * @param string $seoTitle
-	 *
-	 * @return PageDataModel
-	 */
-	public function setSeoTitle(string $seoTitle): PageDataModel {
-		$this->seoTitle = $seoTitle;
-		return $this;
-	}
-	
-	/**
-	 * @return bool
-	 */
-	public function isNoFollow(): bool {
-		return (bool)$this->noFollow;
-	}
-	
-	/**
-	 * @param bool $noFollow
-	 *
-	 * @return PageDataModel
-	 */
-	public function setNoFollow(bool $noFollow): PageDataModel {
-		$this->noFollow = $noFollow;
-		return $this;
-	}
-	
-	/**
-	 * @return bool
-	 */
-	public function isNoIndex(): bool {
-		return (bool)$this->noIndex;
-	}
-	
-	/**
-	 * @param bool $noIndex
-	 *
-	 * @return PageDataModel
-	 */
-	public function setNoIndex(bool $noIndex): PageDataModel {
-		$this->noIndex = $noIndex;
-		return $this;
-	}
+class PageDataModel extends BetterEntity
+{
+
+    /**
+     * @var string
+     */
+    protected $title;
+
+    /**
+     * @var string
+     */
+    protected $navTitle;
+
+    /**
+     * @var string
+     */
+    protected $slug;
+
+    /**
+     * @var string
+     */
+    protected $seoTitle;
+
+    /**
+     * @var bool
+     */
+    protected $noFollow;
+
+    /**
+     * @var bool
+     */
+    protected $noIndex;
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return (string)$this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNavTitle(): string
+    {
+        return $this->navTitle;
+    }
+
+    /**
+     * @param   string  $navTitle
+     *
+     * @return PageDataModel
+     */
+    public function setNavTitle(string $navTitle): PageDataModel
+    {
+        $this->navTitle = $navTitle;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param   string  $slug
+     *
+     * @return PageDataModel
+     */
+    public function setSlug(string $slug): PageDataModel
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * @param   string  $title
+     *
+     * @return PageDataModel
+     */
+    public function setTitle(string $title): PageDataModel
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSeoTitle(): string
+    {
+        return (string)$this->seoTitle;
+    }
+
+    /**
+     * @param   string  $seoTitle
+     *
+     * @return PageDataModel
+     */
+    public function setSeoTitle(string $seoTitle): PageDataModel
+    {
+        $this->seoTitle = $seoTitle;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNoFollow(): bool
+    {
+        return (bool)$this->noFollow;
+    }
+
+    /**
+     * @param   bool  $noFollow
+     *
+     * @return PageDataModel
+     */
+    public function setNoFollow(bool $noFollow): PageDataModel
+    {
+        $this->noFollow = $noFollow;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNoIndex(): bool
+    {
+        return (bool)$this->noIndex;
+    }
+
+    /**
+     * @param   bool  $noIndex
+     *
+     * @return PageDataModel
+     */
+    public function setNoIndex(bool $noIndex): PageDataModel
+    {
+        $this->noIndex = $noIndex;
+
+        return $this;
+    }
 }

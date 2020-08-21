@@ -36,62 +36,75 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementSpaEvent {
-	use ContentElementFilterTrait;
-	
-	/**
-	 * The instance of the resource entity
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
-	 */
-	protected $element;
-	
-	/**
-	 * True if the handler should kill itself
-	 * @var bool
-	 */
-	protected $killHandler = FALSE;
-	
-	/**
-	 * ContentElementPostProcessorEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement              $element
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface $controller
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext   $context
-	 * @param bool                                                                                       $isFrontend
-	 */
-	public function __construct(ContentElement $element, ContentElementControllerInterface $controller,
-								ContentElementControllerContext $context, bool $isFrontend) {
-		$this->element = $element;
-		$this->controller = $controller;
-		$this->context = $context;
-		$this->isFrontend = $isFrontend;
-	}
-	
-	/**
-	 * Returns the instance of the resource entity
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
-	 */
-	public function getElement(): ContentElement {
-		return $this->element;
-	}
-	
-	/**
-	 * Returns true if the handler should kill itself
-	 * @return bool
-	 */
-	public function isKillHandler(): bool {
-		return $this->killHandler;
-	}
-	
-	/**
-	 * Sets the handler to kill itself
-	 *
-	 * @param bool $killHandler
-	 *
-	 * @return ContentElementSpaEvent
-	 */
-	public function setKillHandler(bool $killHandler = TRUE): ContentElementSpaEvent {
-		$this->killHandler = $killHandler;
-		return $this;
-	}
+class ContentElementSpaEvent
+{
+    use ContentElementFilterTrait;
+
+    /**
+     * The instance of the resource entity
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+     */
+    protected $element;
+
+    /**
+     * True if the handler should kill itself
+     *
+     * @var bool
+     */
+    protected $killHandler = false;
+
+    /**
+     * ContentElementPostProcessorEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement               $element
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface  $controller
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext    $context
+     * @param   bool                                                                                        $isFrontend
+     */
+    public function __construct(
+        ContentElement $element,
+        ContentElementControllerInterface $controller,
+        ContentElementControllerContext $context,
+        bool $isFrontend
+    ) {
+        $this->element    = $element;
+        $this->controller = $controller;
+        $this->context    = $context;
+        $this->isFrontend = $isFrontend;
+    }
+
+    /**
+     * Returns the instance of the resource entity
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+     */
+    public function getElement(): ContentElement
+    {
+        return $this->element;
+    }
+
+    /**
+     * Returns true if the handler should kill itself
+     *
+     * @return bool
+     */
+    public function isKillHandler(): bool
+    {
+        return $this->killHandler;
+    }
+
+    /**
+     * Sets the handler to kill itself
+     *
+     * @param   bool  $killHandler
+     *
+     * @return ContentElementSpaEvent
+     */
+    public function setKillHandler(bool $killHandler = true): ContentElementSpaEvent
+    {
+        $this->killHandler = $killHandler;
+
+        return $this;
+    }
 }

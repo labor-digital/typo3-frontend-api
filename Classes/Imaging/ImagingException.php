@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\Imaging;
 
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
 
-class ImagingException extends FrontendApiException {
-	
+class ImagingException extends FrontendApiException
+{
+
 }

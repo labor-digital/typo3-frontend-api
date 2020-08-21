@@ -18,5 +18,9 @@
  */
 
 /** @var string $_EXTKEY */
-betterExtConfig("LaborDigital." . $_EXTKEY, \LaborDigital\Typo3FrontendApi\ExtConfig\Typo3FrontendApiExtConfig::class,
-	["after" => \LaborDigital\Typo3BetterApi\ExtConfig\Builtin\BetterApiExtConfig::class, "before" => "last"]);
+
+use LaborDigital\Typo3BetterApi\ExtConfig\Builtin\BetterApiExtConfig;
+use LaborDigital\Typo3FrontendApi\ExtConfig\Typo3FrontendApiExtConfig;
+
+betterExtConfig("LaborDigital." . $_EXTKEY, Typo3FrontendApiExtConfig::class,
+	["after" => BetterApiExtConfig::class, "before" => "last"]);

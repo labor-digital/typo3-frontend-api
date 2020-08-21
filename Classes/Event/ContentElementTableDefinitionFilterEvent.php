@@ -32,60 +32,71 @@ use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementTableDefinitionFilterEvent {
-	
-	/**
-	 * The tt_content tca table instance
-	 * @var \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable
-	 */
-	protected $table;
-	
-	/**
-	 * The ext config context
-	 * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	protected $context;
-	
-	/**
-	 * The list of all configurators that have been applied
-	 * @var \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurator[]
-	 */
-	protected $configurators;
-	
-	/**
-	 * ContentElementTableDefinitionFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable $table
-	 * @param \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext     $context
-	 * @param array                                                       $configurators
-	 */
-	public function __construct(TcaTable $table, ExtConfigContext $context, array $configurators) {
-		$this->table = $table;
-		$this->context = $context;
-		$this->configurators = $configurators;
-	}
-	
-	/**
-	 * Returns the tt_content tca table instance
-	 * @return \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable
-	 */
-	public function getTable(): TcaTable {
-		return $this->table;
-	}
-	
-	/**
-	 * Returns the ext config context
-	 * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	public function getContext(): ExtConfigContext {
-		return $this->context;
-	}
-	
-	/**
-	 * Returns the list of all configurators that have been applied
-	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurator[]
-	 */
-	public function getConfigurators(): array {
-		return $this->configurators;
-	}
+class ContentElementTableDefinitionFilterEvent
+{
+
+    /**
+     * The tt_content tca table instance
+     *
+     * @var \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable
+     */
+    protected $table;
+
+    /**
+     * The ext config context
+     *
+     * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    protected $context;
+
+    /**
+     * The list of all configurators that have been applied
+     *
+     * @var \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurator[]
+     */
+    protected $configurators;
+
+    /**
+     * ContentElementTableDefinitionFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable  $table
+     * @param   \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext      $context
+     * @param   array                                                        $configurators
+     */
+    public function __construct(TcaTable $table, ExtConfigContext $context, array $configurators)
+    {
+        $this->table         = $table;
+        $this->context       = $context;
+        $this->configurators = $configurators;
+    }
+
+    /**
+     * Returns the tt_content tca table instance
+     *
+     * @return \LaborDigital\Typo3BetterApi\BackendForms\TcaForms\TcaTable
+     */
+    public function getTable(): TcaTable
+    {
+        return $this->table;
+    }
+
+    /**
+     * Returns the ext config context
+     *
+     * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    public function getContext(): ExtConfigContext
+    {
+        return $this->context;
+    }
+
+    /**
+     * Returns the list of all configurators that have been applied
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurator[]
+     */
+    public function getConfigurators(): array
+    {
+        return $this->configurators;
+    }
 }

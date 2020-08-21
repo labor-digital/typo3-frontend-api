@@ -22,18 +22,19 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 
-interface PageMenuPostProcessorInterface {
-	
-	/**
-	 * Used to filter a menu after it was generated in the site configuration
-	 *
-	 * @param string $key      The name/key that was given when the menu was registered
-	 * @param array  $menu     The menu configuration to be passed to the frontend
-	 * @param array  $options  The options that were given when the menu was registered
-	 * @param string $menuType The type of the menu that was generated. One of PageMenu::TYPE_MENU_...
-	 *
-	 * @return array Must return the modified $menu array to be passed to the frontend
-	 */
-	public function process(string $key, array $menu, array $options, string $menuType): array;
-	
+interface PageMenuPostProcessorInterface
+{
+
+    /**
+     * Used to filter a menu after it was generated in the site configuration
+     *
+     * @param   string  $key       The name/key that was given when the menu was registered
+     * @param   array   $menu      The menu configuration to be passed to the frontend
+     * @param   array   $options   The options that were given when the menu was registered
+     * @param   string  $menuType  The type of the menu that was generated. One of PageMenu::TYPE_MENU_...
+     *
+     * @return array Must return the modified $menu array to be passed to the frontend
+     */
+    public function process(string $key, array $menu, array $options, string $menuType): array;
+
 }

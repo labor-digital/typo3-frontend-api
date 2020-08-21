@@ -32,97 +32,114 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class FrontendSimulationMiddlewareFilterEvent {
-	
-	/**
-	 * The language either as numeric value if "L" parameter was given or as object
-	 * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage|int|null
-	 */
-	protected $language;
-	
-	/**
-	 * The page id of the request
-	 * @var int
-	 */
-	protected $pid;
-	
-	/**
-	 * The prepared request object
-	 * @var \Psr\Http\Message\ServerRequestInterface
-	 */
-	protected $request;
-	
-	/**
-	 * FrontendSimulationMiddlewareFilterEvent constructor.
-	 *
-	 * @param                                          $language
-	 * @param int                                      $pid
-	 * @param \Psr\Http\Message\ServerRequestInterface $request *
-	 */
-	public function __construct($language, int $pid, ServerRequestInterface $request) {
-		$this->language = $language;
-		$this->pid = $pid;
-		$this->request = $request;
-	}
-	
-	/**
-	 * Returns the language either as numeric value if "L" parameter was given or as object
-	 * @return int|\TYPO3\CMS\Core\Site\Entity\SiteLanguage|null
-	 */
-	public function getLanguage() {
-		return $this->language;
-	}
-	
-	/**
-	 * Can be used to update the language used for the simulation
-	 *
-	 * @param int|\TYPO3\CMS\Core\Site\Entity\SiteLanguage|null $language
-	 *
-	 * @return FrontendSimulationMiddlewareFilterEvent
-	 */
-	public function setLanguage($language) {
-		$this->language = $language;
-		return $this;
-	}
-	
-	/**
-	 * Returns the page id of the request
-	 * @return int
-	 */
-	public function getPid(): int {
-		return $this->pid;
-	}
-	
-	/**
-	 * Updates the page id of the request
-	 *
-	 * @param int $pid
-	 *
-	 * @return FrontendSimulationMiddlewareFilterEvent
-	 */
-	public function setPid(int $pid): FrontendSimulationMiddlewareFilterEvent {
-		$this->pid = $pid;
-		return $this;
-	}
-	
-	/**
-	 * Returns the prepared request object
-	 * @return \Psr\Http\Message\ServerRequestInterface
-	 */
-	public function getRequest(): ServerRequestInterface {
-		return $this->request;
-	}
-	
-	/**
-	 * Updates the request object
-	 *
-	 * @param \Psr\Http\Message\ServerRequestInterface $request
-	 *
-	 * @return FrontendSimulationMiddlewareFilterEvent
-	 */
-	public function setRequest(ServerRequestInterface $request): FrontendSimulationMiddlewareFilterEvent {
-		$this->request = $request;
-		return $this;
-	}
-	
+class FrontendSimulationMiddlewareFilterEvent
+{
+
+    /**
+     * The language either as numeric value if "L" parameter was given or as object
+     *
+     * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage|int|null
+     */
+    protected $language;
+
+    /**
+     * The page id of the request
+     *
+     * @var int
+     */
+    protected $pid;
+
+    /**
+     * The prepared request object
+     *
+     * @var \Psr\Http\Message\ServerRequestInterface
+     */
+    protected $request;
+
+    /**
+     * FrontendSimulationMiddlewareFilterEvent constructor.
+     *
+     * @param                                             $language
+     * @param   int                                       $pid
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request  *
+     */
+    public function __construct($language, int $pid, ServerRequestInterface $request)
+    {
+        $this->language = $language;
+        $this->pid      = $pid;
+        $this->request  = $request;
+    }
+
+    /**
+     * Returns the language either as numeric value if "L" parameter was given or as object
+     *
+     * @return int|\TYPO3\CMS\Core\Site\Entity\SiteLanguage|null
+     */
+    public function getLanguage()
+    {
+        return $this->language;
+    }
+
+    /**
+     * Can be used to update the language used for the simulation
+     *
+     * @param   int|\TYPO3\CMS\Core\Site\Entity\SiteLanguage|null  $language
+     *
+     * @return FrontendSimulationMiddlewareFilterEvent
+     */
+    public function setLanguage($language)
+    {
+        $this->language = $language;
+
+        return $this;
+    }
+
+    /**
+     * Returns the page id of the request
+     *
+     * @return int
+     */
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
+
+    /**
+     * Updates the page id of the request
+     *
+     * @param   int  $pid
+     *
+     * @return FrontendSimulationMiddlewareFilterEvent
+     */
+    public function setPid(int $pid): FrontendSimulationMiddlewareFilterEvent
+    {
+        $this->pid = $pid;
+
+        return $this;
+    }
+
+    /**
+     * Returns the prepared request object
+     *
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    public function getRequest(): ServerRequestInterface
+    {
+        return $this->request;
+    }
+
+    /**
+     * Updates the request object
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     *
+     * @return FrontendSimulationMiddlewareFilterEvent
+     */
+    public function setRequest(ServerRequestInterface $request): FrontendSimulationMiddlewareFilterEvent
+    {
+        $this->request = $request;
+
+        return $this;
+    }
+
 }

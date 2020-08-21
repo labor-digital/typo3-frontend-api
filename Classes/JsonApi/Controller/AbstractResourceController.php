@@ -36,5 +36,4 @@ abstract class AbstractResourceController implements ResourceControllerInterface
         CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
         CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
     }
-    
 }

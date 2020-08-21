@@ -30,57 +30,68 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class PageMetaTagsFilterEvent {
-	
-	/**
-	 * The meta tags for the current page
-	 * @var array
-	 */
-	protected $tags;
-	
-	/**
-	 * The object containing the information about the current page
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
-	 */
-	protected $pageData;
-	
-	/**
-	 * PageMetaTagsFilterEvent constructor.
-	 *
-	 * @param array                                                                   $tags
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData $pageData
-	 */
-	public function __construct(array $tags, PageData $pageData) {
-		$this->tags = $tags;
-		$this->pageData = $pageData;
-	}
-	
-	/**
-	 * Returns the object containing the information about the current page
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
-	 */
-	public function getPageData(): PageData {
-		return $this->pageData;
-	}
-	
-	/**
-	 * Returns the meta tags for the current page
-	 * @return array
-	 */
-	public function getTags(): array {
-		return $this->tags;
-	}
-	
-	/**
-	 * Used to update the meta tags for the current page
-	 * @param array $tags
-	 *
-	 * @return PageMetaTagsFilterEvent
-	 */
-	public function setTags(array $tags): PageMetaTagsFilterEvent {
-		$this->tags = $tags;
-		return $this;
-	}
-	
-	
+class PageMetaTagsFilterEvent
+{
+
+    /**
+     * The meta tags for the current page
+     *
+     * @var array
+     */
+    protected $tags;
+
+    /**
+     * The object containing the information about the current page
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
+     */
+    protected $pageData;
+
+    /**
+     * PageMetaTagsFilterEvent constructor.
+     *
+     * @param   array                                                                    $tags
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData  $pageData
+     */
+    public function __construct(array $tags, PageData $pageData)
+    {
+        $this->tags     = $tags;
+        $this->pageData = $pageData;
+    }
+
+    /**
+     * Returns the object containing the information about the current page
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
+     */
+    public function getPageData(): PageData
+    {
+        return $this->pageData;
+    }
+
+    /**
+     * Returns the meta tags for the current page
+     *
+     * @return array
+     */
+    public function getTags(): array
+    {
+        return $this->tags;
+    }
+
+    /**
+     * Used to update the meta tags for the current page
+     *
+     * @param   array  $tags
+     *
+     * @return PageMetaTagsFilterEvent
+     */
+    public function setTags(array $tags): PageMetaTagsFilterEvent
+    {
+        $this->tags = $tags;
+
+        return $this;
+    }
+
+
 }

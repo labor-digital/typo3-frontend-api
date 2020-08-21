@@ -29,25 +29,28 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ContentElementController extends AbstractResourceController {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void { }
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_TT_CONTENT, $id]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
+class ContentElementController extends AbstractResourceController
+{
+
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void { }
+
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        return $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_TT_CONTENT, $id]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+
 }

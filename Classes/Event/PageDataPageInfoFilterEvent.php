@@ -27,72 +27,85 @@ namespace LaborDigital\Typo3FrontendApi\Event;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class PageDataPageInfoFilterEvent {
-	/**
-	 * The unique id of the page the data should be filtered for
-	 * @var int
-	 */
-	protected $uid;
-	
-	/**
-	 * The raw page data as an array to filter
-	 * @var array
-	 */
-	protected $row;
-	
-	/**
-	 * The map of fields and their parent page uids to map references correctly
-	 * @var array
-	 */
-	protected $slideFieldPidMapping;
-	
-	/**
-	 * PageDataPageInfoFilterEvent constructor.
-	 *
-	 * @param int   $uid
-	 * @param array $row
-	 */
-	public function __construct(int $uid, array $row, array $slideFieldPidMapping) {
-		$this->uid = $uid;
-		$this->row = $row;
-		$this->slideFieldPidMapping = $slideFieldPidMapping;
-	}
-	
-	/**
-	 * Returns the unique id of the page the data should be filtered for
-	 * @return int
-	 */
-	public function getUid(): int {
-		return $this->uid;
-	}
-	
-	/**
-	 * Returns the map of fields and their parent page uids to map references correctly
-	 * @return array
-	 */
-	public function getSlideFieldPidMapping(): array {
-		return $this->slideFieldPidMapping;
-	}
-	
-	/**
-	 * Returns the raw page data as an array to filter
-	 * @return array
-	 */
-	public function getRow(): array {
-		return $this->row;
-	}
-	
-	/**
-	 * Updates the raw page data as an array to filter
-	 *
-	 * @param array $row
-	 *
-	 * @return PageDataPageInfoFilterEvent
-	 */
-	public function setRow(array $row): PageDataPageInfoFilterEvent {
-		$this->row = $row;
-		return $this;
-	}
-	
-	
+class PageDataPageInfoFilterEvent
+{
+    /**
+     * The unique id of the page the data should be filtered for
+     *
+     * @var int
+     */
+    protected $uid;
+
+    /**
+     * The raw page data as an array to filter
+     *
+     * @var array
+     */
+    protected $row;
+
+    /**
+     * The map of fields and their parent page uids to map references correctly
+     *
+     * @var array
+     */
+    protected $slideFieldPidMapping;
+
+    /**
+     * PageDataPageInfoFilterEvent constructor.
+     *
+     * @param   int    $uid
+     * @param   array  $row
+     */
+    public function __construct(int $uid, array $row, array $slideFieldPidMapping)
+    {
+        $this->uid                  = $uid;
+        $this->row                  = $row;
+        $this->slideFieldPidMapping = $slideFieldPidMapping;
+    }
+
+    /**
+     * Returns the unique id of the page the data should be filtered for
+     *
+     * @return int
+     */
+    public function getUid(): int
+    {
+        return $this->uid;
+    }
+
+    /**
+     * Returns the map of fields and their parent page uids to map references correctly
+     *
+     * @return array
+     */
+    public function getSlideFieldPidMapping(): array
+    {
+        return $this->slideFieldPidMapping;
+    }
+
+    /**
+     * Returns the raw page data as an array to filter
+     *
+     * @return array
+     */
+    public function getRow(): array
+    {
+        return $this->row;
+    }
+
+    /**
+     * Updates the raw page data as an array to filter
+     *
+     * @param   array  $row
+     *
+     * @return PageDataPageInfoFilterEvent
+     */
+    public function setRow(array $row): PageDataPageInfoFilterEvent
+    {
+        $this->row = $row;
+
+        return $this;
+    }
+
+
 }

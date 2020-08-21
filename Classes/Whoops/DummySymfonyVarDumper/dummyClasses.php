@@ -18,56 +18,66 @@
  */
 
 namespace Symfony\Component\VarDumper\Dumper {
-	
-	use LaborDigital\Typo3FrontendApi\Whoops\ErrorHandler;
-	use ReflectionObject;
-	use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-	use Whoops\Util\HtmlDumperOutput;
-	
-	class HtmlDumper {
-		public function dump($var, HtmlDumperOutput $output) {
-			// Disable value rendering
-			if (ErrorHandler::renderValues()) $result = DebuggerUtility::var_dump($var);
-			else {
-				if (is_scalar($var)) $result = (string)$var;
-				else $result = "[VALUE RENDERING DISABLED: " . gettype($var) .
-					(is_object($var) ? ": " . get_class($var) : "") . "]";
-			}
-			
-			// Adjust debug output to match whoops at least somewhat...
-			$result = str_replace("<dfn>\$var</dfn>", "", $result);
-			
-			// Convince whoops to take our output
-			$ref = new ReflectionObject($output);
-			$prop = $ref->getProperty("output");
-			$prop->setAccessible(TRUE);
-			$prop->setValue($output, $result);
-		}
-		
-		public function setStyles() { }
-	}
-	
+
+    use LaborDigital\Typo3FrontendApi\Whoops\ErrorHandler;
+    use ReflectionObject;
+    use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+    use Whoops\Util\HtmlDumperOutput;
+
+    class HtmlDumper
+    {
+        public function dump($var, HtmlDumperOutput $output)
+        {
+            // Disable value rendering
+            if (ErrorHandler::renderValues()) {
+                $result = DebuggerUtility::var_dump($var);
+            } else {
+                if (is_scalar($var)) {
+                    $result = (string)$var;
+                } else {
+                    $result = "[VALUE RENDERING DISABLED: " . gettype($var) .
+                              (is_object($var) ? ": " . get_class($var) : "") . "]";
+                }
+            }
+
+            // Adjust debug output to match whoops at least somewhat...
+            $result = str_replace("<dfn>\$var</dfn>", "", $result);
+
+            // Convince whoops to take our output
+            $ref  = new ReflectionObject($output);
+            $prop = $ref->getProperty("output");
+            $prop->setAccessible(true);
+            $prop->setValue($output, $result);
+        }
+
+        public function setStyles() { }
+    }
+
 }
 
 namespace Symfony\Component\VarDumper\Caster {
-	
-	class Caster {
-		public const EXCLUDE_VERBOSE = TRUE;
-	}
-	
+
+    class Caster
+    {
+        public const EXCLUDE_VERBOSE = true;
+    }
+
 }
 
 namespace Symfony\Component\VarDumper\Cloner {
-	
-	class AbstractCloner {
-		public static $defaultCasters = [];
-		
-		public function cloneVar($val, ...$args) {
-			return $val;
-		}
-	}
-	
-	class VarCloner extends AbstractCloner {
-		public function addCasters(...$args) { }
-	}
+
+    class AbstractCloner
+    {
+        public static $defaultCasters = [];
+
+        public function cloneVar($val, ...$args)
+        {
+            return $val;
+        }
+    }
+
+    class VarCloner extends AbstractCloner
+    {
+        public function addCasters(...$args) { }
+    }
 }

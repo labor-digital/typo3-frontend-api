@@ -21,16 +21,17 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 
-interface SiteConfigurationInterface {
-	
-	/**
-	 * Receives the site configurator and should provide the required information for the frontend site
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator $configurator
-	 * @param \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext            $context
-	 *
-	 * @return void
-	 */
-	public static function configureSite(SiteConfigurator $configurator, ExtConfigContext $context);
-	
+interface SiteConfigurationInterface
+{
+
+    /**
+     * Receives the site configurator and should provide the required information for the frontend site
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator  $configurator
+     * @param   \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext             $context
+     *
+     * @return void
+     */
+    public static function configureSite(SiteConfigurator $configurator, ExtConfigContext $context);
+
 }

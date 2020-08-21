@@ -31,87 +31,102 @@ use LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class HybridApiDataPostProcessorEvent {
-	/**
-	 * The configured window variable name where the global data and the translation labels will be stored initially
-	 * @var string
-	 */
-	protected $windowVar;
-	
-	/**
-	 * The api data that will be added to the head of the page.
-	 * Already converted into an array using the transformer.
-	 * @var array
-	 */
-	protected $data;
-	
-	/**
-	 * The parent event to allow additional asset manipulation
-	 * @var \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent
-	 */
-	protected $parentEvent;
-	
-	/**
-	 * HybridApiDataPostProcessorEvent constructor.
-	 *
-	 * @param string                                                                    $windowVar
-	 * @param array                                                                     $data
-	 * @param \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent $parentEvent
-	 */
-	public function __construct(string $windowVar, array $data, FrontendAssetPostProcessorEvent $parentEvent) {
-		$this->windowVar = $windowVar;
-		$this->data = $data;
-		$this->parentEvent = $parentEvent;
-	}
-	
-	/**
-	 * Return the parent event to allow additional asset manipulation
-	 * @return \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent
-	 */
-	public function getParentEvent(): FrontendAssetPostProcessorEvent {
-		return $this->parentEvent;
-	}
-	
-	/**
-	 * Returns the configured window variable name where the global data and the translation labels will be stored
-	 * initially
-	 * @return string
-	 */
-	public function getWindowVar(): string {
-		return $this->windowVar;
-	}
-	
-	/**
-	 * Used to update the configured window variable name where the global data and the translation labels will be
-	 * stored initially
-	 *
-	 * @param string $windowVar
-	 *
-	 * @return HybridApiDataPostProcessorEvent
-	 */
-	public function setWindowVar(string $windowVar): HybridApiDataPostProcessorEvent {
-		$this->windowVar = $windowVar;
-		return $this;
-	}
-	
-	/**
-	 * Returns the api data that will be added to the head of the page
-	 * @return array
-	 */
-	public function getData(): array {
-		return $this->data;
-	}
-	
-	/**
-	 * Used to update the modified api data that will be added to the head of the page
-	 *
-	 * @param array $data
-	 *
-	 * @return HybridApiDataPostProcessorEvent
-	 */
-	public function setData(array $data): HybridApiDataPostProcessorEvent {
-		$this->data = $data;
-		return $this;
-	}
-	
+class HybridApiDataPostProcessorEvent
+{
+    /**
+     * The configured window variable name where the global data and the translation labels will be stored initially
+     *
+     * @var string
+     */
+    protected $windowVar;
+
+    /**
+     * The api data that will be added to the head of the page.
+     * Already converted into an array using the transformer.
+     *
+     * @var array
+     */
+    protected $data;
+
+    /**
+     * The parent event to allow additional asset manipulation
+     *
+     * @var \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent
+     */
+    protected $parentEvent;
+
+    /**
+     * HybridApiDataPostProcessorEvent constructor.
+     *
+     * @param   string                                                                     $windowVar
+     * @param   array                                                                      $data
+     * @param   \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent  $parentEvent
+     */
+    public function __construct(string $windowVar, array $data, FrontendAssetPostProcessorEvent $parentEvent)
+    {
+        $this->windowVar   = $windowVar;
+        $this->data        = $data;
+        $this->parentEvent = $parentEvent;
+    }
+
+    /**
+     * Return the parent event to allow additional asset manipulation
+     *
+     * @return \LaborDigital\Typo3BetterApi\Event\Events\FrontendAssetPostProcessorEvent
+     */
+    public function getParentEvent(): FrontendAssetPostProcessorEvent
+    {
+        return $this->parentEvent;
+    }
+
+    /**
+     * Returns the configured window variable name where the global data and the translation labels will be stored
+     * initially
+     *
+     * @return string
+     */
+    public function getWindowVar(): string
+    {
+        return $this->windowVar;
+    }
+
+    /**
+     * Used to update the configured window variable name where the global data and the translation labels will be
+     * stored initially
+     *
+     * @param   string  $windowVar
+     *
+     * @return HybridApiDataPostProcessorEvent
+     */
+    public function setWindowVar(string $windowVar): HybridApiDataPostProcessorEvent
+    {
+        $this->windowVar = $windowVar;
+
+        return $this;
+    }
+
+    /**
+     * Returns the api data that will be added to the head of the page
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * Used to update the modified api data that will be added to the head of the page
+     *
+     * @param   array  $data
+     *
+     * @return HybridApiDataPostProcessorEvent
+     */
+    public function setData(array $data): HybridApiDataPostProcessorEvent
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
 }

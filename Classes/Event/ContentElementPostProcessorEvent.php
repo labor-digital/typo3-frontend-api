@@ -36,48 +36,58 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementPostProcessorEvent {
-	use ContentElementFilterTrait;
-	
-	/**
-	 * The instance of the resource entity
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
-	 */
-	protected $element;
-	
-	/**
-	 * ContentElementPostProcessorEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement              $element
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface $controller
-	 * @param \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext   $context
-	 * @param bool                                                                                       $isFrontend
-	 */
-	public function __construct(ContentElement $element, ContentElementControllerInterface $controller,
-								ContentElementControllerContext $context, bool $isFrontend) {
-		$this->element = $element;
-		$this->controller = $controller;
-		$this->context = $context;
-		$this->isFrontend = $isFrontend;
-	}
-	
-	/**
-	 * Returns the instance of the resource entity
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
-	 */
-	public function getElement(): ContentElement {
-		return $this->element;
-	}
-	
-	/**
-	 * Updates the instance of the resource entity
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement $element
-	 *
-	 * @return ContentElementPostProcessorEvent
-	 */
-	public function setElement(ContentElement $element): ContentElementPostProcessorEvent {
-		$this->element = $element;
-		return $this;
-	}
+class ContentElementPostProcessorEvent
+{
+    use ContentElementFilterTrait;
+
+    /**
+     * The instance of the resource entity
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+     */
+    protected $element;
+
+    /**
+     * ContentElementPostProcessorEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement               $element
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface  $controller
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext    $context
+     * @param   bool                                                                                        $isFrontend
+     */
+    public function __construct(
+        ContentElement $element,
+        ContentElementControllerInterface $controller,
+        ContentElementControllerContext $context,
+        bool $isFrontend
+    ) {
+        $this->element    = $element;
+        $this->controller = $controller;
+        $this->context    = $context;
+        $this->isFrontend = $isFrontend;
+    }
+
+    /**
+     * Returns the instance of the resource entity
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+     */
+    public function getElement(): ContentElement
+    {
+        return $this->element;
+    }
+
+    /**
+     * Updates the instance of the resource entity
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement  $element
+     *
+     * @return ContentElementPostProcessorEvent
+     */
+    public function setElement(ContentElement $element): ContentElementPostProcessorEvent
+    {
+        $this->element = $element;
+
+        return $this;
+    }
 }

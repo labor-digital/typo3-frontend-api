@@ -26,25 +26,25 @@ use Traversable;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 class Paginator {
-	
+
 	/**
 	 * The set of data we have to paginate
 	 * @var Traversable|iterable|\LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface
 	 */
 	protected $set;
-	
+
 	/**
 	 * The number of items that are showed on a single page
 	 * @var int
 	 */
 	protected $pageSize = 30;
-	
+
 	/**
 	 * The page finder callback that is used to dynamically search the right page for a certain search field
 	 * @var callable
 	 */
 	protected $pageFinder;
-	
+
 	/**
 	 * Paginator constructor.
 	 *
@@ -53,7 +53,7 @@ class Paginator {
 	public function __construct($set) {
 		$this->set = $set;
 	}
-	
+
 	/**
 	 * Returns the number of items per page
 	 * @return int
@@ -61,7 +61,7 @@ class Paginator {
 	public function getPageSize(): int {
 		return $this->pageSize;
 	}
-	
+
 	/**
 	 * Sets the number of items per page
 	 *
@@ -73,7 +73,7 @@ class Paginator {
 		$this->pageSize = $pageSize;
 		return $this;
 	}
-	
+
 	/**
 	 * Can be used to define a function that is called once for each element of the collection.
 	 * It is used to find the page number of an element in a list. This is useful if you just have an id
@@ -86,7 +86,7 @@ class Paginator {
 	public function setPageFinder(callable $pageFinder) {
 		$this->pageFinder = $pageFinder;
 	}
-	
+
 	/**
 	 * Runs the pagination of the currently given set, according to the current configuration.
 	 *
@@ -103,7 +103,7 @@ class Paginator {
 		$this->sliceSet($pagination);
 		return $pagination;
 	}
-	
+
 	/**
 	 * The same as paginate() but receives a request interface to read the configuration from.
 	 *
@@ -120,7 +120,7 @@ class Paginator {
 		$this->setPageSize($size);
 		return $this->paginate($page);
 	}
-	
+
 	/**
 	 * Returns the total number of items in the current set
 	 * @return int
@@ -136,7 +136,7 @@ class Paginator {
 		} else if ($this->set instanceof Traversable) return iterator_count($this->set);
 		return 1;
 	}
-	
+
 	/**
 	 * Is used internally to run the page finder callable and scroll the cursor to the correct position if possible.
 	 *
@@ -146,8 +146,8 @@ class Paginator {
 	 * @throws \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PaginationException
 	 */
 	protected function applyPageFinder(?int $suggestedPage): int {
-		$suggestedPage = empty($suggestedPage) ? 1 : $suggestedPage;;
-		if (!is_callable($this->pageFinder)) return $suggestedPage;
+		$suggestedPage = empty($suggestedPage) ? 1 : $suggestedPage;
+        if (!is_callable($this->pageFinder)) return $suggestedPage;
 		$set = $this->set;
 		if ($set instanceof SelfPaginatingInterface) {
 			if (!$set instanceof PageFinderAwareSelfPaginatingInterface)
@@ -168,7 +168,7 @@ class Paginator {
 		}
 		return 1;
 	}
-	
+
 	/**
 	 * Internal helper which is used to get the chunk of the current set that represents the page
 	 *
@@ -183,29 +183,29 @@ class Paginator {
 		if ($this->set instanceof QueryResultInterface) {
 			// Handle query results
 			$query = $this->set->getQuery();
-			
+
 			// Handle initial limit
 			$initialLimit = $query->getLimit();
 			$limit = $pagination->pageSize;
 			if (!empty($initialLimit)) $limit = min($initialLimit - $offset, $limit);
-			
+
 			// Handle initial offset
 			$initialOffset = $query->getOffset();
 			if (!empty($initialOffset)) $offset += $initialOffset;
-			
+
 			// Rerun the query
 			$pagination->items = $this->set->getQuery()
 				->setLimit($limit)
 				->setOffset($offset)
 				->execute();
-			
+
 			$pagination->pageCount = $pagination->items->count();
 		} else if ($this->set instanceof SelfPaginatingInterface) {
 			$slice = [];
 			foreach ($this->set->getItemsFor($offset, $pagination->pageSize) as $item)
 				$slice[] = $item;
 			$pagination->items = $slice;
-			
+
 			// Recalculate the pagination values
 			$pagination->pageCount = count($slice);
 			$pagination->itemCount = $this->set->getItemCount();
@@ -230,7 +230,7 @@ class Paginator {
 		} else {
 			throw new PaginationException("Failed to paginate the result set, as it has an unsupported type! Only QueryResults, arrays, iterables or objects which implement " . SelfPaginatingInterface::class . " are allowed");
 		}
-		
+
 		// Return scalar values
 		return [$this->set];
 	}

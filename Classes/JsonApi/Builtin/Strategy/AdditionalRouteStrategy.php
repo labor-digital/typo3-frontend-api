@@ -32,54 +32,76 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
-class AdditionalRouteStrategy extends AbstractResourceStrategy {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface {
-		// Get the resource configuration
-		$routeConfig = $this->getRouteConfig($route);
-		
-		// Check if we have to handle a collection
-		$attributes = $routeConfig->getAttributes();
-		$asCollection = (bool)$attributes["asCollection"];
-		if ($asCollection) $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
-		else $context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
-		
-		// Run the controller
-		$controller = $route->getCallable($this->getContainer());
-		$response = $controller($request, $context, $route->getVars());
-		
-		// Pass through direct responses
-		if ($response instanceof ResponseInterface)
-			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
-		if ($response instanceof ResourceDataResult)
-			return $this->getResponse($route, $response->getData(TRUE));
-		
-		// Unify the response
-		$response = $this->convertDbResponse($response);
-		if (!$asCollection && $response instanceof QueryResultInterface) $response = $response->getFirst();
-		
-		// Prepare the transformation
-		// IMPORTANT: NEVER - EVER - Set the $suggestedResourceType to the context's resource type. Otherwise the denied and allowed
-		// properties automatically apply for all "additional routes" and not only for the element's they should apply to.
-		$transformer = $this->transformerFactory->getTransformer();
-		$resourceType = $context->getResourceType();
-		if (is_string($attributes["asResource"])) $resourceType = $attributes["asResource"];
-		if ($asCollection) $item = new Collection($response, $transformer, $resourceType);
-		else $item = new Item($response, $transformer, $resourceType);
-		if (!empty($context->getMeta())) $item->setMeta($context->getMeta());
-		
-		// Make the manager
-		$manager = $this->getManager($request, $context->getResourceType(), $response);
-		if ($attributes["asResource"] === FALSE) $manager->setSerializer(new ArraySerializer());
-		else if (is_string($attributes["asResource"])) $manager->setSerializer(new JsonApiSerializer());
-		
-		// Build the response
-		$response = $this->getResponse($route, $manager->createData($item)->toArray());
-		if ($attributes["asResource"] === FALSE) $response = $response->withHeader("Content-Type", "application/json");
-		return $response;
-	}
-	
+class AdditionalRouteStrategy extends AbstractResourceStrategy
+{
+
+    /**
+     * @inheritDoc
+     */
+    public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
+    {
+        // Get the resource configuration
+        $routeConfig = $this->getRouteConfig($route);
+
+        // Check if we have to handle a collection
+        $attributes   = $routeConfig->getAttributes();
+        $asCollection = (bool)$attributes["asCollection"];
+        if ($asCollection) {
+            $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
+        } else {
+            $context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
+        }
+
+        // Run the controller
+        $controller = $route->getCallable($this->getContainer());
+        $response   = $controller($request, $context, $route->getVars());
+
+        // Pass through direct responses
+        if ($response instanceof ResponseInterface) {
+            return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+        }
+        if ($response instanceof ResourceDataResult) {
+            return $this->getResponse($route, $response->getData(true));
+        }
+
+        // Unify the response
+        $response = $this->convertDbResponse($response);
+        if (! $asCollection && $response instanceof QueryResultInterface) {
+            $response = $response->getFirst();
+        }
+
+        // Prepare the transformation
+        // IMPORTANT: NEVER - EVER - Set the $suggestedResourceType to the context's resource type. Otherwise the denied and allowed
+        // properties automatically apply for all "additional routes" and not only for the element's they should apply to.
+        $transformer  = $this->transformerFactory->getTransformer();
+        $resourceType = $context->getResourceType();
+        if (is_string($attributes["asResource"])) {
+            $resourceType = $attributes["asResource"];
+        }
+        if ($asCollection) {
+            $item = new Collection($response, $transformer, $resourceType);
+        } else {
+            $item = new Item($response, $transformer, $resourceType);
+        }
+        if (! empty($context->getMeta())) {
+            $item->setMeta($context->getMeta());
+        }
+
+        // Make the manager
+        $manager = $this->getManager($request, $context->getResourceType(), $response);
+        if ($attributes["asResource"] === false) {
+            $manager->setSerializer(new ArraySerializer());
+        } elseif (is_string($attributes["asResource"])) {
+            $manager->setSerializer(new JsonApiSerializer());
+        }
+
+        // Build the response
+        $response = $this->getResponse($route, $manager->createData($item)->toArray());
+        if ($attributes["asResource"] === false) {
+            $response = $response->withHeader("Content-Type", "application/json");
+        }
+
+        return $response;
+    }
+
 }

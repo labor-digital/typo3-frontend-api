@@ -27,26 +27,32 @@ use Neunerlei\TinyTimy\DateTimy;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
 
-class DefaultSpecialObjectTransformer extends AbstractSpecialObjectTransformer {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function transformValue($value) {
-		// Handle date objects
-		if ($value instanceof DateTime)
-			return (new DateTimy($value))->formatJs();
-		
-		// Handle link objects
-		if ($value instanceof TypoLink)
-			return $value->build();
-		if ($value instanceof UriInterface)
-			return (string)$value;
-		if ($value instanceof UriBuilder)
-			return $value->buildFrontendUri();
-		
-		// Not found
-		return NULL;
-	}
-	
+class DefaultSpecialObjectTransformer extends AbstractSpecialObjectTransformer
+{
+
+    /**
+     * @inheritDoc
+     */
+    public function transformValue($value)
+    {
+        // Handle date objects
+        if ($value instanceof DateTime) {
+            return (new DateTimy($value))->formatJs();
+        }
+
+        // Handle link objects
+        if ($value instanceof TypoLink) {
+            return $value->build();
+        }
+        if ($value instanceof UriInterface) {
+            return (string)$value;
+        }
+        if ($value instanceof UriBuilder) {
+            return $value->buildFrontendUri();
+        }
+
+        // Not found
+        return null;
+    }
+
 }

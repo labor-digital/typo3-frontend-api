@@ -30,72 +30,85 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ResourceTransformerPostProcessorEvent {
-	
-	/**
-	 * The array that has been transformed
-	 * @var array
-	 */
-	protected $result;
-	
-	/**
-	 * The value that should be transformed
-	 * @var mixed
-	 */
-	protected $value;
-	
-	/**
-	 * The configuration that is generated for the transformation
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	protected $config;
-	
-	/**
-	 * ResourceTransformerPostProcessorEvent constructor.
-	 *
-	 * @param array                                                                   $result
-	 * @param                                                                         $value
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig $config
-	 */
-	public function __construct(array $result, $value, TransformerConfig $config) {
-		$this->result = $result;
-		$this->value = $value;
-		$this->config = $config;
-	}
-	
-	/**
-	 * Returns the array that has been transformed
-	 * @return array
-	 */
-	public function getResult(): array {
-		return $this->result;
-	}
-	
-	/**
-	 * Updates the array that has been transformed
-	 *
-	 * @param array $result
-	 *
-	 * @return ResourceTransformerPostProcessorEvent
-	 */
-	public function setResult(array $result): ResourceTransformerPostProcessorEvent {
-		$this->result = $result;
-		return $this;
-	}
-	
-	/**
-	 * Returns the value that should be transformed
-	 * @return mixed
-	 */
-	public function getValue() {
-		return $this->value;
-	}
-	
-	/**
-	 * Returns the configuration that is generated for the transformation
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	public function getConfig(): TransformerConfig {
-		return $this->config;
-	}
+class ResourceTransformerPostProcessorEvent
+{
+
+    /**
+     * The array that has been transformed
+     *
+     * @var array
+     */
+    protected $result;
+
+    /**
+     * The value that should be transformed
+     *
+     * @var mixed
+     */
+    protected $value;
+
+    /**
+     * The configuration that is generated for the transformation
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    protected $config;
+
+    /**
+     * ResourceTransformerPostProcessorEvent constructor.
+     *
+     * @param   array                                                                    $result
+     * @param                                                                            $value
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig  $config
+     */
+    public function __construct(array $result, $value, TransformerConfig $config)
+    {
+        $this->result = $result;
+        $this->value  = $value;
+        $this->config = $config;
+    }
+
+    /**
+     * Returns the array that has been transformed
+     *
+     * @return array
+     */
+    public function getResult(): array
+    {
+        return $this->result;
+    }
+
+    /**
+     * Updates the array that has been transformed
+     *
+     * @param   array  $result
+     *
+     * @return ResourceTransformerPostProcessorEvent
+     */
+    public function setResult(array $result): ResourceTransformerPostProcessorEvent
+    {
+        $this->result = $result;
+
+        return $this;
+    }
+
+    /**
+     * Returns the value that should be transformed
+     *
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Returns the configuration that is generated for the transformation
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    public function getConfig(): TransformerConfig
+    {
+        return $this->config;
+    }
 }

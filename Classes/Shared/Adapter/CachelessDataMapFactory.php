@@ -31,18 +31,20 @@ use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
  *
  * @package LaborDigital\Typo3FrontendApi\Shared\Adapter
  */
-class CachelessDataMapFactory extends DataMapFactory {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function buildDataMap($className) {
-		// Reset the configuration manager cache
-		$config = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
-		$this->configurationManager->setConfiguration($config);
-		
-		// Build the map without the cache
-		return $this->buildDataMapInternal($className);
-	}
-	
+class CachelessDataMapFactory extends DataMapFactory
+{
+
+    /**
+     * @inheritDoc
+     */
+    public function buildDataMap($className)
+    {
+        // Reset the configuration manager cache
+        $config = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
+        $this->configurationManager->setConfiguration($config);
+
+        // Build the map without the cache
+        return $this->buildDataMapInternal($className);
+    }
+
 }

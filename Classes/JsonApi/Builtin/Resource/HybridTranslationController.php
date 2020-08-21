@@ -29,26 +29,30 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HybridTranslationController extends AbstractResourceController {
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->addClass(HybridTranslation::class);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
+class HybridTranslationController extends AbstractResourceController
+{
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->addClass(HybridTranslation::class);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+
 }

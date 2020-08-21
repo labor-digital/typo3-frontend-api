@@ -24,13 +24,15 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 
-class DefaultSiteConfigFallback implements SiteConfigurationInterface {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureSite(SiteConfigurator $configurator, ExtConfigContext $context) {
-		// Silence
-	}
-	
+class DefaultSiteConfigFallback implements SiteConfigurationInterface
+{
+
+    /**
+     * @inheritDoc
+     */
+    public static function configureSite(SiteConfigurator $configurator, ExtConfigContext $context)
+    {
+        // Silence
+    }
+
 }

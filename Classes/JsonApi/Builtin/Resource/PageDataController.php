@@ -30,28 +30,32 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext;
 use Psr\Http\Message\ServerRequestInterface;
 
-class PageDataController extends AbstractResourceController {
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->addClass(PageData::class);
-		$configurator->setTransformerClass(PageDataTransformer::class);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		return $this->getInstanceOf(PageData::class, [$id]);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
+class PageDataController extends AbstractResourceController
+{
+
+    /**
+     * @inheritDoc
+     */
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->addClass(PageData::class);
+        $configurator->setTransformerClass(PageDataTransformer::class);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        return $this->getInstanceOf(PageData::class, [$id]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+
 }

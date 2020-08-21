@@ -20,6 +20,7 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Configuration;
 
 
+use InvalidArgumentException;
 use LaborDigital\Typo3BetterApi\ExtConfig\Option\AbstractChildExtConfigOption;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractSpecialObjectTransformer;
@@ -32,13 +33,13 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiOption
 	 */
 	protected $parent;
-	
+
 	/**
 	 * The list of special object transformers
 	 * @var array
 	 */
 	protected $specialObjectTransformers = [];
-	
+
 	/**
 	 * Registers a new resource configuration into the api.
 	 * Resources are domain object representations in the json api definition. A resource controller has by
@@ -68,7 +69,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 		if (empty($resourceType)) $resourceType = $this->makeResourceTypeFromClassName($resourceConfigClass);
 		return $this->addRegistrationToCachedStack("resources", $resourceType, $resourceConfigClass);
 	}
-	
+
 	/**
 	 * Registers an OVERRIDE for existing resource.
 	 *
@@ -92,7 +93,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 		if (empty($resourceType)) $resourceType = $this->makeResourceTypeFromClassName($resourceConfigClass);
 		return $this->addOverrideToCachedStack("resources", $resourceType, $resourceConfigClass);
 	}
-	
+
 	/**
 	 * Registers a whole directory of either new controllers, or overrides for existing controllers in a directory.
 	 * It will traverse all files in the given directory and find all classes that implement the
@@ -113,7 +114,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 			return $this->makeResourceTypeFromClassName($class);
 		}, $asOverrides);
 	}
-	
+
 	/**
 	 * Sometimes you have objects in your resource that do not require their own endpoint (for example dateTime objects,
 	 * Uri objects, and so on). Those classes can be handled using a special object transformer.
@@ -129,14 +130,14 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 	 */
 	public function registerSpecialObjectTransformer(string $transformerClass, $classOrClasses) {
 		if (is_string($classOrClasses)) $classOrClasses = Arrays::makeFromStringList($classOrClasses);
-		if (!is_array($classOrClasses)) throw new \InvalidArgumentException("\$classOrClasses has to be a string or an array of strings!");
+		if (!is_array($classOrClasses)) throw new InvalidArgumentException("\$classOrClasses has to be a string or an array of strings!");
 		if (!in_array(AbstractSpecialObjectTransformer::class, class_parents($transformerClass)))
 			throw new JsonApiException("The given transformer class $transformerClass has to extend the " . AbstractSpecialObjectTransformer::class);
 		foreach ($classOrClasses as $class)
 			$this->specialObjectTransformers[$class] = $transformerClass;
 		return $this;
 	}
-	
+
 	/**
 	 * Internal helper to fill the main config repository' config array with the local configuration
 	 *
@@ -149,7 +150,7 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 			]);
 		$config["specialObjectTransformers"] = $this->specialObjectTransformers;
 	}
-	
+
 	/**
 	 * Internal helper that is used if there was no resource type name given.
 	 * In that case we will use the config class as naming base and try to extract the plugin name out of it.
@@ -166,5 +167,5 @@ class FrontendApiResourceOption extends AbstractChildExtConfigOption {
 		$baseName = preg_replace("~(resource)?(type)?(ext)?(config|configuration|controller)?(overrides?)?$~si", "", $baseName);
 		return Inflector::toCamelBack($baseName);
 	}
-	
+
 }

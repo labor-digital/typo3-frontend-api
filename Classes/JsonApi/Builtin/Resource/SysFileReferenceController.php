@@ -32,26 +32,31 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileReference;
 
-class SysFileReferenceController extends AbstractResourceController {
-	
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->setClasses([
-			FileReference::class,
-			\TYPO3\CMS\Extbase\Domain\Model\FileReference::class,
-		]);
-		$configurator->setTransformerClass(FileResourceTransformer::class);
-	}
-	
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		try {
-			$ref = $this->FalFiles->getFileReference($id);
-			return $ref;
-		} catch (ResourceDoesNotExistException $e) {
-			throw new NotFoundException($e->getMessage(), $e);
-		}
-	}
-	
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
+class SysFileReferenceController extends AbstractResourceController
+{
+
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->setClasses([
+            FileReference::class,
+            \TYPO3\CMS\Extbase\Domain\Model\FileReference::class,
+        ]);
+        $configurator->setTransformerClass(FileResourceTransformer::class);
+    }
+
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        try {
+            $ref = $this->FalFiles->getFileReference($id);
+
+            return $ref;
+        } catch (ResourceDoesNotExistException $e) {
+            throw new NotFoundException($e->getMessage(), $e);
+        }
+    }
+
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
 }

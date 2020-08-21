@@ -22,16 +22,17 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 
-interface CommonCustomElementInterface {
-	
-	/**
-	 * Returns the data of this common element as array
-	 *
-	 * @param string $key  A unique key that identifies this object
-	 * @param array  $data The data that may has been passed when the element was registered
-	 *
-	 * @return array
-	 */
-	public function asArray(string $key, array $data): array;
-	
+interface CommonCustomElementInterface
+{
+
+    /**
+     * Returns the data of this common element as array
+     *
+     * @param   string  $key   A unique key that identifies this object
+     * @param   array   $data  The data that may has been passed when the element was registered
+     *
+     * @return array
+     */
+    public function asArray(string $key, array $data): array;
+
 }

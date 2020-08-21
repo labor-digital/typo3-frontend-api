@@ -26,62 +26,69 @@ use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use Neunerlei\FileSystem\Fs;
 use Neunerlei\PathUtil\Path;
 
-class ImagingEndpointGenerator {
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
-	 */
-	protected $configRepository;
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
-	 */
-	protected $context;
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\Link\LinkService
-	 */
-	protected $linkService;
-	
-	/**
-	 * ImagingEndpointGenerator constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
-	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                 $context
-	 * @param \LaborDigital\Typo3BetterApi\Link\LinkService                        $linkService
-	 */
-	public function __construct(FrontendApiConfigRepository $configRepository, TypoContext $context,
-								LinkService $linkService) {
-		$this->configRepository = $configRepository;
-		$this->context = $context;
-		$this->linkService = $linkService;
-	}
-	
-	/**
-	 * Generates the endpoint php in the root directory of the fileadmin location
-	 */
-	public function generate(): void {
-		// Ignore if the imaging endpoint is disabled
-		if (empty($this->configRepository->tool()->get("imaging", FALSE))) return;
-		
-		// Gather the relevant variables
-		$hostname = $this->linkService->getHost();
-		$varDir = $this->configRepository->tool()->get("imaging.options.redirectDirectoryPath");
-		$vendorDir = $this->context->getPathAspect()->getVendorPath();
-		$endpointPath = $this->configRepository->tool()->get("imaging.options.endpointDirectoryPath");
-		
-		// Calculate entry point depth
-		$endpointPathRelative = Path::makeRelative($endpointPath, $this->context->getPathAspect()->getPublicPath());
-		$endpointPathParts = array_filter(explode("/", $endpointPathRelative));
-		$entryPointDepth = count($endpointPathParts);
-		
-		// Load the template and apply the placeholders
-		$tpl = Fs::readFile(__DIR__ . "/imaging.template.php");
-		$tpl = str_replace(["@@FAI_HOST@@", "@@FAI_REDIRECT_DIR@@", "@@FAI_VENDOR_DIR@@", "@@FAI_EPD@@"],
-			[$hostname, $varDir, $vendorDir, $entryPointDepth], $tpl);
-		
-		// Write the endpoint file at the configured location
-		$endpointPath = Path::join($endpointPath, "imaging.php");
-		Fs::writeFile($endpointPath, $tpl);
-	}
+class ImagingEndpointGenerator
+{
+
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     */
+    protected $configRepository;
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
+     */
+    protected $context;
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\Link\LinkService
+     */
+    protected $linkService;
+
+    /**
+     * ImagingEndpointGenerator constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     * @param   \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                  $context
+     * @param   \LaborDigital\Typo3BetterApi\Link\LinkService                         $linkService
+     */
+    public function __construct(
+        FrontendApiConfigRepository $configRepository,
+        TypoContext $context,
+        LinkService $linkService
+    ) {
+        $this->configRepository = $configRepository;
+        $this->context          = $context;
+        $this->linkService      = $linkService;
+    }
+
+    /**
+     * Generates the endpoint php in the root directory of the fileadmin location
+     */
+    public function generate(): void
+    {
+        // Ignore if the imaging endpoint is disabled
+        if (empty($this->configRepository->tool()->get("imaging", false))) {
+            return;
+        }
+
+        // Gather the relevant variables
+        $hostname     = $this->linkService->getHost();
+        $varDir       = $this->configRepository->tool()->get("imaging.options.redirectDirectoryPath");
+        $vendorDir    = $this->context->getPathAspect()->getVendorPath();
+        $endpointPath = $this->configRepository->tool()->get("imaging.options.endpointDirectoryPath");
+
+        // Calculate entry point depth
+        $endpointPathRelative = Path::makeRelative($endpointPath, $this->context->getPathAspect()->getPublicPath());
+        $endpointPathParts    = array_filter(explode("/", $endpointPathRelative));
+        $entryPointDepth      = count($endpointPathParts);
+
+        // Load the template and apply the placeholders
+        $tpl = Fs::readFile(__DIR__ . "/imaging.template.php");
+        $tpl = str_replace(["@@FAI_HOST@@", "@@FAI_REDIRECT_DIR@@", "@@FAI_VENDOR_DIR@@", "@@FAI_EPD@@"],
+            [$hostname, $varDir, $vendorDir, $entryPointDepth], $tpl);
+
+        // Write the endpoint file at the configured location
+        $endpointPath = Path::join($endpointPath, "imaging.php");
+        Fs::writeFile($endpointPath, $tpl);
+    }
 }

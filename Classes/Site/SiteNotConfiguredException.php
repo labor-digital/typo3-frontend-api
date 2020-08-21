@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\Site;
 
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
 
-class SiteNotConfiguredException extends FrontendApiException {
-	
+class SiteNotConfiguredException extends FrontendApiException
+{
+
 }

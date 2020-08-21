@@ -31,59 +31,70 @@ use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class SiteConfigFilterEvent {
-	/**
-	 * The Site configuration that was generated
-	 * @var \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
-	 */
-	protected $config;
-	
-	/**
-	 * The class that was used to generate the configuration
-	 * @var string
-	 */
-	protected $configClass;
-	
-	/**
-	 * The ext config context object
-	 * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	protected $context;
-	
-	/**
-	 * SiteConfigFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig $config
-	 * @param string                                                       $configClass
-	 * @param \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext      $context
-	 */
-	public function __construct(SiteConfig $config, string $configClass, ExtConfigContext $context) {
-		$this->config = $config;
-		$this->configClass = $configClass;
-		$this->context = $context;
-	}
-	
-	/**
-	 * Returns the Site configuration that was generated
-	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
-	 */
-	public function getConfig(): SiteConfig {
-		return $this->config;
-	}
-	
-	/**
-	 * Returns the class that was used to generate the configuration
-	 * @return string
-	 */
-	public function getConfigClass(): string {
-		return $this->configClass;
-	}
-	
-	/**
-	 * Returns the ext config context object
-	 * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	public function getContext(): ExtConfigContext {
-		return $this->context;
-	}
+class SiteConfigFilterEvent
+{
+    /**
+     * The Site configuration that was generated
+     *
+     * @var \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
+     */
+    protected $config;
+
+    /**
+     * The class that was used to generate the configuration
+     *
+     * @var string
+     */
+    protected $configClass;
+
+    /**
+     * The ext config context object
+     *
+     * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    protected $context;
+
+    /**
+     * SiteConfigFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig  $config
+     * @param   string                                                        $configClass
+     * @param   \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext       $context
+     */
+    public function __construct(SiteConfig $config, string $configClass, ExtConfigContext $context)
+    {
+        $this->config      = $config;
+        $this->configClass = $configClass;
+        $this->context     = $context;
+    }
+
+    /**
+     * Returns the Site configuration that was generated
+     *
+     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig
+     */
+    public function getConfig(): SiteConfig
+    {
+        return $this->config;
+    }
+
+    /**
+     * Returns the class that was used to generate the configuration
+     *
+     * @return string
+     */
+    public function getConfigClass(): string
+    {
+        return $this->configClass;
+    }
+
+    /**
+     * Returns the ext config context object
+     *
+     * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    public function getContext(): ExtConfigContext
+    {
+        return $this->context;
+    }
 }

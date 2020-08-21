@@ -29,40 +29,47 @@ namespace LaborDigital\Typo3FrontendApi\Event;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementDefaultTypeFilterEvent {
-	
-	/**
-	 * The tca array that is by used as a default for a new content element
-	 * @var array
-	 */
-	protected $type;
-	
-	/**
-	 * ContentElementDefaultTypeFilterEvent constructor.
-	 *
-	 * @param array $type
-	 */
-	public function __construct(array $type) {
-		$this->type = $type;
-	}
-	
-	/**
-	 * Returns the tca array that is by used as a default for a new content element
-	 * @return array
-	 */
-	public function getType(): array {
-		return $this->type;
-	}
-	
-	/**
-	 * Updates the tca array that is by used as a default for a new content element
-	 *
-	 * @param array $type
-	 *
-	 * @return ContentElementDefaultTypeFilterEvent
-	 */
-	public function setType(array $type): ContentElementDefaultTypeFilterEvent {
-		$this->type = $type;
-		return $this;
-	}
+class ContentElementDefaultTypeFilterEvent
+{
+
+    /**
+     * The tca array that is by used as a default for a new content element
+     *
+     * @var array
+     */
+    protected $type;
+
+    /**
+     * ContentElementDefaultTypeFilterEvent constructor.
+     *
+     * @param   array  $type
+     */
+    public function __construct(array $type)
+    {
+        $this->type = $type;
+    }
+
+    /**
+     * Returns the tca array that is by used as a default for a new content element
+     *
+     * @return array
+     */
+    public function getType(): array
+    {
+        return $this->type;
+    }
+
+    /**
+     * Updates the tca array that is by used as a default for a new content element
+     *
+     * @param   array  $type
+     *
+     * @return ContentElementDefaultTypeFilterEvent
+     */
+    public function setType(array $type): ContentElementDefaultTypeFilterEvent
+    {
+        $this->type = $type;
+
+        return $this;
+    }
 }

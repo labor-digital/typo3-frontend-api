@@ -33,27 +33,32 @@ use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 
-class SysFileController extends AbstractResourceController {
-	public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void {
-		$configurator->setClasses([
-			File::class,
-			\TYPO3\CMS\Extbase\Domain\Model\File::class,
-			ProcessedFile::class,
-		]);
-		$configurator->setTransformerClass(FileResourceTransformer::class);
-	}
-	
-	public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context) {
-		try {
-			$ref = $this->FalFiles->getFile($id);
-			return $ref;
-		} catch (ResourceDoesNotExistException $e) {
-			throw new NotFoundException($e->getMessage(), $e);
-		}
-	}
-	
-	public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context) {
-		throw new NotImplementedException();
-	}
-	
+class SysFileController extends AbstractResourceController
+{
+    public static function configureResource(ResourceConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->setClasses([
+            File::class,
+            \TYPO3\CMS\Extbase\Domain\Model\File::class,
+            ProcessedFile::class,
+        ]);
+        $configurator->setTransformerClass(FileResourceTransformer::class);
+    }
+
+    public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
+    {
+        try {
+            $ref = $this->FalFiles->getFile($id);
+
+            return $ref;
+        } catch (ResourceDoesNotExistException $e) {
+            throw new NotFoundException($e->getMessage(), $e);
+        }
+    }
+
+    public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
+    {
+        throw new NotImplementedException();
+    }
+
 }

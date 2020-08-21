@@ -25,47 +25,57 @@ namespace LaborDigital\Typo3FrontendApi\Event\Traits;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface;
 
-trait ContentElementFilterTrait {
-	/**
-	 * True if the frontend action should be called, false if not
-	 * @var bool
-	 */
-	protected $isFrontend;
-	
-	/**
-	 * The used controller instance
-	 * @var \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface
-	 */
-	protected $controller;
-	
-	/**
-	 * The context class that was passed to the controller
-	 * @var \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext
-	 */
-	protected $context;
-	
-	/**
-	 * Returns true if the frontend action should be called, false if not
-	 * @return bool
-	 */
-	public function isFrontend(): bool {
-		return $this->isFrontend;
-	}
-	
-	/**
-	 * Returns the used controller instance
-	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface
-	 */
-	public function getController(): ContentElementControllerInterface {
-		return $this->controller;
-	}
-	
-	/**
-	 * Return the context class that was passed to the controller
-	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext
-	 */
-	public function getContext(): ContentElementControllerContext {
-		return $this->context;
-	}
-	
+trait ContentElementFilterTrait
+{
+    /**
+     * True if the frontend action should be called, false if not
+     *
+     * @var bool
+     */
+    protected $isFrontend;
+
+    /**
+     * The used controller instance
+     *
+     * @var \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface
+     */
+    protected $controller;
+
+    /**
+     * The context class that was passed to the controller
+     *
+     * @var \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext
+     */
+    protected $context;
+
+    /**
+     * Returns true if the frontend action should be called, false if not
+     *
+     * @return bool
+     */
+    public function isFrontend(): bool
+    {
+        return $this->isFrontend;
+    }
+
+    /**
+     * Returns the used controller instance
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface
+     */
+    public function getController(): ContentElementControllerInterface
+    {
+        return $this->controller;
+    }
+
+    /**
+     * Return the context class that was passed to the controller
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext
+     */
+    public function getContext(): ContentElementControllerContext
+    {
+        return $this->context;
+    }
+
 }

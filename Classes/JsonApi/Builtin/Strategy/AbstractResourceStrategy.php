@@ -54,17 +54,17 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     use ContainerAwareTrait;
     use RouteConfigAwareTrait;
     use CacheControllingStrategyTrait;
-    
+
     /**
      * @var \Psr\Http\Message\ResponseFactoryInterface
      */
     protected $responseFactory;
-    
+
     /**
      * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
      */
     protected $transformerFactory;
-    
+
     /**
      * AbstractResourceStrategy constructor.
      *
@@ -78,7 +78,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         $this->responseFactory    = $responseFactory;
         $this->transformerFactory = $transformerFactory;
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -86,7 +86,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     {
         return $this->buildJsonResponseMiddleware($exception);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -94,7 +94,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     {
         return $this->buildJsonResponseMiddleware($exception);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -102,7 +102,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     {
         return $this->getNullMiddleware();
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -110,7 +110,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     {
         return $this->getNullMiddleware();
     }
-    
+
     /**
      * Returns a empty middleware that does nothing, just to fill the gaps of this interface...
      *
@@ -118,8 +118,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
      */
     protected function getNullMiddleware(): MiddlewareInterface
     {
-        return new class implements MiddlewareInterface
-        {
+        return new class implements MiddlewareInterface {
             public function process(
                 ServerRequestInterface $request,
                 RequestHandlerInterface $handler
@@ -128,7 +127,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
             }
         };
     }
-    
+
     /**
      * Return a middleware the creates a JSON response from an HTTP exception
      *
@@ -139,14 +138,13 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     protected function buildJsonResponseMiddleware(HttpException $exception): MiddlewareInterface
     {
         // As we have our own error handler we don't need this...
-        return new class($exception) implements MiddlewareInterface
-        {
-            
+        return new class($exception) implements MiddlewareInterface {
+
             /**
              * @var \Throwable
              */
             protected $exception;
-            
+
             /**
              * Exception middleware constructor.
              *
@@ -156,7 +154,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
             {
                 $this->exception = $exception;
             }
-            
+
             /**
              * @param   \Psr\Http\Message\ServerRequestInterface  $request
              * @param   \Psr\Http\Server\RequestHandlerInterface  $handler
@@ -171,7 +169,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
             }
         };
     }
-    
+
     /**
      * Internal helper that makes sure that all the different database objects get unified into a query response
      * interface
@@ -188,10 +186,10 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         if ($response instanceof QueryInterface) {
             return $response->execute();
         }
-        
+
         return $response;
     }
-    
+
     /**
      * Internal factory to generate the context instance for the controller
      *
@@ -209,7 +207,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         if (! isset($routeAttributes["resourceType"])) {
             throw new JsonApiException("The given route: {$route->getName()} is not configured as a resource route!");
         }
-        
+
         /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext $context */
         $context = $this->getContainer()->get($contextClass);
         $context->setRequest($request);
@@ -221,10 +219,10 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         }
         $context->setResourceConfig($this->configRepository->resource()
                                                            ->getResourceConfig($context->getResourceType()));
-        
+
         return $context;
     }
-    
+
     /**
      * Internal factory to create a new fractal manager instance
      *
@@ -238,13 +236,13 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     {
         // Prepare the manager instance
         $manager = new Manager();
-        
+
         // Check if we got sparse fieldSets
         $params = empty($request->getQueryParams()) ? [] : $request->getQueryParams();
         if (is_array($params["fields"])) {
             $manager->parseFieldsets($params["fields"]);
         }
-        
+
         // Check if we got includes
         if (isset($params["include"])) {
             // Check for wildcard include
@@ -267,23 +265,23 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
                     return $v !== "*";
                 }));
                 $params["include"] = implode(",", array_unique($includes));
-                
+
             }
             $manager->parseIncludes($params["include"]);
         }
-        
+
         // Prepare the serializer
         $baseUrl    = $request->getUri()->getScheme() . "://" . $request->getUri()->getHost() . "/" .
                       $this->configRepository->routing()->getRootUriPart() . "/" .
                       $this->configRepository->routing()->getResourceBaseUriPart() . "";
         $serializer = new JsonApiSerializer($baseUrl);
         $manager->setSerializer($serializer);
-        
+
         // Done
         return $manager;
     }
-    
-    
+
+
     /**
      * Internal helper to create a new json response
      *
@@ -298,10 +296,10 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         $response = $response->withHeader("Content-Type", "application/vnd.api+json");
         $response = $response->withBody(stream_for(json_encode($data, JSON_PRETTY_PRINT)));
         $response = $this->addInternalNoCacheHeaderIfRequired($route, $response);
-        
+
         return $response;
     }
-    
+
     /**
      * Internal helper which applies the pagination logic to a collection element
      *
@@ -327,7 +325,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         $collection->setData($pagination->items);
         $collection->setPaginator(new PaginationAdapter($pagination, $request));
     }
-    
+
     /**
      * Count the response items to check if we got a list where we should only get a single value
      *
@@ -352,7 +350,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         if (empty($itemCount)) {
             return 0;
         }
-        
+
         return $itemCount;
     }
 }

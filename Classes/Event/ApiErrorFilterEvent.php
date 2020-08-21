@@ -23,6 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\Event;
 
 
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 /**
  * Class ApiErrorFilterEvent
@@ -32,81 +33,96 @@ use Psr\Http\Message\ResponseInterface;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ApiErrorFilterEvent {
-	/**
-	 * The error that lead to this event
-	 * @var \Throwable
-	 */
-	protected $error;
-	
-	/**
-	 * The generated response
-	 * @var \Psr\Http\Message\ResponseInterface
-	 */
-	protected $response;
-	
-	/**
-	 * True if the ErrorFilterEvent should be emitted, false if not
-	 * @var bool
-	 */
-	protected $emitErrorEvent = TRUE;
-	
-	/**
-	 * ApiErrorFilterEvent constructor.
-	 *
-	 * @param \Throwable                          $error
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 */
-	public function __construct(\Throwable $error, ResponseInterface $response) {
-		$this->error = $error;
-		$this->response = $response;
-	}
-	
-	/**
-	 * Returns the error that lead to this event
-	 * @return \Throwable
-	 */
-	public function getError(): \Throwable {
-		return $this->error;
-	}
-	
-	/**
-	 * Returns the generated response
-	 * @return \Psr\Http\Message\ResponseInterface
-	 */
-	public function getResponse(): ResponseInterface {
-		return $this->response;
-	}
-	
-	/**
-	 * Replaces the generated response
-	 *
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 *
-	 * @return ApiErrorFilterEvent
-	 */
-	public function setResponse(ResponseInterface $response): ApiErrorFilterEvent {
-		$this->response = $response;
-		return $this;
-	}
-	
-	/**
-	 * Returns true if the ErrorFilterEvent should be emitted, false if not
-	 * @return bool
-	 */
-	public function isEmitErrorEvent(): bool {
-		return $this->emitErrorEvent;
-	}
-	
-	/**
-	 * Sets if the ErrorFilterEvent should be emitted
-	 *
-	 * @param bool $emitErrorEvent
-	 *
-	 * @return ApiErrorFilterEvent
-	 */
-	public function setEmitErrorEvent(bool $emitErrorEvent): ApiErrorFilterEvent {
-		$this->emitErrorEvent = $emitErrorEvent;
-		return $this;
-	}
+class ApiErrorFilterEvent
+{
+    /**
+     * The error that lead to this event
+     *
+     * @var \Throwable
+     */
+    protected $error;
+
+    /**
+     * The generated response
+     *
+     * @var \Psr\Http\Message\ResponseInterface
+     */
+    protected $response;
+
+    /**
+     * True if the ErrorFilterEvent should be emitted, false if not
+     *
+     * @var bool
+     */
+    protected $emitErrorEvent = true;
+
+    /**
+     * ApiErrorFilterEvent constructor.
+     *
+     * @param   \Throwable                           $error
+     * @param   \Psr\Http\Message\ResponseInterface  $response
+     */
+    public function __construct(Throwable $error, ResponseInterface $response)
+    {
+        $this->error    = $error;
+        $this->response = $response;
+    }
+
+    /**
+     * Returns the error that lead to this event
+     *
+     * @return \Throwable
+     */
+    public function getError(): Throwable
+    {
+        return $this->error;
+    }
+
+    /**
+     * Returns the generated response
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
+    }
+
+    /**
+     * Replaces the generated response
+     *
+     * @param   \Psr\Http\Message\ResponseInterface  $response
+     *
+     * @return ApiErrorFilterEvent
+     */
+    public function setResponse(ResponseInterface $response): ApiErrorFilterEvent
+    {
+        $this->response = $response;
+
+        return $this;
+    }
+
+    /**
+     * Returns true if the ErrorFilterEvent should be emitted, false if not
+     *
+     * @return bool
+     */
+    public function isEmitErrorEvent(): bool
+    {
+        return $this->emitErrorEvent;
+    }
+
+    /**
+     * Sets if the ErrorFilterEvent should be emitted
+     *
+     * @param   bool  $emitErrorEvent
+     *
+     * @return ApiErrorFilterEvent
+     */
+    public function setEmitErrorEvent(bool $emitErrorEvent): ApiErrorFilterEvent
+    {
+        $this->emitErrorEvent = $emitErrorEvent;
+
+        return $this;
+    }
 }

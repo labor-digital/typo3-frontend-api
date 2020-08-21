@@ -22,90 +22,106 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Event;
 
 
-class SiteMenuPostProcessorEvent {
-	
-	/**
-	 * The key that was given for the menu / common element
-	 * @var string
-	 */
-	protected $key;
-	
-	/**
-	 * The parsed menu as array
-	 * @var array
-	 */
-	protected $menu;
-	
-	/**
-	 * The menu type to filter / generate
-	 * @var string
-	 */
-	protected $type;
-	
-	/**
-	 * The options that have been used to generate the menu array
-	 * @var array
-	 */
-	protected $options;
-	
-	/**
-	 * SiteMenuPostProcessorEvent constructor.
-	 *
-	 * @param string $key
-	 * @param array  $menu
-	 * @param string $type
-	 * @param array  $options
-	 */
-	public function __construct(string $key, array $menu, string $type, array $options) {
-		$this->key = $key;
-		$this->menu = $menu;
-		$this->type = $type;
-		$this->options = $options;
-	}
-	
-	/**
-	 * Returns the key that was given for the menu / common element
-	 * @return string
-	 */
-	public function getKey(): string {
-		return $this->key;
-	}
-	
-	/**
-	 * Returns the menu type to filter / generate
-	 * @return string
-	 */
-	public function getType(): string {
-		return $this->type;
-	}
-	
-	/**
-	 * Returns the options that have been used to generate the menu array
-	 * @return array
-	 */
-	public function getOptions(): array {
-		return $this->options;
-	}
-	
-	/**
-	 * Returns the parsed menu as array
-	 * @return array
-	 */
-	public function getMenu(): array {
-		return $this->menu;
-	}
-	
-	/**
-	 * Updates the parsed menu as array
-	 *
-	 * @param array $menu
-	 *
-	 * @return SiteMenuPostProcessorEvent
-	 */
-	public function setMenu(array $menu): SiteMenuPostProcessorEvent {
-		$this->menu = $menu;
-		return $this;
-	}
-	
-	
+class SiteMenuPostProcessorEvent
+{
+
+    /**
+     * The key that was given for the menu / common element
+     *
+     * @var string
+     */
+    protected $key;
+
+    /**
+     * The parsed menu as array
+     *
+     * @var array
+     */
+    protected $menu;
+
+    /**
+     * The menu type to filter / generate
+     *
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * The options that have been used to generate the menu array
+     *
+     * @var array
+     */
+    protected $options;
+
+    /**
+     * SiteMenuPostProcessorEvent constructor.
+     *
+     * @param   string  $key
+     * @param   array   $menu
+     * @param   string  $type
+     * @param   array   $options
+     */
+    public function __construct(string $key, array $menu, string $type, array $options)
+    {
+        $this->key     = $key;
+        $this->menu    = $menu;
+        $this->type    = $type;
+        $this->options = $options;
+    }
+
+    /**
+     * Returns the key that was given for the menu / common element
+     *
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->key;
+    }
+
+    /**
+     * Returns the menu type to filter / generate
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * Returns the options that have been used to generate the menu array
+     *
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
+     * Returns the parsed menu as array
+     *
+     * @return array
+     */
+    public function getMenu(): array
+    {
+        return $this->menu;
+    }
+
+    /**
+     * Updates the parsed menu as array
+     *
+     * @param   array  $menu
+     *
+     * @return SiteMenuPostProcessorEvent
+     */
+    public function setMenu(array $menu): SiteMenuPostProcessorEvent
+    {
+        $this->menu = $menu;
+
+        return $this;
+    }
+
+
 }

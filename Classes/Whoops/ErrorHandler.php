@@ -50,335 +50,372 @@ use function GuzzleHttp\Psr7\stream_for;
 
 include __DIR__ . "/DummySymfonyVarDumper/include.php";
 
-class ErrorHandler implements SingletonInterface {
-	use ResponseFactoryTrait;
-	
-	/**
-	 * True if the current client accepts html responses
-	 * @var bool
-	 */
-	protected $acceptsHtml = FALSE;
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface
-	 */
-	protected $container;
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
-	 */
-	protected $context;
-	
-	/**
-	 * True if the shutdown function was registered
-	 * @var bool
-	 */
-	protected static $hasShutdownFunction = FALSE;
-	
-	/**
-	 * The number of nested calls we are running in.
-	 * Nested calls will simply re-throw the exception so the outer-most instance of this can handle it.
-	 * @var int
-	 */
-	protected static $nestingLevel = 0;
-	
-	/**
-	 * If this is true our dummy var dumper should not render any parameters while printing
-	 * the whoops screen
-	 * @var bool
-	 */
-	protected static $renderValues = TRUE;
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
-	 */
-	protected $configRepository;
-	
-	/**
-	 * ErrorHandler constructor.
-	 *
-	 * @param \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface        $container
-	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                 $context
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
-	 */
-	public function __construct(TypoContainerInterface $container, TypoContext $context,
-								FrontendApiConfigRepository $configRepository) {
-		$this->container = $container;
-		$this->context = $context;
-		$this->configRepository = $configRepository;
-	}
-	
-	/**
-	 * Can be used to execute the error handler for a given wrapper function.
-	 * The wrapper will be executed inside a try/catch block and all errors will be handled by the handler
-	 *
-	 * @param callable                                 $wrapper
-	 * @param \Psr\Http\Message\ServerRequestInterface $request
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 * @throws \Throwable
-	 */
-	public function handleErrorsIn(callable $wrapper, ServerRequestInterface $request): ResponseInterface {
-		$localNestingLevel = static::$nestingLevel++;
-		try {
-			
-			// Check if the client accepts http responses
-			$accept = $request->getHeaderLine("Accept");
-			$this->acceptsHtml = stripos($accept, "text/html") !== FALSE || stripos($accept, "application/xhtml+xml") !== FALSE;
-			
-			// Allow cors requests in development environments
-			if (Environment::getContext()->isDevelopment())
-				header("Access-Control-Allow-Origin: *");
-			
-			// Check if we should use the speaking error handler
-			$useSpeakingErrorHandler = $this->configRepository->routing()->useSpeakingErrorHandler();
-			if (is_null($useSpeakingErrorHandler)) {
-				// Check if we are running in dev mode
-				$useSpeakingErrorHandler = $this->context->getEnvAspect()->isDev();
-				
-				// Check if we got an admin user
-				if (!$useSpeakingErrorHandler && $this->context->getBeUserAspect()->isAdmin()) $useSpeakingErrorHandler = TRUE;
-				
-				// Don't use the speaking error handler if we got a referrer -> Ajax request
-				if ($useSpeakingErrorHandler && !empty($this->context->getRequestAspect()->getReferrer()))
-					$useSpeakingErrorHandler = FALSE;
-			}
-			
-			// Block all outputs
-			ob_start();
-			$level = ob_get_level();
-			
-			// Handle the request
-			if ($useSpeakingErrorHandler) $response = $this->handleSpeaking($wrapper, $localNestingLevel);
-			else $response = $this->handleNonSpeaking($wrapper, $localNestingLevel);
-			
-			// Stop output blocking
-			while (ob_get_level() >= $level) ob_end_clean();
-			
-			// Allow cors requests in development environments
-			if (Environment::getContext()->isDevelopment())
-				$response = $response->withHeader("Access-Control-Allow-Origin", "*");
-			
-			// Done
-			return $response;
-		} catch (Throwable $e) {
-			throw $e;
-		} finally {
-			static::$nestingLevel--;
-		}
-	}
-	
-	public static function renderValues(): bool {
-		return static::$renderValues;
-	}
-	
-	/**
-	 * Internal factory to create a new whoops instance based on the request and handler objects
-	 *
-	 * @return \Whoops\Run
-	 */
-	protected function makeWhoops(): Run {
-		// Try to select the type of response handler
-		if ($this->acceptsHtml) {
-			$responseHandler = $this->container->get(PrettyPageHandler::class);
-		} else {
-			$responseHandler = $this->container->get(JsonResponseHandler::class);
-			$responseHandler->setJsonApi(TRUE);
-			$responseHandler->addTraceToOutput(TRUE);
-		}
-		
-		// Create new instance
-		$whoops = $this->container->get(Run::class);
-		$whoops->appendHandler($responseHandler);
-		return $whoops;
-	}
-	
-	/**
-	 * Is used as outer wrapper for the given wrapper instance when we should use speaking error handling.
-	 *
-	 * @param callable $wrapper
-	 *
-	 * @param int      $localNestingLevel
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 * @throws \Throwable
-	 */
-	protected function handleSpeaking(callable $wrapper, int $localNestingLevel): ResponseInterface {
-		// Prepare whoops instance
-		$whoops = $this->makeWhoops();
-		$whoops->allowQuit(FALSE);
-		$whoops->writeToOutput(FALSE);
-		$whoops->sendHttpCode(FALSE);
-		$whoops->register();
-		
-		// Register shutdown function
-		if (!static::$hasShutdownFunction) {
-			static::$hasShutdownFunction = TRUE;
-			$shutdownFunction = function () use ($whoops) {
-				$whoops->allowQuit(TRUE);
-				$whoops->writeToOutput(TRUE);
-				$whoops->sendHttpCode(TRUE);
-				
-				// Allow cors requests in development environments
-				if (Environment::getContext()->isDevelopment())
-					header("Access-Control-Allow-Origin", "*");
-				
-				call_user_func([$whoops, Run::SHUTDOWN_HANDLER]);
-			};
-			register_shutdown_function($shutdownFunction);
-		}
-		
-		try {
-			$response = call_user_func($wrapper);
-		} catch (Throwable $exception) {
-			if ($localNestingLevel > 0) throw $exception;
-			$exception = $this->translateImmediateResponseException($exception);
-			$response = $this->getResponse(method_exists($exception, "getStatusCode") ? $exception->getStatusCode() : 500);
-			try {
-				$response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
-			} catch (Throwable $e) {
-				// An exception was thrown while handling an exception o.O
-				// Try to disable the rendering of variables
-				if ($localNestingLevel > 0) throw $e;
-				static::$renderValues = FALSE;
-				$response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
-				static::$renderValues = TRUE;
-			}
-			$response = $response->withHeader("Content-Type", $this->acceptsHtml ? "text/html" : "application/vnd.api+json");
-			$response = $this->responseFilter($response, $exception);
-		}
-		
-		// Disable error handler
-		$whoops->unregister();
-		
-		// Done
-		return $response;
-	}
-	
-	/**
-	 * Is used as outer wrapper for the given wrapper instance when we should use non-speaking error handling.
-	 *
-	 * @param callable $wrapper
-	 *
-	 * @param int      $localNestingLevel
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 * @throws \Throwable
-	 */
-	protected function handleNonSpeaking(callable $wrapper, int $localNestingLevel): ResponseInterface {
-		// Set our internal error handler
-		set_error_handler(function ($errorLevel, $errorMessage, $errorFile, $errorLine) {
-			if ($errorLevel & error_reporting()) {
-				$response = $this->decorateNonSpeakingError(new ErrorException($errorMessage, 0, $errorLevel, $errorFile, $errorLine));
-				$this->container->get(EmitterInterface::class)->emit($response);
-				exit();
-			}
-		});
-		
-		try {
-			$response = call_user_func($wrapper);
-		} catch (Throwable $exception) {
-			if ($localNestingLevel > 0) throw $exception;
-			$exception = $this->translateImmediateResponseException($exception);
-			$response = $this->decorateNonSpeakingError($exception);
-		}
-		
-		// Restore the error handler
-		restore_error_handler();
-		
-		// Done
-		return $response;
-	}
-	
-	/**
-	 * Is used to decorate the received error element and return a formatted response object from it
-	 * It will also automatically convert the typo3 http exceptions into their matching equivalent of the Route package
-	 *
-	 * @param \Throwable $error
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 */
-	protected function decorateNonSpeakingError(Throwable $error): ResponseInterface {
-		// Translate typo3 exceptions
-		$translations = [
-			BadRequestException::class         => Exception\BadRequestException::class,
-			ForbiddenException::class          => Exception\ForbiddenException::class,
-			PageNotFoundException::class       => NotFoundException::class,
-			ServiceUnavailableException::class => NotFoundException::class,
-			UnauthorizedException::class       => Exception\UnauthorizedException::class,
-			NotImplementedException::class     => NotFoundException::class,
-		];
-		$statusMap = [
-			ServiceUnavailableException::class => 503,
-			NotImplementedException::class     => 501,
-		];
-		foreach ($translations as $from => $to) {
-			if ($error instanceof $from) {
-				$code = $error->getCode();
-				if (empty($code)) $code = !empty($statusMap[$from]) ? $statusMap[$from] : 0;
-				$error = new $to($error->getMessage(), $error, $code);
-				break;
-			}
-		}
-		
-		// Check if this is a http exception
-		if (!$error instanceof HttpExceptionInterface) {
-			$statusCode = method_exists($error, "getStatusCode") ? $error->getStatusCode() : 500;
-			$error = new Exception((int)$statusCode, "", ($error instanceof \Exception ? $error : NULL));
-		}
-		
-		// Create the response
-		$response = $this->getResponse($error->getStatusCode())
-			->withHeader("Content-Type", "application/vnd.api+json");
-		$body = [
-			"errors" => [
-				"status" => $error->getStatusCode(),
-				"title"  => $response->getReasonPhrase(),
-			],
-		];
-		$response = $response->withBody(stream_for(json_encode($body, JSON_PRETTY_PRINT)));
-		
-		// Filter the response
-		return $this->responseFilter($response, $error);
-	}
-	
-	/**
-	 * Allow other services to handle our error and modify the response
-	 *
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 * @param \Throwable                          $exception
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 */
-	protected function responseFilter(ResponseInterface $response, Throwable $exception): ResponseInterface {
-		$eventBus = $this->container->get(EventBusInterface::class);
-		
-		// Emit event
-		$eventBus->dispatch(($e = new ApiErrorFilterEvent($exception, $response)));
-		$response = $e->getResponse();
-		
-		// Emit the global event
-		// The Result is given for compatibility but is noop here...
-		if ($e->isEmitErrorEvent())
-			$eventBus->dispatch(new ErrorFilterEvent($exception, NULL));
-		
-		// Done
-		return $response;
-	}
-	
-	/**
-	 * Internal helper to handle immediate response exceptions like normal http exceptions
-	 *
-	 * @param \Throwable $error
-	 *
-	 * @return \Throwable
-	 */
-	protected function translateImmediateResponseException(Throwable $error): Throwable {
-		// Translate immediate response exceptions
-		if ($error instanceof ImmediateResponseException) {
-			$error = new Exception($error->getResponse()->getStatusCode(),
-				$error->getResponse()->getReasonPhrase(), $error, $error->getResponse()->getHeaders());
-		}
-		return $error;
-	}
+class ErrorHandler implements SingletonInterface
+{
+    use ResponseFactoryTrait;
+
+    /**
+     * True if the current client accepts html responses
+     *
+     * @var bool
+     */
+    protected $acceptsHtml = false;
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface
+     */
+    protected $container;
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
+     */
+    protected $context;
+
+    /**
+     * True if the shutdown function was registered
+     *
+     * @var bool
+     */
+    protected static $hasShutdownFunction = false;
+
+    /**
+     * The number of nested calls we are running in.
+     * Nested calls will simply re-throw the exception so the outer-most instance of this can handle it.
+     *
+     * @var int
+     */
+    protected static $nestingLevel = 0;
+
+    /**
+     * If this is true our dummy var dumper should not render any parameters while printing
+     * the whoops screen
+     *
+     * @var bool
+     */
+    protected static $renderValues = true;
+
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     */
+    protected $configRepository;
+
+    /**
+     * ErrorHandler constructor.
+     *
+     * @param   \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface         $container
+     * @param   \LaborDigital\Typo3BetterApi\TypoContext\TypoContext                  $context
+     * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     */
+    public function __construct(
+        TypoContainerInterface $container,
+        TypoContext $context,
+        FrontendApiConfigRepository $configRepository
+    ) {
+        $this->container        = $container;
+        $this->context          = $context;
+        $this->configRepository = $configRepository;
+    }
+
+    /**
+     * Can be used to execute the error handler for a given wrapper function.
+     * The wrapper will be executed inside a try/catch block and all errors will be handled by the handler
+     *
+     * @param   callable                                  $wrapper
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Throwable
+     */
+    public function handleErrorsIn(callable $wrapper, ServerRequestInterface $request): ResponseInterface
+    {
+        $localNestingLevel = static::$nestingLevel++;
+        try {
+            // Check if the client accepts http responses
+            $accept            = $request->getHeaderLine("Accept");
+            $this->acceptsHtml = stripos($accept, "text/html") !== false || stripos($accept, "application/xhtml+xml") !== false;
+
+            // Allow cors requests in development environments
+            if (Environment::getContext()->isDevelopment()) {
+                header("Access-Control-Allow-Origin: *");
+            }
+
+            // Check if we should use the speaking error handler
+            $useSpeakingErrorHandler = $this->configRepository->routing()->useSpeakingErrorHandler();
+            if (is_null($useSpeakingErrorHandler)) {
+                // Check if we are running in dev mode
+                $useSpeakingErrorHandler = $this->context->getEnvAspect()->isDev();
+
+                // Check if we got an admin user
+                if (! $useSpeakingErrorHandler && $this->context->getBeUserAspect()->isAdmin()) {
+                    $useSpeakingErrorHandler = true;
+                }
+
+                // Don't use the speaking error handler if we got a referrer -> Ajax request
+                if ($useSpeakingErrorHandler && ! empty($this->context->getRequestAspect()->getReferrer())) {
+                    $useSpeakingErrorHandler = false;
+                }
+            }
+
+            // Block all outputs
+            ob_start();
+            $level = ob_get_level();
+
+            // Handle the request
+            if ($useSpeakingErrorHandler) {
+                $response = $this->handleSpeaking($wrapper, $localNestingLevel);
+            } else {
+                $response = $this->handleNonSpeaking($wrapper, $localNestingLevel);
+            }
+
+            // Stop output blocking
+            while (ob_get_level() >= $level) {
+                ob_end_clean();
+            }
+
+            // Allow cors requests in development environments
+            if (Environment::getContext()->isDevelopment()) {
+                $response = $response->withHeader("Access-Control-Allow-Origin", "*");
+            }
+
+            // Done
+            return $response;
+        } catch (Throwable $e) {
+            throw $e;
+        } finally {
+            static::$nestingLevel--;
+        }
+    }
+
+    public static function renderValues(): bool
+    {
+        return static::$renderValues;
+    }
+
+    /**
+     * Internal factory to create a new whoops instance based on the request and handler objects
+     *
+     * @return \Whoops\Run
+     */
+    protected function makeWhoops(): Run
+    {
+        // Try to select the type of response handler
+        if ($this->acceptsHtml) {
+            $responseHandler = $this->container->get(PrettyPageHandler::class);
+        } else {
+            $responseHandler = $this->container->get(JsonResponseHandler::class);
+            $responseHandler->setJsonApi(true);
+            $responseHandler->addTraceToOutput(true);
+        }
+
+        // Create new instance
+        $whoops = $this->container->get(Run::class);
+        $whoops->appendHandler($responseHandler);
+
+        return $whoops;
+    }
+
+    /**
+     * Is used as outer wrapper for the given wrapper instance when we should use speaking error handling.
+     *
+     * @param   callable  $wrapper
+     *
+     * @param   int       $localNestingLevel
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Throwable
+     */
+    protected function handleSpeaking(callable $wrapper, int $localNestingLevel): ResponseInterface
+    {
+        // Prepare whoops instance
+        $whoops = $this->makeWhoops();
+        $whoops->allowQuit(false);
+        $whoops->writeToOutput(false);
+        $whoops->sendHttpCode(false);
+        $whoops->register();
+
+        // Register shutdown function
+        if (! static::$hasShutdownFunction) {
+            static::$hasShutdownFunction = true;
+            $shutdownFunction            = function () use ($whoops) {
+                $whoops->allowQuit(true);
+                $whoops->writeToOutput(true);
+                $whoops->sendHttpCode(true);
+
+                // Allow cors requests in development environments
+                if (Environment::getContext()->isDevelopment()) {
+                    header("Access-Control-Allow-Origin", "*");
+                }
+
+                call_user_func([$whoops, Run::SHUTDOWN_HANDLER]);
+            };
+            register_shutdown_function($shutdownFunction);
+        }
+
+        try {
+            $response = call_user_func($wrapper);
+        } catch (Throwable $exception) {
+            if ($localNestingLevel > 0) {
+                throw $exception;
+            }
+            $exception = $this->translateImmediateResponseException($exception);
+            $response  = $this->getResponse(method_exists($exception, "getStatusCode") ? $exception->getStatusCode() : 500);
+            try {
+                $response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
+            } catch (Throwable $e) {
+                // An exception was thrown while handling an exception o.O
+                // Try to disable the rendering of variables
+                if ($localNestingLevel > 0) {
+                    throw $e;
+                }
+                static::$renderValues = false;
+                $response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
+                static::$renderValues = true;
+            }
+            $response = $response->withHeader("Content-Type", $this->acceptsHtml ? "text/html" : "application/vnd.api+json");
+            $response = $this->responseFilter($response, $exception);
+        }
+
+        // Disable error handler
+        $whoops->unregister();
+
+        // Done
+        return $response;
+    }
+
+    /**
+     * Is used as outer wrapper for the given wrapper instance when we should use non-speaking error handling.
+     *
+     * @param   callable  $wrapper
+     *
+     * @param   int       $localNestingLevel
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Throwable
+     */
+    protected function handleNonSpeaking(callable $wrapper, int $localNestingLevel): ResponseInterface
+    {
+        // Set our internal error handler
+        set_error_handler(function ($errorLevel, $errorMessage, $errorFile, $errorLine) {
+            if ($errorLevel & error_reporting()) {
+                $response = $this->decorateNonSpeakingError(new ErrorException($errorMessage, 0, $errorLevel, $errorFile, $errorLine));
+                $this->container->get(EmitterInterface::class)->emit($response);
+                exit();
+            }
+        });
+
+        try {
+            $response = call_user_func($wrapper);
+        } catch (Throwable $exception) {
+            if ($localNestingLevel > 0) {
+                throw $exception;
+            }
+            $exception = $this->translateImmediateResponseException($exception);
+            $response  = $this->decorateNonSpeakingError($exception);
+        }
+
+        // Restore the error handler
+        restore_error_handler();
+
+        // Done
+        return $response;
+    }
+
+    /**
+     * Is used to decorate the received error element and return a formatted response object from it
+     * It will also automatically convert the typo3 http exceptions into their matching equivalent of the Route package
+     *
+     * @param   \Throwable  $error
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    protected function decorateNonSpeakingError(Throwable $error): ResponseInterface
+    {
+        // Translate typo3 exceptions
+        $translations = [
+            BadRequestException::class         => Exception\BadRequestException::class,
+            ForbiddenException::class          => Exception\ForbiddenException::class,
+            PageNotFoundException::class       => NotFoundException::class,
+            ServiceUnavailableException::class => NotFoundException::class,
+            UnauthorizedException::class       => Exception\UnauthorizedException::class,
+            NotImplementedException::class     => NotFoundException::class,
+        ];
+        $statusMap    = [
+            ServiceUnavailableException::class => 503,
+            NotImplementedException::class     => 501,
+        ];
+        foreach ($translations as $from => $to) {
+            if ($error instanceof $from) {
+                $code = $error->getCode();
+                if (empty($code)) {
+                    $code = ! empty($statusMap[$from]) ? $statusMap[$from] : 0;
+                }
+                $error = new $to($error->getMessage(), $error, $code);
+                break;
+            }
+        }
+
+        // Check if this is a http exception
+        if (! $error instanceof HttpExceptionInterface) {
+            $statusCode = method_exists($error, "getStatusCode") ? $error->getStatusCode() : 500;
+            $error      = new Exception((int)$statusCode, "", ($error instanceof \Exception ? $error : null));
+        }
+
+        // Create the response
+        $response = $this->getResponse($error->getStatusCode())
+                         ->withHeader("Content-Type", "application/vnd.api+json");
+        $body     = [
+            "errors" => [
+                "status" => $error->getStatusCode(),
+                "title"  => $response->getReasonPhrase(),
+            ],
+        ];
+        $response = $response->withBody(stream_for(json_encode($body, JSON_PRETTY_PRINT)));
+
+        // Filter the response
+        return $this->responseFilter($response, $error);
+    }
+
+    /**
+     * Allow other services to handle our error and modify the response
+     *
+     * @param   \Psr\Http\Message\ResponseInterface  $response
+     * @param   \Throwable                           $exception
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    protected function responseFilter(ResponseInterface $response, Throwable $exception): ResponseInterface
+    {
+        $eventBus = $this->container->get(EventBusInterface::class);
+
+        // Emit event
+        $eventBus->dispatch(($e = new ApiErrorFilterEvent($exception, $response)));
+        $response = $e->getResponse();
+
+        // Emit the global event
+        // The Result is given for compatibility but is noop here...
+        if ($e->isEmitErrorEvent()) {
+            $eventBus->dispatch(new ErrorFilterEvent($exception, null));
+        }
+
+        // Done
+        return $response;
+    }
+
+    /**
+     * Internal helper to handle immediate response exceptions like normal http exceptions
+     *
+     * @param   \Throwable  $error
+     *
+     * @return \Throwable
+     */
+    protected function translateImmediateResponseException(Throwable $error): Throwable
+    {
+        // Translate immediate response exceptions
+        if ($error instanceof ImmediateResponseException) {
+            $error = new Exception($error->getResponse()->getStatusCode(),
+                $error->getResponse()->getReasonPhrase(), $error, $error->getResponse()->getHeaders());
+        }
+
+        return $error;
+    }
 }

@@ -23,47 +23,55 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
-class PagePidConfig implements SelfTransformingInterface {
-	
-	
-	/**
-	 * The pid that was used to request the pid context
-	 * @var int
-	 */
-	protected $pid;
-	
-	/**
-	 * The list of localized pids
-	 * @var array
-	 */
-	protected $localPids;
-	
-	/**
-	 * PagePid constructor.
-	 *
-	 * @param \LaborDigital\Typo3BetterApi\TypoContext\TypoContext $context
-	 */
-	public function __construct(int $pid, TypoContext $context) {
-		$this->pid = $pid;
-		$this->localPids = $context->getPidAspect()->getAllPids();
-	}
-	
-	/**
-	 * Returns the pid that was used to request the pid context
-	 * @return int
-	 */
-	public function getPid(): int {
-		return $this->pid;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function asArray(): array {
-		$list = $this->localPids;
-		$list["id"] = $this->pid;
-		$list["hash"] = md5(\GuzzleHttp\json_encode($this->localPids));
-		return $list;
-	}
-	
+class PagePidConfig implements SelfTransformingInterface
+{
+
+
+    /**
+     * The pid that was used to request the pid context
+     *
+     * @var int
+     */
+    protected $pid;
+
+    /**
+     * The list of localized pids
+     *
+     * @var array
+     */
+    protected $localPids;
+
+    /**
+     * PagePid constructor.
+     *
+     * @param   \LaborDigital\Typo3BetterApi\TypoContext\TypoContext  $context
+     */
+    public function __construct(int $pid, TypoContext $context)
+    {
+        $this->pid       = $pid;
+        $this->localPids = $context->getPidAspect()->getAllPids();
+    }
+
+    /**
+     * Returns the pid that was used to request the pid context
+     *
+     * @return int
+     */
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        $list         = $this->localPids;
+        $list["id"]   = $this->pid;
+        $list["hash"] = md5(\GuzzleHttp\json_encode($this->localPids));
+
+        return $list;
+    }
+
 }

@@ -31,58 +31,68 @@ use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class RouteGroupFilterEvent {
-	
-	/**
-	 * The list of route groups that have been collected.
-	 * The list is already sorted by the dependencies
-	 * @var array
-	 */
-	protected $groups;
-	
-	/**
-	 * The ext config context
-	 * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	protected $context;
-	
-	/**
-	 * RouteGroupFilterEvent constructor.
-	 *
-	 * @param array                                                   $groups
-	 * @param \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext $context
-	 */
-	public function __construct(array $groups, ExtConfigContext $context) {
-		$this->groups = $groups;
-		$this->context = $context;
-	}
-	
-	/**
-	 * Return the ext config context
-	 * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
-	 */
-	public function getContext(): ExtConfigContext {
-		return $this->context;
-	}
-	
-	/**
-	 * Returns the list of route groups that have been collected
-	 * @return array
-	 */
-	public function getGroups(): array {
-		return $this->groups;
-	}
-	
-	/**
-	 * Used to update the list of route groups that have been collected
-	 *
-	 * @param array $groups
-	 *
-	 * @return RouteGroupFilterEvent
-	 */
-	public function setGroups(array $groups): RouteGroupFilterEvent {
-		$this->groups = $groups;
-		return $this;
-	}
-	
+class RouteGroupFilterEvent
+{
+
+    /**
+     * The list of route groups that have been collected.
+     * The list is already sorted by the dependencies
+     *
+     * @var array
+     */
+    protected $groups;
+
+    /**
+     * The ext config context
+     *
+     * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    protected $context;
+
+    /**
+     * RouteGroupFilterEvent constructor.
+     *
+     * @param   array                                                    $groups
+     * @param   \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext  $context
+     */
+    public function __construct(array $groups, ExtConfigContext $context)
+    {
+        $this->groups  = $groups;
+        $this->context = $context;
+    }
+
+    /**
+     * Return the ext config context
+     *
+     * @return \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
+     */
+    public function getContext(): ExtConfigContext
+    {
+        return $this->context;
+    }
+
+    /**
+     * Returns the list of route groups that have been collected
+     *
+     * @return array
+     */
+    public function getGroups(): array
+    {
+        return $this->groups;
+    }
+
+    /**
+     * Used to update the list of route groups that have been collected
+     *
+     * @param   array  $groups
+     *
+     * @return RouteGroupFilterEvent
+     */
+    public function setGroups(array $groups): RouteGroupFilterEvent
+    {
+        $this->groups = $groups;
+
+        return $this;
+    }
+
 }

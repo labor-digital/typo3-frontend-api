@@ -28,94 +28,111 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory;
  * Class TransformerConfigFilterEvent
  *
  * Dispatched when a transformer proxy requests the configuration for a certain resource type
+ *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class TransformerConfigFilterEvent {
-	
-	/**
-	 * The configuration that was generated for the value
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	protected $config;
-	
-	/**
-	 * The value the configuration was generated for
-	 * @var mixed
-	 */
-	protected $value;
-	
-	/**
-	 * The suggested resource type we should generate the configuration
-	 * for. Is only used if the resource type would otherwise be resolved into
-	 * an "auto"... something
-	 * @var string|null
-	 */
-	protected $suggestedResourceType;
-	
-	/**
-	 * The factory instance that was used to generate the proxy
-	 * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	protected $factory;
-	
-	/**
-	 * TransformerConfigFilterEvent constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig  $config
-	 * @param mixed                                                                    $value
-	 * @param string|null                                                              $suggestedResourceType
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory $factory
-	 */
-	public function __construct(TransformerConfig $config, $value, ?string $suggestedResourceType, TransformerFactory $factory) {
-		$this->config = $config;
-		$this->value = $value;
-		$this->suggestedResourceType = $suggestedResourceType;
-		$this->factory = $factory;
-	}
-	
-	/**
-	 * Returns the value the configuration was generated for
-	 * @return mixed
-	 */
-	public function getValue() {
-		return $this->value;
-	}
-	
-	/**
-	 * Returns the suggested resource type we should generate the configuration for
-	 * @return string
-	 */
-	public function getSuggestedResourceType(): ?string {
-		return $this->suggestedResourceType;
-	}
-	
-	/**
-	 * Return the factory instance that was used to generate the proxy
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
-	 */
-	public function getFactory(): TransformerFactory {
-		return $this->factory;
-	}
-	
-	/**
-	 * Returns the configuration that was generated for the value
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
-	 */
-	public function getConfig(): TransformerConfig {
-		return $this->config;
-	}
-	
-	/**
-	 * Replaces the configuration that was generated for the value
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig $config
-	 *
-	 * @return TransformerConfigFilterEvent
-	 */
-	public function setConfig(TransformerConfig $config): TransformerConfigFilterEvent {
-		$this->config = $config;
-		return $this;
-	}
-	
-	
+class TransformerConfigFilterEvent
+{
+
+    /**
+     * The configuration that was generated for the value
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    protected $config;
+
+    /**
+     * The value the configuration was generated for
+     *
+     * @var mixed
+     */
+    protected $value;
+
+    /**
+     * The suggested resource type we should generate the configuration
+     * for. Is only used if the resource type would otherwise be resolved into
+     * an "auto"... something
+     *
+     * @var string|null
+     */
+    protected $suggestedResourceType;
+
+    /**
+     * The factory instance that was used to generate the proxy
+     *
+     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    protected $factory;
+
+    /**
+     * TransformerConfigFilterEvent constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig   $config
+     * @param   mixed                                                                     $value
+     * @param   string|null                                                               $suggestedResourceType
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory  $factory
+     */
+    public function __construct(TransformerConfig $config, $value, ?string $suggestedResourceType, TransformerFactory $factory)
+    {
+        $this->config                = $config;
+        $this->value                 = $value;
+        $this->suggestedResourceType = $suggestedResourceType;
+        $this->factory               = $factory;
+    }
+
+    /**
+     * Returns the value the configuration was generated for
+     *
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Returns the suggested resource type we should generate the configuration for
+     *
+     * @return string
+     */
+    public function getSuggestedResourceType(): ?string
+    {
+        return $this->suggestedResourceType;
+    }
+
+    /**
+     * Return the factory instance that was used to generate the proxy
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory
+     */
+    public function getFactory(): TransformerFactory
+    {
+        return $this->factory;
+    }
+
+    /**
+     * Returns the configuration that was generated for the value
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig
+     */
+    public function getConfig(): TransformerConfig
+    {
+        return $this->config;
+    }
+
+    /**
+     * Replaces the configuration that was generated for the value
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfig  $config
+     *
+     * @return TransformerConfigFilterEvent
+     */
+    public function setConfig(TransformerConfig $config): TransformerConfigFilterEvent
+    {
+        $this->config = $config;
+
+        return $this;
+    }
+
+
 }

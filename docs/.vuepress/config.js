@@ -17,12 +17,12 @@
  */
 
 module.exports = {
-	title: "TYPO3 - Frontend API by LABOR.digital",
-	themeConfig: {
-		sidebarDepth: 2,
-		sidebar: [
-			"/",
-			"/guide/Tools.md"
-		]
-	}
+    title: 'TYPO3 - Frontend API by LABOR.digital',
+    themeConfig: {
+        sidebarDepth: 2,
+        sidebar: [
+            '/',
+            '/guide/Tools.md'
+        ]
+    }
 };

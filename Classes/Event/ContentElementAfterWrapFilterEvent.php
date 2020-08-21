@@ -34,48 +34,58 @@ use LaborDigital\Typo3FrontendApi\Event\Traits\ContentElementFilterTrait;
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
-class ContentElementAfterWrapFilterEvent {
-	use ContentElementFilterTrait;
-	
-	/**
-	 * The compiled html wrapped by the configured wrapper tags
-	 * @var string
-	 */
-	protected $result;
-	
-	/**
-	 * ContentElementAfterControllerFilterEvent constructor.
-	 *
-	 * @param string                            $result
-	 * @param ContentElementControllerInterface $controller
-	 * @param ContentElementControllerContext   $context
-	 * @param bool                              $isFrontend
-	 */
-	public function __construct(string $result, ContentElementControllerInterface $controller,
-								ContentElementControllerContext $context, bool $isFrontend) {
-		$this->result = $result;
-		$this->controller = $controller;
-		$this->context = $context;
-		$this->isFrontend = $isFrontend;
-	}
-	
-	/**
-	 * Return the compiled html wrapped by the configured wrapper tags
-	 * @return string
-	 */
-	public function getResult(): string {
-		return $this->result;
-	}
-	
-	/**
-	 * Used to update the compiled html wrapped by the configured wrapper tags
-	 *
-	 * @param string $result
-	 *
-	 * @return ContentElementAfterWrapFilterEvent
-	 */
-	public function setResult(string $result): ContentElementAfterWrapFilterEvent {
-		$this->result = $result;
-		return $this;
-	}
+class ContentElementAfterWrapFilterEvent
+{
+    use ContentElementFilterTrait;
+
+    /**
+     * The compiled html wrapped by the configured wrapper tags
+     *
+     * @var string
+     */
+    protected $result;
+
+    /**
+     * ContentElementAfterControllerFilterEvent constructor.
+     *
+     * @param   string                             $result
+     * @param   ContentElementControllerInterface  $controller
+     * @param   ContentElementControllerContext    $context
+     * @param   bool                               $isFrontend
+     */
+    public function __construct(
+        string $result,
+        ContentElementControllerInterface $controller,
+        ContentElementControllerContext $context,
+        bool $isFrontend
+    ) {
+        $this->result     = $result;
+        $this->controller = $controller;
+        $this->context    = $context;
+        $this->isFrontend = $isFrontend;
+    }
+
+    /**
+     * Return the compiled html wrapped by the configured wrapper tags
+     *
+     * @return string
+     */
+    public function getResult(): string
+    {
+        return $this->result;
+    }
+
+    /**
+     * Used to update the compiled html wrapped by the configured wrapper tags
+     *
+     * @param   string  $result
+     *
+     * @return ContentElementAfterWrapFilterEvent
+     */
+    public function setResult(string $result): ContentElementAfterWrapFilterEvent
+    {
+        $this->result = $result;
+
+        return $this;
+    }
 }

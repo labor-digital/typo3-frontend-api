@@ -27,43 +27,50 @@ use League\Route\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class CollectionStrategy extends AbstractResourceStrategy {
-	/**
-	 * @inheritDoc
-	 */
-	public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface {
-		// Get the resource configuration
-		/** @var CollectionControllerContext $context */
-		$context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
-		
-		// Prepare pagination from resource type
-		if (!empty($context->getResourceConfig()))
-			$context->setPageSize($context->getResourceConfig()->pageSize);
-		
-		// Run the controller
-		$controller = $route->getCallable($this->getContainer());
-		$response = $controller($request, $context);
-		
-		// Pass through direct responses
-		if ($response instanceof ResourceDataResult)
-			return $this->getResponse($route, $response->getData(TRUE));
-		if ($response instanceof ResponseInterface)
-			return $this->addInternalNoCacheHeaderIfRequired($route, $response);
-		
-		// Unify the response
-		$response = $this->convertDbResponse($response);
-		
-		// Prepare pagination
-		$transformer = $this->transformerFactory->getTransformer($context->getResourceType());
-		$collection = new Collection($response, $transformer, $context->getResourceType());
-		if (!empty($context->getMeta())) $collection->setMeta($context->getMeta());
-		$this->paginateCollection($collection, $request, $context);
-		
-		// Make the manager
-		$manager = $this->getManager($request, $context->getResourceType(), $response);
-		
-		// Done
-		return $this->getResponse($route, $manager->createData($collection)->toArray());
-	}
-	
+class CollectionStrategy extends AbstractResourceStrategy
+{
+    /**
+     * @inheritDoc
+     */
+    public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
+    {
+        // Get the resource configuration
+        /** @var CollectionControllerContext $context */
+        $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
+
+        // Prepare pagination from resource type
+        if (! empty($context->getResourceConfig())) {
+            $context->setPageSize($context->getResourceConfig()->pageSize);
+        }
+
+        // Run the controller
+        $controller = $route->getCallable($this->getContainer());
+        $response   = $controller($request, $context);
+
+        // Pass through direct responses
+        if ($response instanceof ResourceDataResult) {
+            return $this->getResponse($route, $response->getData(true));
+        }
+        if ($response instanceof ResponseInterface) {
+            return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+        }
+
+        // Unify the response
+        $response = $this->convertDbResponse($response);
+
+        // Prepare pagination
+        $transformer = $this->transformerFactory->getTransformer($context->getResourceType());
+        $collection  = new Collection($response, $transformer, $context->getResourceType());
+        if (! empty($context->getMeta())) {
+            $collection->setMeta($context->getMeta());
+        }
+        $this->paginateCollection($collection, $request, $context);
+
+        // Make the manager
+        $manager = $this->getManager($request, $context->getResourceType(), $response);
+
+        // Done
+        return $this->getResponse($route, $manager->createData($collection)->toArray());
+    }
+
 }
