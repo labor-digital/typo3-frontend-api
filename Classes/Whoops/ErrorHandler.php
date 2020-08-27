@@ -240,7 +240,7 @@ class ErrorHandler implements SingletonInterface
 
                 // Allow cors requests in development environments
                 if (Environment::getContext()->isDevelopment()) {
-                    header('Access-Control-Allow-Origin', '*');
+                    header('Access-Control-Allow-Origin: *');
                 }
 
                 $whoops->{Run::SHUTDOWN_HANDLER}();
