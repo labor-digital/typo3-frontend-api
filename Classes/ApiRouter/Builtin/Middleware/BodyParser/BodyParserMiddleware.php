@@ -123,8 +123,12 @@ class BodyParserMiddleware implements MiddlewareInterface
         $parsers     = $this->getParsers();
         $contentType = $request->getHeaderLine('Content-Type');
 
-        if (isset($parsers[$contentType])) {
-            $request = call_user_func($parsers[$contentType], $request);
+        foreach ($parsers as $parserContentType => $parser) {
+            if (stripos($contentType, $parserContentType) !== 0) {
+                continue;
+            }
+            $request = call_user_func($parsers[$parserContentType], $request);
+            break;
         }
 
         return $handler->handle($request);
