@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -48,7 +49,7 @@ use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 use function GuzzleHttp\Psr7\stream_for;
 
-include __DIR__ . "/DummySymfonyVarDumper/include.php";
+include __DIR__ . '/DummySymfonyVarDumper/include.php';
 
 class ErrorHandler implements SingletonInterface
 {
@@ -131,29 +132,25 @@ class ErrorHandler implements SingletonInterface
         $localNestingLevel = static::$nestingLevel++;
         try {
             // Check if the client accepts http responses
-            $accept            = $request->getHeaderLine("Accept");
-            $this->acceptsHtml = stripos($accept, "text/html") !== false || stripos($accept, "application/xhtml+xml") !== false;
+            $accept            = $request->getHeaderLine('Accept');
+            $this->acceptsHtml = stripos($accept, 'text/html') !== false || stripos($accept, 'application/xhtml+xml') !== false;
 
             // Allow cors requests in development environments
             if (Environment::getContext()->isDevelopment()) {
-                header("Access-Control-Allow-Origin: *");
+                header('Access-Control-Allow-Origin: *');
             }
 
             // Check if we should use the speaking error handler
             $useSpeakingErrorHandler = $this->configRepository->routing()->useSpeakingErrorHandler();
-            if (is_null($useSpeakingErrorHandler)) {
+            if ($useSpeakingErrorHandler === null) {
                 // Check if we are running in dev mode
-                $useSpeakingErrorHandler = $this->context->getEnvAspect()->isDev();
+                $useSpeakingErrorHandler = $this->context->Env()->isDev();
 
                 // Check if we got an admin user
-                if (! $useSpeakingErrorHandler && $this->context->getBeUserAspect()->isAdmin()) {
+                if (! $useSpeakingErrorHandler && $this->context->BeUser()->isAdmin()) {
                     $useSpeakingErrorHandler = true;
                 }
 
-                // Don't use the speaking error handler if we got a referrer -> Ajax request
-                if ($useSpeakingErrorHandler && ! empty($this->context->getRequestAspect()->getReferrer())) {
-                    $useSpeakingErrorHandler = false;
-                }
             }
 
             // Block all outputs
@@ -174,7 +171,7 @@ class ErrorHandler implements SingletonInterface
 
             // Allow cors requests in development environments
             if (Environment::getContext()->isDevelopment()) {
-                $response = $response->withHeader("Access-Control-Allow-Origin", "*");
+                $response = $response->withHeader('Access-Control-Allow-Origin', '*');
             }
 
             // Done
@@ -236,31 +233,31 @@ class ErrorHandler implements SingletonInterface
         // Register shutdown function
         if (! static::$hasShutdownFunction) {
             static::$hasShutdownFunction = true;
-            $shutdownFunction            = function () use ($whoops) {
+            $shutdownFunction            = static function () use ($whoops) {
                 $whoops->allowQuit(true);
                 $whoops->writeToOutput(true);
                 $whoops->sendHttpCode(true);
 
                 // Allow cors requests in development environments
                 if (Environment::getContext()->isDevelopment()) {
-                    header("Access-Control-Allow-Origin", "*");
+                    header('Access-Control-Allow-Origin', '*');
                 }
 
-                call_user_func([$whoops, Run::SHUTDOWN_HANDLER]);
+                $whoops->{Run::SHUTDOWN_HANDLER}();
             };
             register_shutdown_function($shutdownFunction);
         }
 
         try {
-            $response = call_user_func($wrapper);
+            $response = $wrapper();
         } catch (Throwable $exception) {
             if ($localNestingLevel > 0) {
                 throw $exception;
             }
             $exception = $this->translateImmediateResponseException($exception);
-            $response  = $this->getResponse(method_exists($exception, "getStatusCode") ? $exception->getStatusCode() : 500);
+            $response  = $this->getResponse(method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 500);
             try {
-                $response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
+                $response->getBody()->write($whoops->{Run::EXCEPTION_HANDLER}($exception));
             } catch (Throwable $e) {
                 // An exception was thrown while handling an exception o.O
                 // Try to disable the rendering of variables
@@ -268,10 +265,10 @@ class ErrorHandler implements SingletonInterface
                     throw $e;
                 }
                 static::$renderValues = false;
-                $response->getBody()->write(call_user_func([$whoops, Run::EXCEPTION_HANDLER], $exception));
+                $response->getBody()->write($whoops->{Run::EXCEPTION_HANDLER}($exception));
                 static::$renderValues = true;
             }
-            $response = $response->withHeader("Content-Type", $this->acceptsHtml ? "text/html" : "application/vnd.api+json");
+            $response = $response->withHeader('Content-Type', $this->acceptsHtml ? 'text/html' : 'application/vnd.api+json');
             $response = $this->responseFilter($response, $exception);
         }
 
@@ -297,14 +294,16 @@ class ErrorHandler implements SingletonInterface
         // Set our internal error handler
         set_error_handler(function ($errorLevel, $errorMessage, $errorFile, $errorLine) {
             if ($errorLevel & error_reporting()) {
-                $response = $this->decorateNonSpeakingError(new ErrorException($errorMessage, 0, $errorLevel, $errorFile, $errorLine));
+                $response = $this->decorateNonSpeakingError(
+                    new ErrorException($errorMessage, 0, $errorLevel, $errorFile, $errorLine)
+                );
                 $this->container->get(EmitterInterface::class)->emit($response);
                 exit();
             }
         });
 
         try {
-            $response = call_user_func($wrapper);
+            $response = $wrapper();
         } catch (Throwable $exception) {
             if ($localNestingLevel > 0) {
                 throw $exception;
@@ -327,6 +326,7 @@ class ErrorHandler implements SingletonInterface
      * @param   \Throwable  $error
      *
      * @return \Psr\Http\Message\ResponseInterface
+     * @throws \JsonException
      */
     protected function decorateNonSpeakingError(Throwable $error): ResponseInterface
     {
@@ -356,20 +356,20 @@ class ErrorHandler implements SingletonInterface
 
         // Check if this is a http exception
         if (! $error instanceof HttpExceptionInterface) {
-            $statusCode = method_exists($error, "getStatusCode") ? $error->getStatusCode() : 500;
-            $error      = new Exception((int)$statusCode, "", ($error instanceof \Exception ? $error : null));
+            $statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : 500;
+            $error      = new Exception($statusCode, '', ($error instanceof \Exception ? $error : null));
         }
 
         // Create the response
         $response = $this->getResponse($error->getStatusCode())
-                         ->withHeader("Content-Type", "application/vnd.api+json");
+                         ->withHeader('Content-Type', 'application/vnd.api+json');
         $body     = [
-            "errors" => [
-                "status" => $error->getStatusCode(),
-                "title"  => $response->getReasonPhrase(),
+            'errors' => [
+                'status' => $error->getStatusCode(),
+                'title'  => $response->getReasonPhrase(),
             ],
         ];
-        $response = $response->withBody(stream_for(json_encode($body, JSON_PRETTY_PRINT)));
+        $response = $response->withBody(stream_for(json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
 
         // Filter the response
         return $this->responseFilter($response, $error);
