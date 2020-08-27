@@ -62,9 +62,9 @@ class PageDataTransformer extends AbstractResourceTransformer
     {
         /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData $value */
         $pageObject             = $value->getData();
-        $result                 = $this->autoTransform($pageObject, ["allIncludes"]);
-        $result["metaTags"]     = $this->getMetaTags($value);
-        $result["canonicalUrl"] = $this->getCleanCanonicalUrl();
+        $result                 = $this->autoTransform($pageObject, ['allIncludes']);
+        $result['metaTags']     = $this->getMetaTags($value);
+        $result['canonicalUrl'] = $this->getCleanCanonicalUrl();
 
         return $result;
     }
@@ -82,7 +82,7 @@ class PageDataTransformer extends AbstractResourceTransformer
             return $this->Links()->getLink()->build();
         }
         $canonicalTag = $this->getInstanceOf(CanonicalGenerator::class)->generate();
-        preg_match("~href=\"(.*?)\"~", $canonicalTag, $m);
+        preg_match('~href="(.*?)"~', $canonicalTag, $m);
         $url                      = $m[1];
         $url                      = (string)Path::makeUri($url)->withQuery(null);
         $GLOBALS['TYPO3_REQUEST'] = $requestBackup;
@@ -116,22 +116,22 @@ class PageDataTransformer extends AbstractResourceTransformer
 
             // Check if the twitter / og images got slided
             $slidedProps = [];
-            $slidedProps = $this->generateSlidedProp($generator, $value, $slidedProps, "og:image", "og_image");
-            $slidedProps = $this->generateSlidedProp($generator, $value, $slidedProps, "twitter:image", "twitter_image");
+            $slidedProps = $this->generateSlidedProp($generator, $value, $slidedProps, 'og:image', 'og_image');
+            $slidedProps = $this->generateSlidedProp($generator, $value, $slidedProps, 'twitter:image', 'twitter_image');
 
             // Prepare the registry for the default properties
             foreach ($this->metaTagManagerRegistry->getAllManagers() as $manager) {
                 $manager->removeAllProperties();
             }
-            $this->getInstanceOf(MetaTagGenerator::class)->generate(["page" => $pageInfo]);
-            $tagsString = "";
+            $this->getInstanceOf(MetaTagGenerator::class)->generate(['page' => $pageInfo]);
+            $tagsString = '';
 
             // Inject slided props
             if (! empty($slidedProps)) {
                 foreach ($slidedProps as $prop => $definition) {
                     $manager = $this->metaTagManagerRegistry->getManagerForProperty($prop);
                     $manager->removeProperty($prop);
-                    $manager->addProperty($prop, $definition["content"], $definition["subProperties"]);
+                    $manager->addProperty($prop, $definition['content'], $definition['subProperties']);
                 }
             }
 
@@ -139,36 +139,37 @@ class PageDataTransformer extends AbstractResourceTransformer
             foreach ($this->metaTagManagerRegistry->getAllManagers() as $manager) {
                 $tagsString .= $manager->renderAllProperties();
             }
-            $html = new DOMDocument("1.0", "utf-8");
-            $html->loadHTML($tagsString);
-            foreach ($html->getElementsByTagName("meta") as $node) {
+
+            $html = new DOMDocument();
+            $html->loadHTML('<?xml encoding="utf-8" ?>' . $tagsString);
+            foreach ($html->getElementsByTagName('meta') as $node) {
                 /** @var \DOMElement $node */
                 $attributes = [];
                 foreach ($node->attributes as $attr) {
                     $attributes[$attr->nodeName] = $attr->nodeValue;
                 }
                 // Ignore og:image metadata to make them easier to overwrite in the frontend
-                if (in_array($attributes["property"], ["og:image:url", "og:image:width", "og:image:height"])) {
+                if (in_array($attributes['property'], ['og:image:url', 'og:image:width', 'og:image:height'])) {
                     continue;
                 }
                 $tags[] = $attributes;
-                if (isset($attributes["name"])) {
-                    $knownNodes[] = $attributes["name"];
+                if (isset($attributes['name'])) {
+                    $knownNodes[] = $attributes['name'];
                 }
             }
         }
 
         // Add additional meta tags
-        if (! empty($pageInfo["description"]) && ! in_array("description", $knownNodes)) {
+        if (! empty($pageInfo['description']) && ! in_array('description', $knownNodes, true)) {
             $tags[] = [
-                "name"    => "description",
-                "content" => trim($pageInfo["description"]),
+                'name'    => 'description',
+                'content' => trim($pageInfo['description']),
             ];
         }
-        if (! empty($pageInfo["keywords"]) && ! in_array("keywords", $knownNodes)) {
+        if (! empty($pageInfo['keywords']) && ! in_array('keywords', $knownNodes, true)) {
             $tags[] = [
-                "name"    => "keywords",
-                "content" => implode(",", Arrays::makeFromStringList($pageInfo["keywords"])),
+                'name'    => 'keywords',
+                'content' => implode(',', Arrays::makeFromStringList($pageInfo['keywords'])),
             ];
         }
 
@@ -197,9 +198,9 @@ class PageDataTransformer extends AbstractResourceTransformer
             return $list;
         }
         $ogImagePageInfo = $value->getSlideParentPageInfoMap()[$slided[$fieldName]];
-        $generator->generate(["page" => $ogImagePageInfo]);
-        $list[$property]
-            = reset($this->metaTagManagerRegistry->getManagerForProperty($property)->getProperty($property));
+        $generator->generate(['page' => $ogImagePageInfo]);
+        $props           = $this->metaTagManagerRegistry->getManagerForProperty($property)->getProperty($property);
+        $list[$property] = reset($props);
 
         return $list;
     }
