@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.22.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.22.0...v9.22.1) (2020-08-27)
+
+
+### Bug Fixes
+
+* **PageDataTransformer:** fix encoding problems with multibyte chars in meta tags ([d7071b3](https://github.com/labor-digital/typo3-frontend-api/commit/d7071b373a16e2765b07a582580203db9290c854))
+
 ## [9.22.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.21.1...v9.22.0) (2020-08-27)
 
 
