@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.22.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.21.1...v9.22.0) (2020-08-27)
+
+
+### Features
+
+* **ApiRouter:** implement body parser middleware for the most common content types ([f949a84](https://github.com/labor-digital/typo3-frontend-api/commit/f949a84364b134f74b17586b7b3d902d62f6c60a))
+* **ResponseFactoryTrait:** add getJsonOkResponse() helper ([587e3c7](https://github.com/labor-digital/typo3-frontend-api/commit/587e3c77237ac87cbdc2c447188d1b00c7ae4635))
+
+
+### Bug Fixes
+
+* **BodyParserMiddleware:** handle compound content types as well ([cc75a56](https://github.com/labor-digital/typo3-frontend-api/commit/cc75a5600b65ce96f5e7d7e26ca033d3ceb4ee50))
+* **ErrorHandler:** allow speaking errors without referer + clean up error handler code ([3195e06](https://github.com/labor-digital/typo3-frontend-api/commit/3195e06e74158745832471f184d4e47471c80e4a))
+* **ErrorHandler:** fix wrong header declaration ([2b02a7c](https://github.com/labor-digital/typo3-frontend-api/commit/2b02a7ce94c1cca9b3dafc791387ad3e520f980c))
+
 ### [9.21.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.21.0...v9.21.1) (2020-08-21)
 
 
