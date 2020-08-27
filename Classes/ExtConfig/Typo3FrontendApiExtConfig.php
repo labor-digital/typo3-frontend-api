@@ -30,6 +30,7 @@ use LaborDigital\Typo3BetterApi\Link\TypoLink;
 use LaborDigital\Typo3BetterApi\Middleware\RequestCollectorMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\SchedulerController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\UpController;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\BodyParser\BodyParserMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddlewareEventHandler;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\ErrorHandler\ErrorHandlerMiddleware;
@@ -72,9 +73,10 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
         $frontendApi
             ->middleware()
             ->registerGlobalMiddleware(ErrorHandlerMiddleware::class, ["middlewareStack" => "external"])
-            ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
+            ->registerGlobalMiddleware(BodyParserMiddleware::class, ['middlewareStack' => 'external'])
             ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
                 ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
+            ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
             ->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
 
         // Register the default resources
