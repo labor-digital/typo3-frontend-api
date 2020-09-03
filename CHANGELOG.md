@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.22.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.22.1...v9.22.2) (2020-09-03)
+
+
+### Bug Fixes
+
+* **JsonApi:** fix multiple issues while calculating the page size ([bc38b7c](https://github.com/labor-digital/typo3-frontend-api/commit/bc38b7c4e15c7a0cdcc965334615439f0ce07882))
+
 ### [9.22.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.22.0...v9.22.1) (2020-08-27)
 
 
