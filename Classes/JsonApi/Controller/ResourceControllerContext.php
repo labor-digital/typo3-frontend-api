@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Controller;
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfig;
 use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
 
 class ResourceControllerContext
 {
@@ -83,7 +84,11 @@ class ResourceControllerContext
      */
     public function setRequest(ServerRequestInterface $request): ResourceControllerContext
     {
-        $this->query   = JsonApiResourceQuery::makeNewInstance($request);
+        if (! isset($this->resourceConfig)) {
+            throw new RuntimeException('You have to call setResourceConfig() before setRequest()!');
+        }
+
+        $this->query   = JsonApiResourceQuery::makeNewInstance($request, $this->resourceConfig);
         $this->request = $request;
 
         return $this;

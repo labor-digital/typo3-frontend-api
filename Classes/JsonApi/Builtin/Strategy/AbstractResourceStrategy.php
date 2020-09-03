@@ -210,7 +210,6 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
 
         /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Controller\ResourceControllerContext $context */
         $context = $this->getContainer()->get($contextClass);
-        $context->setRequest($request);
         $context->setParams($route->getVars());
         $context->setResourceType($routeAttributes["resourceType"]);
         $resourceConfig = $this->configRepository->resource()->getResourceConfig($context->getResourceType());
@@ -219,6 +218,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         }
         $context->setResourceConfig($this->configRepository->resource()
                                                            ->getResourceConfig($context->getResourceType()));
+        $context->setRequest($request);
 
         return $context;
     }

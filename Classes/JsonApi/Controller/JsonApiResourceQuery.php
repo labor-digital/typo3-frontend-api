@@ -20,6 +20,7 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Controller;
 
 
+use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfig;
 use League\Route\Http\Exception\BadRequestException;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
@@ -168,12 +169,14 @@ class JsonApiResourceQuery
     /**
      * Factory to create a new query object based on the given request
      *
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     * @param   \Psr\Http\Message\ServerRequestInterface                             $request
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfig  $config
      *
      * @return \LaborDigital\Typo3FrontendApi\JsonApi\Controller\JsonApiResourceQuery
      * @throws \League\Route\Http\Exception\BadRequestException
      */
-    public static function makeNewInstance(ServerRequestInterface $request): JsonApiResourceQuery
+    public static function makeNewInstance(ServerRequestInterface $request, ResourceConfig $config): JsonApiResourceQuery
     {
         $i           = new static();
         $queryParams = $request->getQueryParams();
@@ -216,14 +219,14 @@ class JsonApiResourceQuery
                 $i->page = max(1, (int)$queryParams["page"]["number"]);
             }
             if (isset($queryParams["page"]["size"])) {
-                $i->pageSize = max(1, (int)$queryParams["page"]["size"]);
+                $i->pageSize = min(1000, max(1, (int)$queryParams["page"]["size"]));
+            } else {
+                $i->pageSize = $config->pageSize;
             }
         }
 
         // Prepare the remaining query elements
-        unset($queryParams["filter"]);
-        unset($queryParams["sort"]);
-        unset($queryParams["include"]);
+        unset($queryParams["filter"], $queryParams["sort"], $queryParams["include"]);
         if (is_array($queryParams["page"])) {
             unset($queryParams["page"]["number"]);
             unset($queryParams["page"]["size"]);
