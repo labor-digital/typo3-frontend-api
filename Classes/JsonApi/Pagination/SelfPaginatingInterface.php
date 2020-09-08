@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -30,24 +31,26 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Pagination;
  *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Pagination
  * @see     \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PageFinderAwareSelfPaginatingInterface
+ * @see     \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\LateCountingSelfPaginatingInterface
  */
-interface SelfPaginatingInterface {
-	
-	/**
-	 * MUST return the list of items for a slice of the returned data based on the $offset and the $limit
-	 *
-	 * @param int $offset Similar to a SQL Offset, the absolute number of ITEMS (not pages) that should be skipped
-	 * @param int $limit  Similar to a SQL Limit, the number of ITEMS that should be return for the current page
-	 *
-	 * @return iterable
-	 */
-	public function getItemsFor(int $offset, int $limit): iterable;
-	
-	/**
-	 * MUST return the number of all ITEMS (not pages) that could be found in the paginated data collection
-	 *
-	 * @return int
-	 */
-	public function getItemCount(): int;
-	
+interface SelfPaginatingInterface
+{
+
+    /**
+     * MUST return the list of items for a slice of the returned data based on the $offset and the $limit
+     *
+     * @param   int  $offset  Similar to a SQL Offset, the absolute number of ITEMS (not pages) that should be skipped
+     * @param   int  $limit   Similar to a SQL Limit, the number of ITEMS that should be return for the current page
+     *
+     * @return iterable
+     */
+    public function getItemsFor(int $offset, int $limit): iterable;
+
+    /**
+     * MUST return the number of all ITEMS (not pages) that could be found in the paginated data collection
+     *
+     * @return int
+     */
+    public function getItemCount(): int;
+
 }

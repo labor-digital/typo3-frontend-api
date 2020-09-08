@@ -342,8 +342,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
             return 1;
         }
         try {
-            $paginator = new Paginator($response);
-            $itemCount = $paginator->getItemCount();
+            $itemCount = (new Paginator($response))->getItemCount();
         } catch (PaginationException $exception) {
             return 1;
         }

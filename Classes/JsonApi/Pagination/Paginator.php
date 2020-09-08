@@ -157,7 +157,8 @@ class Paginator
                 return count($this->set);
             }
             throw new PaginationException("Failed to paginate the given set, that is an array but neither an array list nor a sequential array!");
-        } elseif ($this->set instanceof Traversable) {
+        }
+        if ($this->set instanceof Traversable) {
             return iterator_count($this->set);
         }
 
@@ -174,7 +175,7 @@ class Paginator
      */
     protected function applyPageFinder(?int $suggestedPage): int
     {
-        $suggestedPage = empty($suggestedPage) ? 1 : $suggestedPage;
+        $suggestedPage = $suggestedPage ?? 1;
         if (! is_callable($this->pageFinder)) {
             return $suggestedPage;
         }
@@ -243,13 +244,31 @@ class Paginator
 
             $pagination->pageCount = $pagination->items->count();
         } elseif ($this->set instanceof SelfPaginatingInterface) {
-            $pagination->itemCount = $this->set->getItemCount();
-            $pagination->pages     = max(ceil($pagination->itemCount / $pagination->pageSize), 1);
-            $pagination->page      = max(min($pagination->pages, $pagination->page), 1);
-            $slice                 = [];
+            $isLateCounting = $this->set instanceof LateCountingSelfPaginatingInterface;
+
+            /**
+             * Helper to update the page and item counts based on the set
+             *
+             * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface  $set
+             * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\Pagination               $pagination
+             */
+            $countGenerator = static function (SelfPaginatingInterface $set, Pagination $pagination): void {
+                $pagination->itemCount = $set->getItemCount();
+                $pagination->pages     = max(ceil($pagination->itemCount / $pagination->pageSize), 1);
+                $pagination->page      = max(min($pagination->pages, $pagination->page), 1);
+            };
+
+            if (! $isLateCounting) {
+                $countGenerator($this->set, $pagination);
+            }
+
+            $slice = [];
             foreach (
                 $this->set->getItemsFor(
-                    $pagination->pageSize * ($pagination->page - 1),
+                    ($isLateCounting
+                        ? $offset
+                        : $pagination->pageSize * ($pagination->page - 1)
+                    ),
                     $pagination->pageSize
                 ) as $item
             ) {
@@ -257,9 +276,15 @@ class Paginator
             }
             $pagination->items     = $slice;
             $pagination->pageCount = count($slice);
+
+            if ($isLateCounting) {
+                $countGenerator($this->set, $pagination);
+            }
+
         } elseif (is_array($this->set)) {
             // Handle arrays
-            $pagination->items     = array_slice($this->set, $offset, $pagination->pageSize);
+            $pagination->items = array_slice($this->set, $offset, $pagination->pageSize);
+            /** @noinspection PhpParamsInspection */
             $pagination->pageCount = count($pagination->items);
         } elseif ($this->set instanceof Traversable) {
             // Handle iterators

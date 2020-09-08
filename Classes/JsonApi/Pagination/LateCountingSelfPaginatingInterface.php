@@ -1,6 +1,5 @@
 <?php
-declare(strict_types=1);
-/**
+/*
  * Copyright 2020 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,30 +14,23 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.05.20 at 18:21
+ * Last modified: 2020.09.08 at 13:47
  */
+
+declare(strict_types=1);
+
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Pagination;
 
 /**
- * Interface PageFinderAwareSelfPaginationInterface
+ * Interface LateCountingSelfPaginatingInterface
  *
- * An extension for the SelfPaginatingInterface to allow usage of the pageFinder for custom pagination objects
+ * An extension for the SelfPaginating interface which tells the paginator to call getItemCount() after getItemsFor() was executed.
+ * This can be really helpful if you get the number of all items as part of your api request you do in getItemsFor()
  *
  * @package LaborDigital\Typo3FrontendApi\JsonApi\Pagination
- * @see     \LaborDigital\Typo3FrontendApi\JsonApi\Pagination\SelfPaginatingInterface
  */
-interface PageFinderAwareSelfPaginatingInterface
+interface LateCountingSelfPaginatingInterface
 {
-
-    /**
-     * MUST return a list of ALL items on ALL pages to iterate.
-     * This is used to find the page of a certain object using the page finder
-     *
-     * @return iterable
-     *
-     * @see \LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext::setPageFinder()
-     */
-    public function getAllItems(): iterable;
 
 }
