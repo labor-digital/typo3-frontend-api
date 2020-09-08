@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.23.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.22.2...v9.23.0) (2020-09-08)
+
+
+### Features
+
+* **Pagination:** add LateCountingSelfPaginatingInterface ([e3a4887](https://github.com/labor-digital/typo3-frontend-api/commit/e3a4887e5494c1eb3ee156131672ba2c6bd8c09e))
+
 ### [9.22.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.22.1...v9.22.2) (2020-09-03)
 
 
