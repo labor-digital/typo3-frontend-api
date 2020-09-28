@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.25.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.24.0...v9.25.0) (2020-09-28)
+
+
+### Features
+
+* refactor frontend simulation middleware ([1f393d0](https://github.com/labor-digital/typo3-frontend-api/commit/1f393d0b92bc4f699c77d492157b86cdded17b82))
+
 ## [9.24.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.23.0...v9.24.0) (2020-09-28)
 
 
