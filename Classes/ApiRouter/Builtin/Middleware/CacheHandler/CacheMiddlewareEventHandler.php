@@ -36,70 +36,88 @@ use Neunerlei\EventBus\Subscription\LazyEventSubscriberInterface;
  * This is quite brutal, but there is no real better solution as there are so many cross dependencies
  * between content elements (initial state) and record tables.
  *
- * @package LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler
+ * @package    LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler
+ * @deprecated no longer actually in use. Will be removed in v10
  */
-class CacheMiddlewareEventHandler implements LazyEventSubscriberInterface {
-	
-	/**
-	 * This is true if the cache was already flushed in this lifecycle,
-	 * so we don't have to do it again
-	 * @var bool
-	 */
-	protected static $cacheFlushed = FALSE;
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\Cache\FrontendCache
-	 */
-	protected $frontendCache;
-	
-	/**
-	 * CacheMiddlewareEventHandler constructor.
-	 *
-	 * @param \LaborDigital\Typo3BetterApi\Cache\FrontendCache $frontendCache
-	 */
-	public function __construct(FrontendCache $frontendCache) {
-		$this->frontendCache = $frontendCache;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public static function subscribeToEvents(EventSubscriptionInterface $subscription) {
-		$subscription->subscribe([
-			DataHandlerActionPostProcessorEvent::class,
-			DataHandlerSavePostProcessorEvent::class,
-			ExtBaseAfterPersistObjectEvent::class,
-		], "__onCacheClearEvent");
-	}
-	
-	/**
-	 * Event handler to flush the caches when a database action is performed
-	 *
-	 * @param object $e
-	 */
-	public function __onCacheClearEvent(object $e) {
-		// Ignore if the cache was already flushed
-		if (static::$cacheFlushed) return;
-		
-		// Check if we can determine a table name
-		if ($e instanceof DataHandlerSavePostProcessorEvent || $e instanceof DataHandlerActionPostProcessorEvent) {
-			$table = $e->getTableName();
-			// Ignore all "cf_", "be_", "fe_" tables
-			if (in_array(substr($table, 0, 3), ["cf_", "be_", "fe_"])) return;
-			// Ignore all but some "sys_" tables
-			if (substr($table, 0, 4) === "sys_" && !in_array($table, [
-					"sys_file", "sys_file_reference", "sys_category", "sys_registry",
-				])) return;
-			// Ignore some static tables
-			if (in_array($table, [
-				"backend_layout", "cache_treelist",
-			])) return;
-		}
-		
-		// Mark the caches as flushed
-		static::$cacheFlushed = TRUE;
-		
-		// Flush the cache
-		$this->frontendCache->clearTags([CacheMiddleware::CACHE_TAG]);
-	}
+class CacheMiddlewareEventHandler implements LazyEventSubscriberInterface
+{
+
+    /**
+     * This is true if the cache was already flushed in this lifecycle,
+     * so we don't have to do it again
+     *
+     * @var bool
+     */
+    protected static $cacheFlushed = false;
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\Cache\FrontendCache
+     */
+    protected $frontendCache;
+
+    /**
+     * CacheMiddlewareEventHandler constructor.
+     *
+     * @param   \LaborDigital\Typo3BetterApi\Cache\FrontendCache  $frontendCache
+     */
+    public function __construct(FrontendCache $frontendCache)
+    {
+        $this->frontendCache = $frontendCache;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function subscribeToEvents(EventSubscriptionInterface $subscription)
+    {
+        $subscription->subscribe([
+            DataHandlerActionPostProcessorEvent::class,
+            DataHandlerSavePostProcessorEvent::class,
+            ExtBaseAfterPersistObjectEvent::class,
+        ], "__onCacheClearEvent");
+    }
+
+    /**
+     * Event handler to flush the caches when a database action is performed
+     *
+     * @param   object  $e
+     */
+    public function __onCacheClearEvent(object $e)
+    {
+        // Ignore if the cache was already flushed
+        if (static::$cacheFlushed) {
+            return;
+        }
+
+        // Check if we can determine a table name
+        if ($e instanceof DataHandlerSavePostProcessorEvent || $e instanceof DataHandlerActionPostProcessorEvent) {
+            $table = $e->getTableName();
+            // Ignore all "cf_", "be_", "fe_" tables
+            if (in_array(substr($table, 0, 3), ["cf_", "be_", "fe_"])) {
+                return;
+            }
+            // Ignore all but some "sys_" tables
+            if (substr($table, 0, 4) === "sys_" && ! in_array($table, [
+                    "sys_file",
+                    "sys_file_reference",
+                    "sys_category",
+                    "sys_registry",
+                ])) {
+                return;
+            }
+            // Ignore some static tables
+            if (in_array($table, [
+                "backend_layout",
+                "cache_treelist",
+            ])) {
+                return;
+            }
+        }
+
+        // Mark the caches as flushed
+        static::$cacheFlushed = true;
+
+        // Flush the cache
+        $this->frontendCache->clearTags([CacheMiddleware::CACHE_TAG]);
+    }
 }

@@ -39,12 +39,12 @@ use Psr\Http\Message\ServerRequestInterface;
 class PageController extends AbstractResourceController
 {
     use ModelHydrationTrait;
-    
+
     /**
      * @var \LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository
      */
     protected $repository;
-    
+
     /**
      * PageController constructor.
      *
@@ -54,7 +54,7 @@ class PageController extends AbstractResourceController
     {
         $this->repository = $repository;
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -64,7 +64,7 @@ class PageController extends AbstractResourceController
         $configurator->addClass(Page::class);
         $configurator->addAdditionalRoute('/bySlug', 'bySlugAction')->setStrategy(ResourceStrategy::class);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -74,12 +74,14 @@ class PageController extends AbstractResourceController
         $loadedLanguageCodes = Arrays::makeFromStringList($context->getQuery()->get('loadedLanguageCodes', ''));
         $currentLayout       = $context->getQuery()->get('currentLayout', '');
         $refreshCommon       = Arrays::makeFromStringList($context->getQuery()->get('refreshCommon', ''));
-        
-        // Get the additional
-        return $this->Container()->getWithoutDi(
-            Page::class, [$id, (string)$currentLayout, $loadedLanguageCodes, $refreshCommon]);
+        $languageCode        = $this->FrontendApiContext()->getLanguageCode();
+
+        return $this->FrontendApiContext()->getInstanceWithoutDi(
+            Page::class,
+            [$id, (string)$currentLayout, $loadedLanguageCodes, $refreshCommon, $languageCode]
+        );
     }
-    
+
     /**
      * The main entry point for page requests.
      * It receives a frontend slug as "slug" parameter and renders the page data for it.
@@ -98,11 +100,11 @@ class PageController extends AbstractResourceController
         if (empty($slug)) {
             throw new BadRequestException('This endpoint expects a slug parameter!');
         }
-        
+
         // Handle the request by the default method
         return $this->resourceAction($request, (int)$this->Tsfe()->getTsfe()->id, $context);
     }
-    
+
     /**
      * @inheritDoc
      */

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -22,47 +23,80 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContext;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
+use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
 
 class ContentElementColumnList implements SelfTransformingInterface
 {
-    /**
-     * True while we recursively convert the children into a json api array
-     *
-     * @var bool
-     */
-    protected $asJsonApiArray = false;
+    use FrontendApiContextAwareTrait;
+    use ShortTimeMemoryTrait;
 
     /**
-     * The list of columns this list holds
-     * COL_ID => ELEMENTS[]
+     * The page id of the contents
+     *
+     * @var int
+     */
+    protected $pid;
+
+    /**
+     * The list of raw content element records by their column id
      *
      * @var array
+     * @see \LaborDigital\Typo3BetterApi\Page\PageService::getPageContents()
      */
-    public $columns = [];
+    protected $contents;
+
+    /**
+     * The two char iso language code for this column list
+     *
+     * @var string
+     */
+    protected $languageCode;
 
     /**
      * ContentElementColumnList constructor.
      *
-     * @param   array          $contents
-     * @param   TypoContainer  $container
+     * @param   int     $pid
+     * @param   array   $contents
+     * @param   string  $languageCode
      */
-    public function __construct(array $contents, TypoContainer $container)
+    public function __construct(int $pid, array $contents, string $languageCode)
     {
-        foreach ($contents as $colId => $columnElements) {
-            foreach ($columnElements as $columnElement) {
-                $element = $container->get(ContentElement::class, [
-                    "args" => [
-                        ContentElement::TYPE_TT_CONTENT,
-                        $columnElement["uid"],
-                    ],
-                ]);
-                if (! empty($columnElement["children"])) {
-                    $element->children = $container->get(ContentElementColumnList::class,
-                        ["args" => [$columnElement["children"]]]);
-                }
-                $this->columns[$colId][] = $element;
-            }
-        }
+        $this->pid          = $pid;
+        $this->contents     = $contents;
+        $this->languageCode = $languageCode;
+    }
+
+    /**
+     * Returns the page id of the contents
+     *
+     * @return int
+     */
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
+
+    /**
+     * Returns the two char iso language code for this column list
+     *
+     * @return string
+     */
+    public function getLanguageCode(): string
+    {
+        return $this->languageCode;
+    }
+
+    /**
+     * Returns the list of raw content element records by their column id
+     *
+     * @return array
+     * @see \LaborDigital\Typo3BetterApi\Page\PageService::getPageContents()
+     */
+    public function getContents(): array
+    {
+        return $this->contents;
     }
 
     /**
@@ -70,29 +104,53 @@ class ContentElementColumnList implements SelfTransformingInterface
      */
     public function asArray(): array
     {
-        $result = [];
-        foreach ($this->columns as $colId => $columnElements) {
-            foreach ($columnElements as $columnElement) {
-                $result[$colId][] = $this->asJsonApiArray ?
-                    $columnElement->asJsonApiArray() : $columnElement->asArray();
-            }
-        }
+        return $this->remember(function () {
+            $result = [];
 
-        return $result;
+            foreach ($this->getColumns() as $colId => $elements) {
+                foreach ($elements as $element) {
+                    $result[$colId][] = $element->asArray();
+                }
+            }
+
+            return $result;
+        }, 'array');
     }
 
     /**
-     * Similar to "asArray" but returns the content elements formatted in the json-api schema
+     * Returns the list of all column instances and their nested content element instances as well
      *
-     * @return array
+     * @return ContentElement[][]
      */
-    public function asJsonApiArray(): array
+    public function getColumns(): array
     {
-        $this->asJsonApiArray = true;
-        $result               = $this->asArray();
-        $this->asJsonApiArray = false;
+        return $this->remember(function () {
+            $result  = [];
+            $context = $this->FrontendApiContext();
+            foreach ($this->contents as $colId => $columnElements) {
+                foreach ($columnElements as $columnElement) {
+                    /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement $element */
+                    $element = $context->getInstanceWithoutDi(
+                        ContentElement::class,
+                        [
+                            ContentElement::TYPE_TT_CONTENT,
+                            $columnElement['uid'],
+                            $this->languageCode,
+                        ]
+                    );
 
-        return $result;
+                    if (! empty($columnElement['children'])) {
+                        $element->children = $context->getInstanceWithoutDi(
+                            static::class, [$this->pid, $columnElement['children'], $this->languageCode]
+                        );
+                    }
+
+                    $result[$colId][] = $element;
+                }
+            }
+
+            return $result;
+        }, 'columns');
     }
 
     /**
@@ -107,6 +165,8 @@ class ContentElementColumnList implements SelfTransformingInterface
      */
     public static function makeInstanceFromPageContentsArray(array $contents): ContentElementColumnList
     {
-        return TypoContainer::getInstance()->get(static::class, ["args" => [$contents]]);
+        $languageCode = FrontendApiContext::getInstance()->getLanguageCode();
+
+        return TypoContainer::getInstance()->get(static::class, ['args' => [$contents, $languageCode]]);
     }
 }

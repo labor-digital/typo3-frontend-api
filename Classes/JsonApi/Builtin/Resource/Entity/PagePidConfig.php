@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -19,13 +20,12 @@
 
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
-
-use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 class PagePidConfig implements SelfTransformingInterface
 {
-
+    use FrontendApiContextAwareTrait;
 
     /**
      * The pid that was used to request the pid context
@@ -35,21 +35,13 @@ class PagePidConfig implements SelfTransformingInterface
     protected $pid;
 
     /**
-     * The list of localized pids
-     *
-     * @var array
-     */
-    protected $localPids;
-
-    /**
      * PagePid constructor.
      *
-     * @param   \LaborDigital\Typo3BetterApi\TypoContext\TypoContext  $context
+     * @param   int  $pid
      */
-    public function __construct(int $pid, TypoContext $context)
+    public function __construct(int $pid)
     {
-        $this->pid       = $pid;
-        $this->localPids = $context->getPidAspect()->getAllPids();
+        $this->pid = $pid;
     }
 
     /**
@@ -67,11 +59,15 @@ class PagePidConfig implements SelfTransformingInterface
      */
     public function asArray(): array
     {
-        $list         = $this->localPids;
-        $list["id"]   = $this->pid;
-        $list["hash"] = md5(\GuzzleHttp\json_encode($this->localPids));
+        $pids = $this->FrontendApiContext()->TypoContext()->Pid()->getAll();
 
-        return $list;
+        return array_merge(
+            $pids,
+            [
+                'id'   => $this->pid,
+                'hash' => md5(\GuzzleHttp\json_encode($pids)),
+            ]
+        );
     }
 
 }

@@ -20,16 +20,52 @@
 namespace LaborDigital\Typo3FrontendApi\ContentElement;
 
 
+use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement;
+use Psr\Http\Message\ResponseFactoryInterface;
 use TYPO3\CMS\Core\Http\ImmediateResponseException;
 
 /**
  * Class SpaContentPreparedException
+ *
  * @package LaborDigital\Typo3FrontendApi\ContentElement
  *
  * This exception extends the ImmediateResponseException, because in that way we will
  * bypass the TYPO3\CMS\Frontend\ContentObject\Exception\ProductionExceptionHandler completely
  * without having to deal with the default error handling.
  */
-class SpaContentPreparedException extends ImmediateResponseException {
+class SpaContentPreparedException extends ImmediateResponseException
+{
+    /**
+     * The instance of the prepared content element
+     *
+     * @var ContentElement
+     */
+    protected $contentElement;
 
+    /**
+     * Returns the instance of the prepared content element
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
+     */
+    public function getContentElement(): ContentElement
+    {
+        return $this->contentElement;
+    }
+
+    /**
+     * Creates a new instance of myself ready to be thrown
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement  $contentElement
+     *
+     * @return static
+     */
+    public static function makeInstance(ContentElement $contentElement): self
+    {
+        $responseFactory      = TypoContainer::getInstance()->get(ResponseFactoryInterface::class);
+        $self                 = new self($responseFactory->createResponse());
+        $self->contentElement = $contentElement;
+
+        return $self;
+    }
 }

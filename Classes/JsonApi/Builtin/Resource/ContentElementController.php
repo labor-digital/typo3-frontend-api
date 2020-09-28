@@ -42,7 +42,14 @@ class ContentElementController extends AbstractResourceController
      */
     public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
     {
-        return $this->getInstanceOf(ContentElement::class, [ContentElement::TYPE_TT_CONTENT, $id]);
+        return $this->getInstanceOf(
+            ContentElement::class,
+            [
+                ContentElement::TYPE_TT_CONTENT,
+                $id,
+                $this->TypoContext()->Language()->getCurrentFrontendLanguage()->toArray(),
+            ]
+        );
     }
 
     /**

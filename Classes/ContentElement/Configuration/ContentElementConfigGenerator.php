@@ -175,11 +175,11 @@ class ContentElementConfigGenerator implements CachedStackGeneratorInterface
     {
         // Check if we got a controller class
         if (empty($configurator->getControllerClass())) {
-            throw new ContentElementConfigException('There is no controller class registered for content element: {$configurator->getSignature()}');
+            throw new ContentElementConfigException('There is no controller class registered for content element: ' . $configurator->getSignature());
         }
 
         // Select content object to use
-        $co = $configurator->isUseCache() ? 'USER' : 'USER_INT';
+        $co = $configurator->isCacheEnabled() ? 'USER' : 'USER_INT';
 
         // Build definition
         $userFunc   = ContentElementHandler::class . '->handleFrontend';
@@ -196,7 +196,22 @@ class ContentElementConfigGenerator implements CachedStackGeneratorInterface
 			type = {$type}
 			extKey = {$context->getExtKey()}
 			vendor = {$context->getVendor()}
-		}";
+			caching {
+			    ttl = {$configurator->getCacheTtl()}
+			    enabled = {$configurator->isCacheEnabled()}
+			    tags {
+			        " .
+               (static function () use ($configurator) {
+                   $result = [];
+                   foreach ($configurator->getCacheTags() as $i => $tag) {
+                       $result[] = $i . ' = ' . $tag;
+                   }
+
+                   return implode(PHP_EOL, $result);
+               })() . '
+			    }
+			}
+		}';
     }
 
     /**

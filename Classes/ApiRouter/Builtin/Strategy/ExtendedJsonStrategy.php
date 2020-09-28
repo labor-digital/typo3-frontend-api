@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -20,6 +21,7 @@
 namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Strategy;
 
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\CacheControllingStrategyTrait;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\RouteStrategyTrait;
 use League\Route\Http\Exception as HttpException;
 use League\Route\Route;
 use League\Route\Strategy\JsonStrategy;
@@ -29,71 +31,85 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
 
-class ExtendedJsonStrategy extends JsonStrategy {
-	use CacheControllingStrategyTrait;
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface {
-		$response = parent::invokeRouteCallable($route, $request);
-		return $this->addInternalNoCacheHeaderIfRequired($route, $response);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function getExceptionHandler(): MiddlewareInterface {
-		return $this->buildNullThrowableHandler();
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function getThrowableHandler(): MiddlewareInterface {
-		return $this->buildNullThrowableHandler();
-	}
-	
-	/**
-	 * Let exceptions fall through to the error handler
-	 * @return \Psr\Http\Server\MiddlewareInterface
-	 */
-	protected function buildNullThrowableHandler(): MiddlewareInterface {
-		return new class implements MiddlewareInterface {
-			public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-				return $handler->handle($request);
-			}
-		};
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	protected function buildJsonResponseMiddleware(HttpException $exception): MiddlewareInterface {
-		// As we have our own error handler we don't need this...
-		return new class($exception) implements MiddlewareInterface {
-			
-			/**
-			 * @var \Throwable
-			 */
-			protected $exception;
-			
-			/**
-			 * Exception middleware constructor.
-			 *
-			 * @param \Throwable $exception
-			 */
-			public function __construct(Throwable $exception) {
-				$this->exception = $exception;
-			}
-			
-			/**
-			 * @inheritDoc
-			 * @throws \Exception
-			 */
-			public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-				throw $this->exception;
-			}
-		};
-	}
+class ExtendedJsonStrategy extends JsonStrategy
+{
+    use CacheControllingStrategyTrait;
+    use RouteStrategyTrait {
+        RouteStrategyTrait::getRouteConfig insteadof CacheControllingStrategyTrait;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
+    {
+        $this->announceRouteCacheOptions($route);
+
+        return parent::invokeRouteCallable($route, $request);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExceptionHandler(): MiddlewareInterface
+    {
+        return $this->buildNullThrowableHandler();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getThrowableHandler(): MiddlewareInterface
+    {
+        return $this->buildNullThrowableHandler();
+    }
+
+    /**
+     * Let exceptions fall through to the error handler
+     *
+     * @return \Psr\Http\Server\MiddlewareInterface
+     */
+    protected function buildNullThrowableHandler(): MiddlewareInterface
+    {
+        return new class implements MiddlewareInterface {
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+            {
+                return $handler->handle($request);
+            }
+        };
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function buildJsonResponseMiddleware(HttpException $exception): MiddlewareInterface
+    {
+        // As we have our own error handler we don't need this...
+        return new class($exception) implements MiddlewareInterface {
+
+            /**
+             * @var \Throwable
+             */
+            protected $exception;
+
+            /**
+             * Exception middleware constructor.
+             *
+             * @param   \Throwable  $exception
+             */
+            public function __construct(Throwable $exception)
+            {
+                $this->exception = $exception;
+            }
+
+            /**
+             * @inheritDoc
+             * @throws \Exception
+             */
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+            {
+                throw $this->exception;
+            }
+        };
+    }
 }

@@ -25,7 +25,7 @@ namespace LaborDigital\Typo3FrontendApi\Event;
  * Class SiteMenuPreProcessorEvent
  *
  * Emitted when a menu object is rendered in based on the site configuration.
- * Receives the prepared typoscript object and might intersect the default rendering
+ * Receives the prepared typoScript object and might intersect the default rendering
  *
  * @package LaborDigital\Typo3FrontendApi\Event
  */
@@ -49,19 +49,38 @@ class SiteMenuPreProcessorEvent
      * True as long as the menu should be rendered by the typo script controller
      *
      * @var bool
+     * @deprecated will be removed in v10
      */
     protected $render = true;
+
+    /**
+     * The unique key of the menu that is processed
+     *
+     * @var string
+     */
+    protected $key;
+
+    /**
+     * The options configured for this menu
+     *
+     * @var array
+     */
+    protected $options;
 
     /**
      * SiteMenuPreProcessorEvent constructor.
      *
      * @param   array   $definition
      * @param   string  $type
+     * @param   string  $key
+     * @param   array   $options
      */
-    public function __construct(array $definition, string $type)
+    public function __construct(array $definition, string $type, string $key, array $options)
     {
         $this->definition = $definition;
         $this->type       = $type;
+        $this->key        = $key;
+        $this->options    = $options;
     }
 
     /**
@@ -81,7 +100,7 @@ class SiteMenuPreProcessorEvent
      *
      * @return SiteMenuPreProcessorEvent
      */
-    public function setDefinition(array $definition): SiteMenuPreProcessorEvent
+    public function setDefinition(array $definition): self
     {
         $this->definition = $definition;
 
@@ -99,9 +118,30 @@ class SiteMenuPreProcessorEvent
     }
 
     /**
+     * Returns the unique key of the menu that is processed
+     *
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->key;
+    }
+
+    /**
+     * Returns the options configured for this menu
+     *
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
      * Returns true as long as the menu should be rendered by the typo script controller
      *
      * @return bool
+     * @deprecated will be removed in v10
      */
     public function isRender(): bool
     {
@@ -114,6 +154,7 @@ class SiteMenuPreProcessorEvent
      * @param   bool  $render
      *
      * @return SiteMenuPreProcessorEvent
+     * @deprecated will be removed in v10
      */
     public function setRender(bool $render): SiteMenuPreProcessorEvent
     {

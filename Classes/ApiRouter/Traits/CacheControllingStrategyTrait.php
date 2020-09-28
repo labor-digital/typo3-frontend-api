@@ -24,21 +24,34 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\Cach
 use League\Route\Route;
 use Psr\Http\Message\ResponseInterface;
 
-trait CacheControllingStrategyTrait {
-	use RouteConfigAwareTrait;
-	
-	/**
-	 * This method checks if a given route has a configured "useCache" attribute that is set to false.
-	 * If so it will add an X-FRONTEND-API-CACHE header to the response with the value of false
-	 *
-	 * @param \League\Route\Route                 $route
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface
-	 */
-	protected function addInternalNoCacheHeaderIfRequired(Route $route, ResponseInterface $response): ResponseInterface {
-		$routeConfig = $this->getRouteConfig($route);
-		if (!$routeConfig->isUseCache()) return $response->withAddedHeader(CacheMiddleware::CACHE_CONTROL_HEADER, "off");
-		return $response;
-	}
+/**
+ * Trait CacheControllingStrategyTrait
+ *
+ * @package    LaborDigital\Typo3FrontendApi\ApiRouter\Traits
+ * @deprecated will be removed in v10 use RouteStrategyTrait instead!
+ */
+trait CacheControllingStrategyTrait
+{
+    use RouteConfigAwareTrait;
+
+
+    /**
+     * This method checks if a given route has a configured "useCache" attribute that is set to false.
+     * If so it will add an X-FRONTEND-API-CACHE header to the response with the value of false
+     *
+     * @param   \League\Route\Route                  $route
+     * @param   \Psr\Http\Message\ResponseInterface  $response
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     * @deprecated will be removed in v10 use RouteStrategyTrait instead!
+     */
+    protected function addInternalNoCacheHeaderIfRequired(Route $route, ResponseInterface $response): ResponseInterface
+    {
+        $routeConfig = $this->getRouteConfig($route);
+        if (! $routeConfig->isUseCache()) {
+            return $response->withAddedHeader(CacheMiddleware::CACHE_CONTROL_HEADER, "off");
+        }
+
+        return $response;
+    }
 }

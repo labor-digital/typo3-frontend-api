@@ -47,7 +47,7 @@ class SysFileReferenceController extends AbstractResourceController
     public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
     {
         try {
-            $ref = $this->FalFiles->getFileReference($id);
+            $ref = $this->FalFiles()->getFileReference($id);
 
             return $ref;
         } catch (ResourceDoesNotExistException $e) {

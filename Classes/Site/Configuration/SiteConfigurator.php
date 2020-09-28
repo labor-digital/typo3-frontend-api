@@ -22,7 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageMenu;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\PageMenu;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -58,46 +58,72 @@ class SiteConfigurator
         $this->context            = $context;
         $this->config             = $config;
         $this->menuDefaultOptions = [
-            "entryLevel"       => [
-                "type"    => "int",
-                "default" => 0,
+            'entryLevel'        => [
+                'type'    => 'int',
+                'default' => 0,
             ],
-            "excludeUidList"   => [
-                "type"      => "array",
-                "default"   => [],
-                "preFilter" => function ($v) {
+            'excludeUidList'    => [
+                'type'      => 'array',
+                'default'   => [],
+                'preFilter' => function ($v) {
                     return $this->convertPids($v);
                 },
             ],
-            "includeNotInMenu" => [
-                "type"    => "bool",
-                "default" => false,
+            'includeNotInMenu'  => [
+                'type'    => 'bool',
+                'default' => false,
             ],
-            "levels"           => [
-                "type"    => "int",
-                "default" => 2,
+            'levels'            => [
+                'type'    => 'int',
+                'default' => 2,
             ],
-            "additionalFields" => [
-                "type"    => "array",
-                "default" => [],
+            'additionalFields'  => [
+                'type'    => 'array',
+                'default' => [],
             ],
-            "loadForLayouts"   => [
-                "type"    => "array",
-                "default" => [],
+            'fileFields'        => [
+                'type'    => 'array',
+                'default' => [],
             ],
-            "postProcessor"    => [
-                "type"      => ["string", "null"],
-                "default"   => null,
-                "validator" => function (?string $class) {
-                    if (is_null($class)) {
+            'loadForLayouts'    => [
+                'type'    => 'array',
+                'default' => [],
+            ],
+            'useV10Renderer'    => [
+                'type'    => 'bool',
+                'default' => false,
+            ],
+            'postProcessor'     => [
+                'type'      => ['string', 'null'],
+                'default'   => null,
+                'validator' => static function (?string $class) {
+                    if ($class === null) {
                         return true;
                     }
                     if (! class_exists($class)) {
-                        return "The given post processor class: \"$class\" does not exist!";
+                        return 'The given post processor class: "' . $class . '" does not exist!';
                     }
-                    if (! in_array(PageMenuPostProcessorInterface::class, class_implements($class))) {
-                        return "The given post processor \"$class\" must implement the required interface: " .
+                    if (! in_array(PageMenuPostProcessorInterface::class, class_implements($class), true)) {
+                        return 'The given post processor "' . $class . '" must implement the required interface: ' .
                                PageMenuPostProcessorInterface::class;
+                    }
+
+                    return true;
+                },
+            ],
+            'itemPostProcessor' => [
+                'type'      => ['string', 'null'],
+                'default'   => null,
+                'validator' => static function (?string $class) {
+                    if ($class === null) {
+                        return true;
+                    }
+                    if (! class_exists($class)) {
+                        return 'The given item post processor class: "' . $class . '" does not exist!';
+                    }
+                    if (! in_array(PageMenuItemPostProcessorInterface::class, class_implements($class), true)) {
+                        return 'The given item post processor "' . $class . '" must implement the required interface: ' .
+                               PageMenuItemPostProcessorInterface::class;
                     }
 
                     return true;
@@ -131,7 +157,7 @@ class SiteConfigurator
      */
     public function registerTranslationFile(string $file): SiteConfigurator
     {
-        $labels                          = $this->context->Translation->getAllKeysInFile($this->context->replaceMarkers($file));
+        $labels                          = $this->context->Translation()->getAllKeysInFile($this->context->replaceMarkers($file));
         $this->config->translationLabels = array_merge($this->config->translationLabels, $labels);
 
         return $this;
@@ -153,7 +179,7 @@ class SiteConfigurator
      */
     public function registerCommonTypoScriptElement(string $key, string $typoScriptObjectPath, array $loadForLayouts = []): SiteConfigurator
     {
-        return $this->addToCommonElements("ts", $key, $loadForLayouts, $typoScriptObjectPath);
+        return $this->addToCommonElements('ts', $key, $loadForLayouts, $typoScriptObjectPath);
     }
 
     /**
@@ -172,7 +198,7 @@ class SiteConfigurator
      */
     public function registerCommonContentElement(string $key, int $elementUid, array $loadForLayouts = []): SiteConfigurator
     {
-        return $this->addToCommonElements("contentElement", $key, $loadForLayouts, $elementUid);
+        return $this->addToCommonElements('contentElement', $key, $loadForLayouts, $elementUid);
     }
 
     /**
@@ -200,9 +226,9 @@ class SiteConfigurator
             throw new FrontendApiException("The given class: \"$class\" has to implement the required interface: " . CommonCustomElementInterface::class);
         }
 
-        return $this->addToCommonElements("custom", $key, $loadForLayouts, [
-            "class" => $class,
-            "data"  => $data,
+        return $this->addToCommonElements('custom', $key, $loadForLayouts, [
+            'class' => $class,
+            'data'  => $data,
         ]);
     }
 
@@ -219,8 +245,8 @@ class SiteConfigurator
         if (! class_exists($class)) {
             throw new JsonApiException("The given page data model $class does not exist!");
         }
-        if (! in_array(AbstractEntity::class, class_parents($class))) {
-            throw new JsonApiException("The given page data model $class has to extend the " . AbstractEntity::class . " class!");
+        if (! in_array(AbstractEntity::class, class_parents($class), true)) {
+            throw new JsonApiException("The given page data model $class has to extend the " . AbstractEntity::class . ' class!');
         }
         $this->config->pageDataClass = $class;
 
@@ -297,23 +323,33 @@ class SiteConfigurator
      *                            before it is passed to the frontend api. Has to implement the
      *                            PageMenuPostProcessorInterface
      *
-     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+     *                            TEMPORARY:
+     *                            - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
+     *                            This option will be removed in v10 because it will be the new default.
+     *
+     *                            useV10Renderer Options:
+     *                            - fileFields array: A list of page fields that should be resolved as fal file references
+     *                            - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item level while
+     *                            the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
+     *
+     * @return $this
      * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuItemPostProcessorInterface
      */
-    public function registerPageMenu(string $key, array $options = []): SiteConfigurator
+    public function registerPageMenu(string $key, array $options = []): self
     {
         // Prepare options
         $optionDefinition                = $this->menuDefaultOptions;
-        $optionDefinition["showSpacers"] = [
-            "type"    => "bool",
-            "default" => false,
+        $optionDefinition['showSpacers'] = [
+            'type'    => 'bool',
+            'default' => false,
         ];
         $options                         = Options::make($options, $optionDefinition);
 
         // Store the menu
-        return $this->addToCommonElements("menu", $key, $options["loadForLayouts"], [
-            "type"    => PageMenu::TYPE_MENU_PAGE,
-            "options" => $options,
+        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
+            'type'    => PageMenu::TYPE_MENU_PAGE,
+            'options' => $options,
         ]);
     }
 
@@ -338,28 +374,38 @@ class SiteConfigurator
      *                            before it is passed to the frontend api. Has to implement the
      *                            PageMenuPostProcessorInterface
      *
-     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+     *                            TEMPORARY:
+     *                            - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
+     *                            This option will be removed in v10 because it will be the new default.
+     *
+     *                            useV10Renderer Options:
+     *                            - fileFields array: A list of page fields that should be resolved as fal file references
+     *                            - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item level while
+     *                            the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
+     *
+     * @return $this
      * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuItemPostProcessorInterface
      */
     public function registerRootLineMenu(string $key, array $options = []): SiteConfigurator
     {
         // Prepare options
         $optionDefinition = $this->menuDefaultOptions;
-        unset($optionDefinition["levels"]);
-        $optionDefinition["offsetStart"] = [
-            "type"    => "int",
-            "default" => 0,
+        unset($optionDefinition['levels']);
+        $optionDefinition['offsetStart'] = [
+            'type'    => 'int',
+            'default' => 0,
         ];
-        $optionDefinition["offsetEnd"]   = [
-            "type"    => "int",
-            "default" => 0,
+        $optionDefinition['offsetEnd']   = [
+            'type'    => 'int',
+            'default' => 0,
         ];
         $options                         = Options::make($options, $optionDefinition);
 
         // Store the menu
-        return $this->addToCommonElements("menu", $key, $options["loadForLayouts"], [
-            "type"    => PageMenu::TYPE_MENU_ROOT_LINE,
-            "options" => $options,
+        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
+            'type'    => PageMenu::TYPE_MENU_ROOT_LINE,
+            'options' => $options,
         ]);
     }
 
@@ -386,31 +432,41 @@ class SiteConfigurator
      *                                before it is passed to the frontend api. Has to implement the
      *                                PageMenuPostProcessorInterface
      *
-     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+     *                                TEMPORARY:
+     *                                - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
+     *                                This option will be removed in v10 because it will be the new default.
+     *
+     *                                useV10Renderer Options:
+     *                                - fileFields array: A list of page fields that should be resolved as fal file references
+     *                                - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item level while
+     *                                the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
+     *
+     * @return $this
      * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuItemPostProcessorInterface
      */
     public function registerDirectoryMenu(string $key, $pid, array $options = []): SiteConfigurator
     {
         // Prepare options
         $optionDefinition                      = $this->menuDefaultOptions;
-        $optionDefinition["showSpacers"]       = [
-            "type"    => "bool",
-            "default" => false,
+        $optionDefinition['showSpacers']       = [
+            'type'    => 'bool',
+            'default' => false,
         ];
-        $optionDefinition["pid"]               = [
-            "type"      => "int",
-            "default"   => $pid,
-            "preFilter" => function ($v) {
+        $optionDefinition['pid']               = [
+            'type'      => 'int',
+            'default'   => $pid,
+            'preFilter' => function ($v) {
                 return $this->convertPids($v);
             },
         ];
-        $optionDefinition["levels"]["default"] = 1;
+        $optionDefinition['levels']['default'] = 1;
         $options                               = Options::make($options, $optionDefinition);
 
         // Store the menu
-        return $this->addToCommonElements("menu", $key, $options["loadForLayouts"], [
-            "type"    => PageMenu::TYPE_MENU_DIRECTORY,
-            "options" => $options,
+        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
+            'type'    => PageMenu::TYPE_MENU_DIRECTORY,
+            'options' => $options,
         ]);
     }
 
@@ -519,12 +575,12 @@ class SiteConfigurator
     protected function addToCommonElements(string $type, string $key, array $loadForLayouts, $value): SiteConfigurator
     {
         if (empty($loadForLayouts)) {
-            $loadForLayouts = ["*"];
+            $loadForLayouts = ['*'];
         }
         foreach ($loadForLayouts as $layout) {
             $this->config->commonElements[$layout][$key] = [
-                "type"  => $type,
-                "value" => $value,
+                'type'  => $type,
+                'value' => $value,
             ];
         }
 

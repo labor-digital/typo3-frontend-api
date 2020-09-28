@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -21,6 +22,8 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 
 
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Model\PageDataModel;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\CommonElement;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SiteConfig
 {
@@ -52,7 +55,7 @@ class SiteConfig
      *
      * @var string
      */
-    public $pageLayoutField = "backend_layout";
+    public $pageLayoutField = 'backend_layout';
 
     /**
      * A list of short translation labels and their matching typo3 translation keys
@@ -85,7 +88,10 @@ class SiteConfig
     public $additionalRootLineFields = [];
 
     /**
-     * @var callable
+     * A list of classes that provide additional data for the site's root line definition
+     *
+     * @var string[]
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface
      */
     public $rootLineDataProviders = [];
 
@@ -96,4 +102,30 @@ class SiteConfig
      * @var float|int
      */
     public $browserCacheTtl = 15 * 60;
+
+    /**
+     * Generates the list of all common element instances for this site.
+     *
+     * @param   string  $layout         The layout key to find the elements for
+     * @param   array   $requestedKeys  A list of keys that is used to filter the page objects
+     *
+     * @return array
+     */
+    public function getCommonElementInstances(string $layout, array $requestedKeys = []): array
+    {
+        $collection = [];
+
+        if (empty($this->commonElements[$layout])) {
+            $layout = 'default';
+        }
+
+        foreach ($this->commonElements[$layout] as $key => $foo) {
+            if (! empty($requestedKeys) && ! in_array($key, $requestedKeys, true)) {
+                continue;
+            }
+            $collection[] = GeneralUtility::makeInstance(CommonElement::class, $layout, $key);
+        }
+
+        return $collection;
+    }
 }

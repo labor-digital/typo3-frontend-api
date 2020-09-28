@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -21,13 +22,20 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\PageMenu;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 class CommonElement implements SelfTransformingInterface
 {
-    use SiteConfigAwareTrait;
+    use FrontendApiContextAwareTrait;
+
+    public const TYPE_CONTENT_ELEMENT = 'contentElement';
+    public const TYPE_TYPO_SCRIPT     = 'ts';
+    public const TYPE_MENU            = 'menu';
+    public const TYPE_CUSTOM          = 'custom';
 
     /**
      * The object key for this element
@@ -61,45 +69,55 @@ class CommonElement implements SelfTransformingInterface
     public function asArray(): array
     {
         // Check if we got this element
-        $siteConfig = $this->getCurrentSiteConfig();
+        $context    = $this->FrontendApiContext();
+        $siteConfig = $context->getCurrentSiteConfig();
         $layout     = $this->layout;
         if (empty($elementList[$layout])) {
-            $layout = "default";
+            $layout = 'default';
         }
-        if (! isset($siteConfig->commonElements[$layout]) ||
-            ! isset($siteConfig->commonElements[$layout][$this->key])) {
-            throw new JsonApiException("There is no common element with the given key: $this->key");
+        if (! isset($siteConfig->commonElements[$layout], $siteConfig->commonElements[$layout][$this->key])) {
+            throw new JsonApiException('There is no common element with the given key: ' . $this->key);
         }
 
-        // Create the instance
-        $config = $siteConfig->commonElements[$layout][$this->key];
-        switch ($config["type"]) {
-            case "contentElement":
-                $data = $this->getInstanceOf(ContentElement::class,
-                    [ContentElement::TYPE_TT_CONTENT, $config["value"]])->asArray();
-                break;
-            case "ts":
-                $data = $this->getInstanceOf(ContentElement::class,
-                    [ContentElement::TYPE_TYPO_SCRIPT, $config["value"]])->asArray();
-                break;
-            case "menu":
-                $data = $this->getInstanceOf(PageMenu::class, [$this->key, $config["value"]])->asArray();
-                break;
-            case "custom":
-                /** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\CommonCustomElementInterface $handler */
-                $handler = $this->getInstanceOf($config["value"]["class"]);
-                $data    = $handler->asArray($this->key, $config["value"]["data"]);
-                break;
-            default:
-                throw new JsonApiException("Could not render a common element with type: " . $config["type"]);
-        }
+        // Retrieve the data
+        $key    = $this->key;
+        $config = $siteConfig->commonElements[$layout][$key];
+        $type   = $config['type'];
+        $data   = $context->CacheService()->remember(static function () use ($config, $key, $context, $type) {
+            if ($type === static::TYPE_CONTENT_ELEMENT || $type === static::TYPE_TYPO_SCRIPT) {
+                return $context->getInstanceWithoutDi(ContentElement::class, [
+                    $type === static::TYPE_CONTENT_ELEMENT ? ContentElement::TYPE_TT_CONTENT : ContentElement::TYPE_TYPO_SCRIPT,
+                    $config['value'],
+                    $context->getLanguageCode(),
+                ])->asArray();
+            }
+
+            if ($type === static::TYPE_MENU) {
+                return $context->getInstanceWithoutDi(PageMenu::class, [
+                    $key,
+                    $config['value']['type'],
+                    $config['value']['options'],
+                ])->asArray();
+            }
+
+            if ($type === static::TYPE_CUSTOM) {
+                return $context->getInstanceOf($config['value']['class'])->asArray($key, $config['value']['data']);
+            }
+
+            throw new JsonApiException('Could not render a common element with type: ' . $type);
+
+        }, [
+            'tags'         => ['commonElement_' . $layout . '_' . $key],
+            'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class,
+                [[__CLASS__, $siteConfig->siteIdentifier, $key, $layout, $type, $config]]),
+        ]);
 
         // Done
         return [
-            "id"          => $this->key,
-            "layout"      => $this->layout,
-            "elementType" => $config["type"],
-            "element"     => $data,
+            'id'          => $this->key,
+            'layout'      => $this->layout,
+            'elementType' => $config['type'],
+            'element'     => $data,
         ];
     }
 
@@ -114,6 +132,6 @@ class CommonElement implements SelfTransformingInterface
      */
     public static function makeInstance(string $layout, string $key): CommonElement
     {
-        return TypoContainer::getInstance()->get(static::class, ["args" => [$layout, $key]]);
+        return TypoContainer::getInstance()->get(static::class, ['args' => [$layout, $key]]);
     }
 }

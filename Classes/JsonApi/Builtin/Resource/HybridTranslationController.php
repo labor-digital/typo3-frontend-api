@@ -22,7 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\NotImplementedException;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\HybridTranslation;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Translation\HybridTranslation;
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\AbstractResourceController;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;

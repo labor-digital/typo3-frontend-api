@@ -39,7 +39,7 @@ class CollectionStrategy extends AbstractResourceStrategy
         $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
 
         // Prepare pagination from resource type
-        if (! empty($context->getResourceConfig())) {
+        if ($context->getResourceConfig() !== null) {
             $context->setPageSize($context->getResourceConfig()->pageSize);
         }
 
@@ -48,11 +48,11 @@ class CollectionStrategy extends AbstractResourceStrategy
         $response   = $controller($request, $context);
 
         // Pass through direct responses
-        if ($response instanceof ResourceDataResult) {
-            return $this->getResponse($route, $response->getData(true));
-        }
         if ($response instanceof ResponseInterface) {
-            return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+            return $response;
+        }
+        if ($response instanceof ResourceDataResult) {
+            return $this->getJsonApiResponse($response->getData(true));
         }
 
         // Unify the response
@@ -70,7 +70,7 @@ class CollectionStrategy extends AbstractResourceStrategy
         $manager = $this->getManager($request, $context->getResourceType(), $response);
 
         // Done
-        return $this->getResponse($route, $manager->createData($collection)->toArray());
+        return $this->getJsonApiResponse($manager->createData($collection)->toArray());
     }
 
 }

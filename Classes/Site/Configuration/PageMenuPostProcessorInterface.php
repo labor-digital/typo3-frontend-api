@@ -34,6 +34,7 @@ interface PageMenuPostProcessorInterface
      * @param   string  $menuType  The type of the menu that was generated. One of PageMenu::TYPE_MENU_...
      *
      * @return array Must return the modified $menu array to be passed to the frontend
+     * @see PageMenuItemPostProcessorInterface to filter the items for a menu instead of the complete menu
      */
     public function process(string $key, array $menu, array $options, string $menuType): array;
 

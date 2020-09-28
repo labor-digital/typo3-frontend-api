@@ -22,7 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource;
 
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageTranslation;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Translation\PageTranslation;
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\AbstractResourceController;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;
@@ -31,8 +31,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class PageTranslationController extends AbstractResourceController
 {
-    use SiteConfigAwareTrait;
-    
+
     /**
      * @inheritDoc
      */
@@ -41,7 +40,7 @@ class PageTranslationController extends AbstractResourceController
         $configurator->getResourceRoute()->setPath('/{id}');
         $configurator->addClass(PageTranslation::class);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -49,17 +48,17 @@ class PageTranslationController extends AbstractResourceController
     {
         return $this->getInstanceOf(PageTranslation::class, [$id]);
     }
-    
+
     /**
      * @inheritDoc
      */
     public function collectionAction(ServerRequestInterface $request, CollectionControllerContext $context)
     {
         $languages = [];
-        foreach ($this->ConfigRepository()->site()->getSite()->getLanguages() as $language) {
+        foreach ($this->FrontendApiContext()->ConfigRepository()->site()->getSite()->getLanguages() as $language) {
             $languages[] = $this->getInstanceOf(PageTranslation::class, [$language]);
         }
-        
+
         return $languages;
     }
 }

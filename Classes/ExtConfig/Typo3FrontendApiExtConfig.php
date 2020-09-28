@@ -31,13 +31,12 @@ use LaborDigital\Typo3BetterApi\Middleware\RequestCollectorMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\SchedulerController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Controller\UpController;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\BodyParser\BodyParserMiddleware;
-use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddleware;
-use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\CacheHandler\CacheMiddlewareEventHandler;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Cache\CacheMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\ErrorHandler\ErrorHandlerMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\RedirectHandler\ApiRedirectMiddleware;
 use LaborDigital\Typo3FrontendApi\ApiRouter\ResponseFactory;
-use LaborDigital\Typo3FrontendApi\ContentElement\BackendListLabelFilterEventHandler;
+use LaborDigital\Typo3FrontendApi\Cache\CacheEventHandler;
 use LaborDigital\Typo3FrontendApi\Domain\Table\Override\TtContentOverrides;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingEventHandler;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer\DefaultSpecialObjectTransformer;
@@ -45,6 +44,8 @@ use LaborDigital\Typo3FrontendApi\TypoMiddleware\ApiMiddlewareFork;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
+use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 
 class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface
 {
@@ -56,6 +57,18 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
         // Register translation
         $configurator->translation()->registerContext('frontendApi');
 
+        // Register cache
+        $configurator->core()->registerCache(
+            'T3FA', VariableFrontend::class, Typo3DatabaseBackend::class,
+            [
+                'options' => [
+                    'compression'     => true,
+                    'defaultLifetime' => 60 * 60 * 24 * 7,
+                ],
+                'groups'  => 'pages',
+            ]
+        );
+
         // Register new implementations
         $configurator->core()
                      ->registerImplementation(ResponseFactoryInterface::class, ResponseFactory::class);
@@ -65,7 +78,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 
         // Register our event handlers
         $configurator->event()
-                     ->registerLazySubscriber(CacheMiddlewareEventHandler::class)
+                     ->registerLazySubscriber(CacheEventHandler::class)
                      ->registerLazySubscriber(ImagingEventHandler::class);
 
         // Register default middlewares
@@ -77,7 +90,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
             ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
                 ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
             ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
-            ->registerGlobalMiddleware(CacheMiddleware::class, ["middlewareStack" => "external"]);
+            ->registerGlobalMiddleware(CacheMiddleware::class, ['middlewareStack' => 'external']);;
 
         // Register the default resources
         $frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");

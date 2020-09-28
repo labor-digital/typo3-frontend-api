@@ -30,8 +30,9 @@ use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig;
 /**
  * Trait SiteConfigAwareTrait
  *
- * @package LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource
- * @see     \LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait
+ * @package    LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource
+ * @see        \LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait
+ * @deprecated will be removed in v10
  */
 trait SiteConfigAwareTrait
 {
@@ -40,7 +41,7 @@ trait SiteConfigAwareTrait
         CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
         CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
     }
-    
+
     /**
      * Returns the instance of the config repository
      *
@@ -50,7 +51,7 @@ trait SiteConfigAwareTrait
     {
         return $this->getSingletonOf(FrontendApiConfigRepository::class);
     }
-    
+
     /**
      * Returns the site configuration either for the current site or the global site if no specific site config was
      * found.
@@ -61,7 +62,7 @@ trait SiteConfigAwareTrait
     {
         return $this->ConfigRepository()->site()->getCurrentSiteConfig();
     }
-    
+
     /**
      * Generates the list of all page objects for this site.
      *
@@ -83,7 +84,7 @@ trait SiteConfigAwareTrait
             }
             $collection[] = $this->Container()->getWithoutDi(CommonElement::class, [$layout, $key]);
         }
-        
+
         return $collection;
     }
 }

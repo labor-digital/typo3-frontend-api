@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\ContentElement\Controller;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3FrontendApi\Cache\CacheOptionsTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use Neunerlei\Arrays\Arrays;
@@ -29,6 +30,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class ContentElementControllerContext
 {
+    use CacheOptionsTrait;
 
     /**
      * The c-type that is used as unique key for the content element
@@ -65,7 +67,7 @@ class ContentElementControllerContext
      *
      * @var AbstractContentElementModel|mixed
      */
-    protected $data;
+    protected $model;
 
     /**
      * The server request that lead to this content element
@@ -141,7 +143,7 @@ class ContentElementControllerContext
         array $cssClasses
     ) {
         $this->config      = $config;
-        $this->data        = $model;
+        $this->model       = $model;
         $this->request     = $request;
         $this->cType       = $cType;
         $type              = explode('_', $cType);
@@ -154,10 +156,21 @@ class ContentElementControllerContext
      * Returns the instance of the data model for this content element
      *
      * @return \LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel|\LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\DefaultContentElementModel
+     * @deprecated will be removed in v10, use getModel() instead!
      */
     public function getData(): AbstractContentElementModel
     {
-        return $this->data;
+        return $this->model;
+    }
+
+    /**
+     * Returns the instance of the data model for this content element
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel|\LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\DefaultContentElementModel
+     */
+    public function getModel(): AbstractContentElementModel
+    {
+        return $this->model;
     }
 
     /**

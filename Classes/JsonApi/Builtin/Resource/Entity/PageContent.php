@@ -21,50 +21,66 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
-use LaborDigital\Typo3BetterApi\Container\ContainerAwareTrait;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3BetterApi\Page\PageService;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
+use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
 
 class PageContent implements SelfTransformingInterface
 {
-    use ContainerAwareTrait;
-    
-    /**
-     * The internal column list we use as data handler
-     *
-     * @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElementColumnList
-     */
-    protected $columnList;
-    
+    use FrontendApiContextAwareTrait;
+    use ShortTimeMemoryTrait;
+
     /**
      * The page id we hold the layout data for
      *
      * @var int
      */
     protected $id;
-    
+
+    /**
+     * The two char iso language code for this element
+     *
+     * @var string
+     */
+    protected $languageCode;
+
     /**
      * PageContent constructor.
      *
-     * @param   int  $id  The pid of the page to gather the contents for
+     * @param   int     $id  The pid of the page to gather the contents for
+     * @param   string  $languageCode
      */
-    public function __construct(int $id)
+    public function __construct(int $id, string $languageCode)
     {
-        $this->id = $id;
+        $this->id           = $id;
+        $this->languageCode = $languageCode;
     }
-    
+
     /**
      * @inheritDoc
      */
     public function asArray(): array
     {
-        return [
-            'id'       => $this->id,
-            'children' => $this->getContents()->asArray(),
-        ];
+        $context = $this->FrontendApiContext();
+
+        return $context->CacheService()->remember(
+            function () {
+                return [
+                    'id'       => $this->id,
+                    'children' => $this->getContents()->asArray(),
+                ];
+            },
+            [
+                'tags'         => ['page_' . $this->id, 'pages_' . $this->id],
+                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
+                    [__CLASS__, $this->id, $this->languageCode],
+                ]),
+            ]
+        );
     }
-    
+
     /**
      * Returns the contents as object representation
      *
@@ -72,14 +88,17 @@ class PageContent implements SelfTransformingInterface
      */
     public function getContents(): ContentElementColumnList
     {
-        if (isset($this->columnList)) {
-            return $this->columnList;
-        }
-        
-        return $this->columnList = $this->getInstanceOf(ContentElementColumnList::class,
-            [$this->getSingletonOf(PageService::class)->getPageContents($this->id)]);
+        return $this->remember(function () {
+            $context = $this->FrontendApiContext();
+
+            return $context->getInstanceWithoutDi(ContentElementColumnList::class, [
+                $this->id,
+                $context->Page()->getPageContents($this->id),
+                $this->languageCode,
+            ]);
+        });
     }
-    
+
     /**
      * Factory method to create a new instance of myself
      *

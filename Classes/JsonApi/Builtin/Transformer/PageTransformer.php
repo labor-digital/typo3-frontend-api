@@ -31,14 +31,14 @@ class PageTransformer extends AbstractResourceTransformer
      *
      * @var array
      */
-    protected $availableIncludes = ["data", "content", "common", "translation", "pidConfig"];
+    protected $availableIncludes = ['data', 'content', 'common', 'translation', 'pidConfig'];
 
     /**
      * Register all default includes
      *
      * @var array
      */
-    protected $defaultIncludes = ["pidConfig"];
+    protected $defaultIncludes = ['pidConfig'];
 
     /**
      * @inheritDoc
@@ -50,26 +50,26 @@ class PageTransformer extends AbstractResourceTransformer
         }
 
         // Check if the frontend requires the new translation knows this translation
-        if (! in_array($value->getLanguageCode(), $value->getLoadedLanguageCodes())) {
-            $this->defaultIncludes[] = "translation";
+        if (! in_array($value->getLanguageCode(), $value->getLoadedLanguageCodes(), true)) {
+            $this->defaultIncludes[] = 'translation';
         }
 
         // Check if we have to render the common elements, because we changed the layout
         // or check if common elements have to be refreshed
         if ($value->isLayoutChange() || ! empty($value->getRefreshCommon())) {
-            $this->defaultIncludes[] = "common";
+            $this->defaultIncludes[] = 'common';
         }
 
         // Convert the page object itself
         return [
-            "id"            => $value->getId(),
-            "siteUrl"       => $value->getSiteUrl(),
-            "siteLanguages" => $value->getLanguageCodes(),
-            "languageCode"  => $value->getLanguageCode(),
-            "pageLayout"    => $value->getPageLayout(),
-            "rootLine"      => $value->getRootLine(),
-            "links"         => $value->getLinks(),
-            "isPreview"     => $this->Tsfe()->getTsfe()->fePreview === 1,
+            'id'            => $value->getId(),
+            'siteUrl'       => $value->getSiteUrl(),
+            'siteLanguages' => $value->getLanguageCodes(),
+            'languageCode'  => $value->getLanguageCode(),
+            'pageLayout'    => $value->getPageLayout(),
+            'rootLine'      => $value->getRootLine(),
+            'links'         => $value->getLinks(),
+            'isPreview'     => $this->Tsfe()->getTsfe()->fePreview === 1,
         ];
     }
 

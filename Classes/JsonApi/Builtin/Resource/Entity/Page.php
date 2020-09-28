@@ -23,37 +23,36 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3FrontendApi\Event\PageRootLineFilterEvent;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Translation\PageTranslation;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface;
 use Neunerlei\Inflection\Inflector;
 
 class Page
 {
-    use SiteConfigAwareTrait {
-        SiteConfigAwareTrait::getCommonElements as getCommonElementsInternal;
-    }
-    
+    use FrontendApiContextAwareTrait;
+
     /**
      * The page id we hold the representation for
      *
      * @var int
      */
     protected $id;
-    
+
     /**
      * Holds the page layout identifier after it was resolved
      *
      * @var string|null
      */
     protected $pageLayout;
-    
+
     /**
      * Holds the page's root line array after it was resolved
      *
      * @var array|null
      */
     protected $rootLine;
-    
+
     /**
      * The list of loaded language codes the frontend already knows,
      * this is used to avoid duplicate translations when translating this entity
@@ -61,7 +60,7 @@ class Page
      * @var array
      */
     protected $loadedLanguageCodes;
-    
+
     /**
      * An optional list of common element keys that should be included in the response.
      * Useful if elements have to be refreshed on every page load.
@@ -70,7 +69,14 @@ class Page
      * @var array
      */
     protected $refreshCommon;
-    
+
+    /**
+     * The two char iso language code for this element
+     *
+     * @var string
+     */
+    protected $languageCode;
+
     /**
      * The last known layout of the frontend.
      * This is used to check which common elements should be rendered.
@@ -79,7 +85,7 @@ class Page
      * @var string
      */
     protected $lastLayout;
-    
+
     /**
      * Page constructor.
      *
@@ -87,15 +93,17 @@ class Page
      * @param   string  $lastLayout
      * @param   array   $loadedLanguageCodes
      * @param   array   $refreshCommon
+     * @param   string  $languageCode
      */
-    public function __construct(int $id, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon)
+    public function __construct(int $id, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon, string $languageCode)
     {
         $this->id                  = $id;
         $this->lastLayout          = $lastLayout;
         $this->loadedLanguageCodes = $loadedLanguageCodes;
         $this->refreshCommon       = $refreshCommon;
+        $this->languageCode        = $languageCode;
     }
-    
+
     /**
      * Returns the page id this object represents
      *
@@ -105,7 +113,7 @@ class Page
     {
         return $this->id;
     }
-    
+
     /**
      * Returns the additional link entries for this page
      *
@@ -114,14 +122,14 @@ class Page
     public function getLinks(): array
     {
         // Prepare the link
-        $link = $this->Links->getLink()->withPid($this->getId());
-        
+        $link = $this->FrontendApiContext()->Links()->getLink()->withPid($this->getId());
+
         return [
             'frontend' => $link->build(),
             'slug'     => $link->build(['relative']),
         ];
     }
-    
+
     /**
      * Returns the base url for the site that contains this page
      *
@@ -129,9 +137,9 @@ class Page
      */
     public function getSiteUrl(): string
     {
-        return $this->TypoContext->getSiteAspect()->getSite()->getBase()->__toString();
+        return $this->FrontendApiContext()->TypoContext()->Site()->getCurrent()->getBase()->__toString();
     }
-    
+
     /**
      * Returns the page layout identifier of the current page
      *
@@ -139,19 +147,21 @@ class Page
      */
     public function getPageLayout(): string
     {
-        if (! is_null($this->pageLayout)) {
+        if ($this->pageLayout !== null) {
             return $this->pageLayout;
         }
-        $pageLayoutField = $this->getCurrentSiteConfig()->pageLayoutField;
-        $pageData        = $this->Page->getPageInfo($this->id);
+        $context         = $this->FrontendApiContext();
+        $pageLayoutField = $context->getCurrentSiteConfig()->pageLayoutField;
+        $pageData        = $context->Page()->getPageInfo($this->id);
         if (empty($pageData)) {
             $pageData = [];
         }
+
         // Find layout by root line if required
         if (! empty($pageData[$pageLayoutField])) {
             return $this->pageLayout = $pageData[$pageLayoutField];
         }
-        $rootLine    = $this->Page->getRootLine($this->id);
+        $rootLine    = $context->Page()->getRootLine($this->id);
         $lookupField = $pageLayoutField . '_next_level';
         foreach ($rootLine as $row) {
             if (! empty($row[$pageLayoutField])) {
@@ -161,10 +171,10 @@ class Page
                 return $this->pageLayout = $row[$lookupField];
             }
         }
-        
+
         return $this->pageLayout = 'default';
     }
-    
+
     /**
      * Returns the root line of this page as an array
      *
@@ -172,20 +182,24 @@ class Page
      */
     public function getRootLine(): array
     {
-        if (! is_null($this->rootLine)) {
+        if ($this->rootLine !== null) {
             return $this->rootLine;
         }
+
+        $context        = $this->FrontendApiContext();
         $rootLine       = [];
-        $rootLineRaw    = $this->Page->getRootLine($this->id);
+        $rootLineRaw    = $context->Page()->getRootLine($this->id);
         $this->rootLine = $rootLineRaw;
-        
+
         // Allow filtering
-        $this->EventBus->dispatch(($e = new PageRootLineFilterEvent($this, $rootLineRaw)));
+        $context->EventBus()->dispatch(($e = new PageRootLineFilterEvent($this, $rootLineRaw)));
         $this->rootLine = null;
         $rootLineRaw    = $e->getRootLine();
-        
-        $additionalFields = $this->getCurrentSiteConfig()->additionalRootLineFields;
-        $dataProviders    = $this->getCurrentSiteConfig()->rootLineDataProviders;
+
+        // Traverse the root line and inject the additional data
+        $siteConfig       = $context->getCurrentSiteConfig();
+        $additionalFields = $siteConfig->additionalRootLineFields;
+        $dataProviders    = $siteConfig->rootLineDataProviders;
         $c                = 0;
         foreach (array_reverse($rootLineRaw) as $pageData) {
             $pageDataPrepared = [
@@ -194,13 +208,16 @@ class Page
                 'level'    => $c++,
                 'title'    => $pageData['title'],
                 'navTitle' => $pageData['nav_title'],
-                'slug'     => $this->Links->getLink()->withPid($pageData['uid'])->build(['relative']),
+                'link'     => $context->Links()->getLink()->withPid($pageData['uid'])->build(['relative']),
             ];
-            
+
+            // @todo remove this in v10
+            $pageDataPrepared['slug'] = $pageDataPrepared['link'];
+
             // Merge in additional fields
             $pageInfo = null;
             if (! empty($additionalFields)) {
-                $pageInfo = $this->Page->getPageInfo($pageDataPrepared['id']);
+                $pageInfo = $context->Page()->getPageInfo($pageDataPrepared['id']);
                 foreach ($additionalFields as $field) {
                     $propertyName = Inflector::toCamelBack($field);
                     if (isset($pageInfo[$field])) {
@@ -210,29 +227,29 @@ class Page
                     }
                 }
             }
-            
+
             // Check if we have data providers
             if (! empty($dataProviders)) {
                 if (empty($pageInfo)) {
-                    $pageInfo = $this->Page->getPageInfo($pageData['uid']);
+                    $pageInfo = $context->Page()->getPageInfo($pageData['uid']);
                 }
                 foreach ($dataProviders as $dataProvider) {
                     /** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\RootLineDataProviderInterface $provider */
-                    $provider = $this->getInstanceOf($dataProvider);
+                    $provider = $context->getInstanceOf($dataProvider);
                     if (! $provider instanceof RootLineDataProviderInterface) {
                         continue;
                     }
                     $pageDataPrepared = $provider->addData($pageDataPrepared, $pageInfo, $rootLineRaw);
                 }
             }
-            
+
             // Done
             $rootLine[] = $pageDataPrepared;
         }
-        
+
         return $this->rootLine = $rootLine;
     }
-    
+
     /**
      * Returns the current language code of this page
      *
@@ -240,9 +257,9 @@ class Page
      */
     public function getLanguageCode(): string
     {
-        return $this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()->getTwoLetterIsoCode();
+        return $this->languageCode;
     }
-    
+
     /**
      * Returns the list of all language codes the frontend may display
      *
@@ -251,13 +268,13 @@ class Page
     public function getLanguageCodes(): array
     {
         $languages = [];
-        foreach ($this->TypoContext->getLanguageAspect()->getAllFrontendLanguages() as $language) {
+        foreach ($this->FrontendApiContext()->TypoContext()->Language()->getAllFrontendLanguages() as $language) {
             $languages[] = $language->getTwoLetterIsoCode();
         }
-        
+
         return $languages;
     }
-    
+
     /**
      * Returns the list of all loaded language codes the frontend told us about
      *
@@ -267,7 +284,7 @@ class Page
     {
         return $this->loadedLanguageCodes;
     }
-    
+
     /**
      * Returns the name of the last known layout the frontend told us about
      *
@@ -277,7 +294,7 @@ class Page
     {
         return $this->lastLayout;
     }
-    
+
     /**
      * Returns true if we detected a layout change between the requests -> render all common elements
      *
@@ -287,7 +304,7 @@ class Page
     {
         return empty($this->getLastLayout()) || $this->getLastLayout() !== $this->getPageLayout();
     }
-    
+
     /**
      * Returns a list of common element keys that should be included in the response.
      *
@@ -297,7 +314,7 @@ class Page
     {
         return $this->refreshCommon;
     }
-    
+
     /**
      * Returns the list of pids that are configured for this page
      *
@@ -305,9 +322,9 @@ class Page
      */
     public function getPagePidConfig(): PagePidConfig
     {
-        return $this->getInstanceOf(PagePidConfig::class, [$this->id]);
+        return $this->FrontendApiContext()->getInstanceWithoutDi(PagePidConfig::class, [$this->id]);
     }
-    
+
     /**
      * Returns the page data object for this page
      *
@@ -315,9 +332,9 @@ class Page
      */
     public function getPageData(): PageData
     {
-        return $this->getInstanceOf(PageData::class, [$this->id]);
+        return $this->FrontendApiContext()->getInstanceWithoutDi(PageData::class, [$this->id, $this->languageCode]);
     }
-    
+
     /**
      * Returns the content object list for this page
      *
@@ -325,9 +342,9 @@ class Page
      */
     public function getPageContents(): PageContent
     {
-        return $this->getInstanceOf(PageContent::class, [$this->id]);
+        return $this->FrontendApiContext()->getInstanceWithoutDi(PageContent::class, [$this->id, $this->languageCode]);
     }
-    
+
     /**
      * Returns the list of typoScript and layout objects for this page
      *
@@ -335,36 +352,38 @@ class Page
      */
     public function getCommonElements(): array
     {
-        return $this->getCommonElementsInternal($this->getPageLayout(), ($this->isLayoutChange() ? [] : $this->getRefreshCommon()));
+        return $this->FrontendApiContext()->getCurrentSiteConfig()->getCommonElementInstances(
+            $this->getPageLayout(),
+            $this->isLayoutChange() ? [] : $this->getRefreshCommon()
+        );
     }
-    
+
     /**
      * Returns the page translation object for the current frontend language of this page
      *
-     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageTranslation
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Translation\PageTranslation
      */
-    public function getPageTranslation()
+    public function getPageTranslation(): PageTranslation
     {
-        return $this->getInstanceOf(PageTranslation::class,
-            [$this->TypoContext->getLanguageAspect()->getCurrentFrontendLanguage()]);
+        return $this->FrontendApiContext()->getInstanceWithoutDi(PageTranslation::class, [$this->languageCode]);
     }
-    
+
     /**
      * Factory method to create a new instance of myself
      *
      * @param   int     $pageId
      * @param   string  $lastLayout
      * @param   array   $loadedLanguageCodes
-     *
      * @param   array   $refreshCommon
+     * @param   string  $languageCode
      *
      * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page
      * @deprecated removed in v10 use the __construct method instead
      */
-    public static function makeInstance(int $pageId, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon): Page
+    public static function makeInstance(int $pageId, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon, string $languageCode): Page
     {
         return TypoContainer::getInstance()->get(static::class, [
-            'args' => [$pageId, $lastLayout, $loadedLanguageCodes, $refreshCommon],
+            'args' => [$pageId, $lastLayout, $loadedLanguageCodes, $refreshCommon, $languageCode],
         ]);
     }
 }

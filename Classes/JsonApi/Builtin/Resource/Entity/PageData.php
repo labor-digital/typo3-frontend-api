@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -22,17 +23,19 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3FrontendApi\Event\PageDataPageInfoFilterEvent;
-use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\SiteConfigAwareTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ModelHydrationTrait;
+use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
 use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Inflection\Inflector;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class PageData
 {
-    use SiteConfigAwareTrait;
+    use FrontendApiContextAwareTrait;
     use ModelHydrationTrait;
+    use ShortTimeMemoryTrait;
 
     /**
      * The page id we hold the data for
@@ -42,11 +45,11 @@ class PageData
     protected $id;
 
     /**
-     * Holds the last page info array or is null
+     * The two char iso language code for this element
      *
-     * @var array
+     * @var string
      */
-    protected $pageInfo;
+    protected $languageCode;
 
     /**
      * The map of fields and their parent page uids to map references correctly
@@ -65,11 +68,33 @@ class PageData
     /**
      * PageData constructor.
      *
-     * @param   int  $id  The pid of the page we should represent the data for
+     * @param   int     $id  The pid of the page we should represent the data for
+     * @param   string  $languageCode
      */
-    public function __construct(int $id)
+    public function __construct(int $id, string $languageCode)
     {
-        $this->id = $id;
+        $this->id           = $id;
+        $this->languageCode = $languageCode;
+    }
+
+    /**
+     * Returns the page id we hold the data for
+     *
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Returns the two char iso language code for this element
+     *
+     * @return string
+     */
+    public function getLanguageCode(): string
+    {
+        return $this->languageCode;
     }
 
     /**
@@ -81,19 +106,20 @@ class PageData
      */
     public function getData(): AbstractEntity
     {
-        $pageClass = $this->getCurrentSiteConfig()->pageDataClass;
-        if (! class_exists($pageClass)) {
-            throw new JsonApiException("The given page data class: $pageClass does not exist!");
-        }
-        $model = $this->hydrateModelObject($pageClass, "pages", $this->getPageInfo());
+        return $this->remember(function () {
+            $pageClass = $this->FrontendApiContext()->getCurrentSiteConfig()->pageDataClass;
+            if (! class_exists($pageClass)) {
+                throw new JsonApiException('The given page data class: ' . $pageClass . ' does not exist!');
+            }
+            $model = $this->hydrateModelObject($pageClass, 'pages', $this->getPageInfo());
 
-        // Check if we have to update slided properties
-        if (! empty($this->slideFieldPidMap)) {
-            $this->applySlideProperties($pageClass, $model);
-        }
+            // Check if we have to update slided properties
+            if (! empty($this->slideFieldPidMap)) {
+                $this->applySlideProperties($pageClass, $model);
+            }
 
-        // Done
-        return $model;
+            return $model;
+        }, 'model');
     }
 
     /**
@@ -104,24 +130,25 @@ class PageData
      */
     public function getPageInfo(): array
     {
-        if (isset($this->pageInfo)) {
-            return $this->pageInfo;
-        }
-        $pageInfo = $this->Page->getPageInfo($this->id);
-        if (empty($pageInfo)) {
-            throw new NotFoundException();
-        }
+        return $this->remember(function () {
+            $context  = $this->FrontendApiContext();
+            $pageInfo = $context->Page()->getPageInfo($this->id);
 
-        // Apply slide fields if required
-        $slideFields = $this->getCurrentSiteConfig()->pageDataSlideFields;
-        if (! empty($slideFields)) {
-            $pageInfo = $this->applySlideFields($pageInfo, $slideFields);
-        }
+            if (empty($pageInfo)) {
+                throw new NotFoundException();
+            }
 
-        // Allow filtering
-        $this->EventBus->dispatch(($e = new PageDataPageInfoFilterEvent($this->id, $pageInfo, $this->slideFieldPidMap)));
+            // Apply slide fields if required
+            $slideFields = $context->getCurrentSiteConfig()->pageDataSlideFields;
+            if (! empty($slideFields)) {
+                $pageInfo = $this->applySlideFields($pageInfo, $slideFields);
+            }
 
-        return $this->pageInfo = $e->getRow();
+            // Allow filtering
+            return $context->EventBus()->dispatch(
+                new PageDataPageInfoFilterEvent($this->id, $pageInfo, $this->slideFieldPidMap)
+            )->getRow();
+        }, 'pageInfo');
     }
 
     /**
@@ -131,11 +158,12 @@ class PageData
      */
     public function getSlideFieldPidMap(): array
     {
-        if (! isset($this->pageInfo)) {
+        return $this->remember(function () {
+            // This has to be called in order for slideFieldPidMap to be filled
             $this->getPageInfo();
-        }
 
-        return $this->slideFieldPidMap;
+            return $this->slideFieldPidMap;
+        }, 'slideFieldPidMap');
     }
 
     /**
@@ -145,20 +173,12 @@ class PageData
      */
     public function getSlideParentPageInfoMap(): array
     {
-        return $this->slideParentPageInfoMap;
-    }
+        return $this->remember(function () {
+            // This has to be called in order for slideParentPageInfoMap to be filled
+            $this->getPageInfo();
 
-    /**
-     * Factory method to create a new instance of myself
-     *
-     * @param   int  $id
-     *
-     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
-     * @deprecated removed in v10 use the __construct method instead
-     */
-    public static function makeInstance(int $id): PageData
-    {
-        return TypoContainer::getInstance()->get(static::class, ["args" => [$id]]);
+            return $this->slideParentPageInfoMap;
+        }, 'slideParentPageInfoMap');
     }
 
     /**
@@ -175,11 +195,11 @@ class PageData
         $fields = array_intersect_key($pageInfo, array_fill_keys($slideFields, null));
 
         // A helper to check if a field's value is empty
-        $isEmpty = function (string $field, array $pageInfo): bool {
+        $isEmpty = static function (string $field, array $pageInfo): bool {
             if (! array_key_exists($field, $pageInfo)) {
                 return false;
             }
-            if (is_null($pageInfo[$field]) || $pageInfo[$field] === "" || $pageInfo[$field] === "0") {
+            if ($pageInfo[$field] === null || $pageInfo[$field] === '' || $pageInfo[$field] === '0') {
                 return true;
             }
 
@@ -187,7 +207,8 @@ class PageData
         };
 
         // Generate the root line and prepare a cache to store resolved page information
-        $rootLine      = $this->Page->getRootLine($this->id);
+        $pageService   = $this->FrontendApiContext()->Page();
+        $rootLine      = $pageService->getRootLine($this->id);
         $pageInfoCache = [];
 
         // Run trough all fields and try to update them
@@ -200,10 +221,10 @@ class PageData
             // Iterate up the root line
             foreach ($rootLine as $parentPageInfo) {
                 // Load the row from the page info cache or from the repository
-                if (! isset($pageInfoCache[$parentPageInfo["uid"]])) {
-                    $pageInfoCache[$parentPageInfo["uid"]] = $this->Page->getPageInfo($parentPageInfo["uid"]);
+                if (! isset($pageInfoCache[$parentPageInfo['uid']])) {
+                    $pageInfoCache[$parentPageInfo['uid']] = $pageService->getPageInfo($parentPageInfo['uid']);
                 }
-                $parentPageInfo = $pageInfoCache[$parentPageInfo["uid"]];
+                $parentPageInfo = $pageInfoCache[$parentPageInfo['uid']];
 
                 // Check if the field in the parent is empty as well
                 if ($isEmpty($k, $parentPageInfo)) {
@@ -212,8 +233,8 @@ class PageData
 
                 // Map the info
                 $pageInfo[$k]                                         = $parentPageInfo[$k];
-                $this->slideFieldPidMap[$k]                           = $parentPageInfo["pid"];
-                $this->slideParentPageInfoMap[$parentPageInfo["pid"]] = $parentPageInfo;
+                $this->slideFieldPidMap[$k]                           = $parentPageInfo['pid'];
+                $this->slideParentPageInfoMap[$parentPageInfo['pid']] = $parentPageInfo;
                 continue 2;
             }
         }
@@ -233,7 +254,7 @@ class PageData
     protected function applySlideProperties(string $pageClass, AbstractEntity $model): void
     {
         $props          = $model->_getProperties();
-        $slideableProps = array_combine(array_map([Inflector::class, "toProperty"], array_keys($this->slideFieldPidMap)), $this->slideFieldPidMap);
+        $slideableProps = array_combine(array_map([Inflector::class, 'toProperty'], array_keys($this->slideFieldPidMap)), $this->slideFieldPidMap);
 
         // Check if we have props to slide -> Ignore if not...
         $slidedProps = array_intersect_key($slideableProps, $props);
@@ -247,12 +268,24 @@ class PageData
             // Try to resolve the model from the cache or create it
             if (! isset($parentModels[$parentPid])) {
                 $parentModels[$parentPid] = $this->hydrateModelObject(
-                    $pageClass, "page", $this->slideParentPageInfoMap[$parentPid]);
+                    $pageClass, 'page', $this->slideParentPageInfoMap[$parentPid]);
             }
-            /** @var AbstractEntity $parent */
             $parent = $parentModels[$parentPid];
             $model->_setProperty($slidedProp, $parent->_getProperty($slidedProp));
         }
         unset($parentModels);
+    }
+
+    /**
+     * Factory method to create a new instance of myself
+     *
+     * @param   int  $id
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData
+     * @deprecated removed in v10 use the __construct method instead
+     */
+    public static function makeInstance(int $id): PageData
+    {
+        return TypoContainer::getInstance()->get(static::class, ['args' => [$id]]);
     }
 }

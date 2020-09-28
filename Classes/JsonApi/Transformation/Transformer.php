@@ -23,7 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 class Transformer extends AbstractResourceTransformer
 {
-    
+
     /**
      * @inheritDoc
      */
@@ -36,11 +36,11 @@ class Transformer extends AbstractResourceTransformer
         } elseif ($this->config->isScalar) {
             // Handle scalar
             $result = [
-                "id"    => md5((string)microtime(true)),
-                "value" => $value,
+                'id'    => md5((string)microtime(true)),
+                'value' => $value,
             ];
         } elseif ($this->config->isNull) {
-            $result = ["id" => null];
+            $result = ['id' => null];
         } elseif ($this->config->isSelfTransforming && $value instanceof SelfTransformingInterface) {
             $result = $value->asArray();
             if ($value instanceof HybridSelfTransformingInterface) {
@@ -52,26 +52,26 @@ class Transformer extends AbstractResourceTransformer
             $transformer->setFactory($this->transformerFactory);
             $transformer->setTransformerConfig($this->config);
             $result = [
-                "id"    => md5((string)microtime(true)),
-                "value" => $transformer->transformValue($value),
+                'id'    => md5((string)microtime(true)),
+                'value' => $transformer->transformValue($value),
             ];
         } else {
             // Handle objects
             $this->setAvailableIncludes(array_keys($this->config->includes));
             $result = [
-                "id" => call_user_func($this->config->idGetter, $value),
+                'id' => call_user_func($this->config->idGetter, $value),
             ];
-            
+
             // Transform the attributes
             foreach ($this->config->attributes as $k => $getterClosure) {
                 $result[$k] = $this->autoTransform($getterClosure($value));
             }
         }
-        
+
         // Done
         return $result;
     }
-    
+
     /**
      * Magic method to automatically handle the include method calls
      *
@@ -90,18 +90,20 @@ class Transformer extends AbstractResourceTransformer
         $value = $arguments[0];
         // Load the config and the data
         $config = $this->config->includes[$property];
-        $data   = call_user_func($this->config->includes[$property]["getter"], $value);
-        
+        $data   = call_user_func($this->config->includes[$property]['getter'], $value);
+
         // Run the transformer
         if (empty($data)) {
             return $this->null();
         }
-        $childConfig      = $this->transformerFactory->getConfigFor($data);
-        $childTransformer = $this->transformerFactory->getTransformer();
-        if ($config["isCollection"]) {
+
+        $factory          = $this->TransformerFactory();
+        $childConfig      = $factory->getConfigFor($data);
+        $childTransformer = $factory->getTransformer();
+        if ($config['isCollection']) {
             return $this->collection($data, $childTransformer, $childConfig->resourceType);
         }
-        
+
         return $this->item($data, $childTransformer, $childConfig->resourceType);
     }
 }

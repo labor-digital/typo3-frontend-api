@@ -22,6 +22,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer;
 
 use DOMDocument;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\Event\PageMetaTagsFilterEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
@@ -61,12 +62,24 @@ class PageDataTransformer extends AbstractResourceTransformer
     protected function transformValue($value): array
     {
         /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData $value */
-        $pageObject             = $value->getData();
-        $result                 = $this->autoTransform($pageObject, ['allIncludes']);
-        $result['metaTags']     = $this->getMetaTags($value);
-        $result['canonicalUrl'] = $this->getCleanCanonicalUrl();
+        $context = $this->FrontendApiContext();
 
-        return $result;
+        return $context->CacheService()->remember(
+            function () use ($value) {
+                $pageObject             = $value->getData();
+                $result                 = $this->autoTransform($pageObject, ['allIncludes']);
+                $result['metaTags']     = $this->getMetaTags($value);
+                $result['canonicalUrl'] = $this->getCleanCanonicalUrl();
+
+                return $result;
+            },
+            [
+                'tags'         => ['page_' . $value->getId(), 'pages_' . $value->getId()],
+                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
+                    [__CLASS__, $value->getId(), $value->getLanguageCode()],
+                ]),
+            ]
+        );
     }
 
     /**

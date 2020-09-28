@@ -46,11 +46,11 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy
         // Check if we have to handle a collection
         $attributes   = $routeConfig->getAttributes();
         $asCollection = (bool)$attributes["asCollection"];
-        if ($asCollection) {
-            $context = $this->getContextInstance(CollectionControllerContext::class, $route, $request);
-        } else {
-            $context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
-        }
+        $context      = $this->getContextInstance(
+            $asCollection ? CollectionControllerContext::class : ResourceControllerContext::class,
+            $route,
+            $request
+        );
 
         // Run the controller
         $controller = $route->getCallable($this->getContainer());
@@ -58,10 +58,10 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy
 
         // Pass through direct responses
         if ($response instanceof ResponseInterface) {
-            return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+            return $response;
         }
         if ($response instanceof ResourceDataResult) {
-            return $this->getResponse($route, $response->getData(true));
+            return $this->getJsonApiResponse($response->getData(true));
         }
 
         // Unify the response
@@ -89,19 +89,14 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy
 
         // Make the manager
         $manager = $this->getManager($request, $context->getResourceType(), $response);
-        if ($attributes["asResource"] === false) {
-            $manager->setSerializer(new ArraySerializer());
-        } elseif (is_string($attributes["asResource"])) {
+        if (is_string($attributes["asResource"])) {
             $manager->setSerializer(new JsonApiSerializer());
         }
 
         // Build the response
-        $response = $this->getResponse($route, $manager->createData($item)->toArray());
-        if ($attributes["asResource"] === false) {
-            $response = $response->withHeader("Content-Type", "application/json");
-        }
-
-        return $response;
+        return $attributes["asResource"] === false ?
+            $this->getJsonResponse($manager->setSerializer(new ArraySerializer())->createData($item)->toArray())
+            : $this->getJsonApiResponse($manager->createData($item)->toArray());
     }
 
 }

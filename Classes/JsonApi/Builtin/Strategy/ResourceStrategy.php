@@ -40,6 +40,7 @@ class ResourceStrategy extends AbstractResourceStrategy
     public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
     {
         // Get the resource configuration
+        $this->announceRouteCacheOptions($route);
         $context = $this->getContextInstance(ResourceControllerContext::class, $route, $request);
 
         // Run the controller
@@ -48,11 +49,11 @@ class ResourceStrategy extends AbstractResourceStrategy
         $response   = $controller($request, (is_numeric($id) ? (int)$id : $id), $context);
 
         // Pass through direct responses
-        if ($response instanceof ResourceDataResult) {
-            return $this->getResponse($route, $response->getData(true));
-        }
         if ($response instanceof ResponseInterface) {
-            return $this->addInternalNoCacheHeaderIfRequired($route, $response);
+            return $response;
+        }
+        if ($response instanceof ResourceDataResult) {
+            return $this->getJsonApiResponse($response->getData(true));
         }
 
         // Unify the response
@@ -91,9 +92,11 @@ class ResourceStrategy extends AbstractResourceStrategy
                 throw new NotFoundException();
             }
 
-            return $this->getResponse($route, $relationship);
+            return $this->getJsonApiResponse($relationship);
 
-        } elseif (is_string($route->getVars()["related"])) {
+        }
+
+        if (is_string($route->getVars()["related"])) {
             // Handle the list of related objects
             $propertyName = $route->getVars()["related"];
 
@@ -119,11 +122,11 @@ class ResourceStrategy extends AbstractResourceStrategy
             }
 
             // Done
-            return $this->getResponse($route, $manager->createData($subItem)->toArray());
-        } else {
-            // Find the data of a resource
-            return $this->getResponse($route, $manager->createData($item)->toArray());
+            return $this->getJsonApiResponse($manager->createData($subItem)->toArray());
         }
+
+        // Find the data of a resource
+        return $this->getJsonApiResponse($manager->createData($item)->toArray());
     }
 
 }

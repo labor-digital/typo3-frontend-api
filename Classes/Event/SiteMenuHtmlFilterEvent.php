@@ -27,7 +27,8 @@ namespace LaborDigital\Typo3FrontendApi\Event;
  * Dispatched when a when a menu object is rendered in based on the site configuration.
  * Used to filter the generated html before it is passed to the post processor
  *
- * @package LaborDigital\Typo3FrontendApi\Event
+ * @package    LaborDigital\Typo3FrontendApi\Event
+ * @deprecated will be removed in v10
  */
 class SiteMenuHtmlFilterEvent
 {

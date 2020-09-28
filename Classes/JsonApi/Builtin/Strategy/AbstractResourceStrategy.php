@@ -21,7 +21,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy;
 
 use LaborDigital\Typo3BetterApi\Domain\BetterQuery\BetterQuery;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\CacheControllingStrategyTrait;
-use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\RouteConfigAwareTrait;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\RouteStrategyTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Controller\CollectionControllerContext;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Pagination\PaginationAdapter;
@@ -38,7 +38,6 @@ use League\Route\Http\Exception\MethodNotAllowedException;
 use League\Route\Http\Exception\NotFoundException;
 use League\Route\Route;
 use League\Route\Strategy\AbstractStrategy;
-use League\Route\Strategy\StrategyInterface;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -47,13 +46,15 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
-use function GuzzleHttp\Psr7\stream_for;
 
-abstract class AbstractResourceStrategy extends AbstractStrategy implements StrategyInterface, ContainerAwareInterface
+abstract class AbstractResourceStrategy extends AbstractStrategy implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
-    use RouteConfigAwareTrait;
     use CacheControllingStrategyTrait;
+    use RouteStrategyTrait {
+        RouteStrategyTrait::getRouteConfig insteadof CacheControllingStrategyTrait;
+        RouteStrategyTrait::getResponse as getRealResponse;
+    }
 
     /**
      * @var \Psr\Http\Message\ResponseFactoryInterface
@@ -203,6 +204,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
     protected function getContextInstance(string $contextClass, Route $route, ServerRequestInterface $request)
     {
         $routeConfig     = $this->getRouteConfig($route);
+        $configRepo      = $this->FrontendApiContext()->ConfigRepository();
         $routeAttributes = $routeConfig->getAttributes();
         if (! isset($routeAttributes["resourceType"])) {
             throw new JsonApiException("The given route: {$route->getName()} is not configured as a resource route!");
@@ -212,12 +214,11 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         $context = $this->getContainer()->get($contextClass);
         $context->setParams($route->getVars());
         $context->setResourceType($routeAttributes["resourceType"]);
-        $resourceConfig = $this->configRepository->resource()->getResourceConfig($context->getResourceType());
-        if (empty($resourceConfig)) {
+        $resourceConfig = $configRepo->resource()->getResourceConfig($context->getResourceType());
+        if ($resourceConfig === null) {
             throw new JsonApiException("The given route: {$route->getName()} was marked as resource, but does not have a resource configuration mapped to it!");
         }
-        $context->setResourceConfig($this->configRepository->resource()
-                                                           ->getResourceConfig($context->getResourceType()));
+        $context->setResourceConfig($configRepo->resource()->getResourceConfig($context->getResourceType()));
         $context->setRequest($request);
 
         return $context;
@@ -271,9 +272,10 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         }
 
         // Prepare the serializer
+        $configRepo = $this->FrontendApiContext()->ConfigRepository();
         $baseUrl    = $request->getUri()->getScheme() . "://" . $request->getUri()->getHost() . "/" .
-                      $this->configRepository->routing()->getRootUriPart() . "/" .
-                      $this->configRepository->routing()->getResourceBaseUriPart() . "";
+                      $configRepo->routing()->getRootUriPart() . "/" .
+                      $configRepo->routing()->getResourceBaseUriPart() . "";
         $serializer = new JsonApiSerializer($baseUrl);
         $manager->setSerializer($serializer);
 
@@ -289,15 +291,19 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
      * @param   int    $code
      *
      * @return \Psr\Http\Message\ResponseInterface
+     * @deprecated will be removed in v10. use the ResponseFactoryTrait instead
      */
-    protected function getResponse(Route $route, array $data, int $code = 200): ResponseInterface
+    protected function getResponse($route, $data = 200, $code = 200): ResponseInterface
     {
-        $response = $this->responseFactory->createResponse($code);
-        $response = $response->withHeader("Content-Type", "application/vnd.api+json");
-        $response = $response->withBody(stream_for(json_encode($data, JSON_PRETTY_PRINT)));
-        $response = $this->addInternalNoCacheHeaderIfRequired($route, $response);
+        // What a mess, but this has to be done to keep legacy compatibility
+        if (is_int($route)) {
+            return $this->getRealResponse($route, is_string($data) ? $data : '');
+        }
+        if (is_array($route) && is_int($data)) {
+            return $this->getJsonApiResponse($route, $data);
+        }
 
-        return $response;
+        return $this->getJsonApiResponse($data, $code);
     }
 
     /**
@@ -313,7 +319,7 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Stra
         ?CollectionControllerContext $context = null
     ) {
         $paginator = new Paginator($collection->getData());
-        if (! is_null($context)) {
+        if ($context !== null) {
             if (! empty($context->getPageFinder())) {
                 $paginator->setPageFinder($context->getPageFinder());
             }

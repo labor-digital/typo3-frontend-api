@@ -34,7 +34,8 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement
  * It is used by the ContentElement entity to break the content element rendering by the TSFE to avoid
  * additional overhead we don't need when a content element is populated.
  *
- * @package LaborDigital\Typo3FrontendApi\Event
+ * @package    LaborDigital\Typo3FrontendApi\Event
+ * @deprecated will be removed in v10
  */
 class ContentElementSpaEvent
 {
@@ -52,7 +53,7 @@ class ContentElementSpaEvent
      *
      * @var bool
      */
-    protected $killHandler = false;
+    protected $killHandler = true;
 
     /**
      * ContentElementPostProcessorEvent constructor.

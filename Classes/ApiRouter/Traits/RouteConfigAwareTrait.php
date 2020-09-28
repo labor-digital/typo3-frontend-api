@@ -24,30 +24,41 @@ use LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RouteConfig;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use League\Route\Route;
 
-trait RouteConfigAwareTrait {
-	
-	/**
-	 * @var FrontendApiConfigRepository
-	 */
-	protected $configRepository;
-	
-	/**
-	 * Injects the config repository to resolve the route information with
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
-	 */
-	public function injectConfigRepository(FrontendApiConfigRepository $configRepository) {
-		$this->configRepository = $configRepository;
-	}
-	
-	/**
-	 * Finds the route configuration object for a given router-route.
-	 *
-	 * @param \League\Route\Route $route
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RouteConfig
-	 */
-	public function getRouteConfig(Route $route): RouteConfig {
-		return $this->configRepository->routing()->getRouteConfig($route);
-	}
+/**
+ * Trait RouteConfigAwareTrait
+ *
+ * @package    LaborDigital\Typo3FrontendApi\ApiRouter\Traits
+ * @deprecated will be removed in v10 use RouteStrategyTrait instead!
+ */
+trait RouteConfigAwareTrait
+{
+
+    /**
+     * @var FrontendApiConfigRepository
+     * @deprecated will be removed in v10
+     */
+    protected $configRepository;
+
+    /**
+     * Injects the config repository to resolve the route information with
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     */
+    public function injectConfigRepository(FrontendApiConfigRepository $configRepository)
+    {
+        $this->configRepository = $configRepository;
+    }
+
+    /**
+     * Finds the route configuration object for a given router-route.
+     *
+     * @param   \League\Route\Route  $route
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RouteConfig
+     * @deprecated will be removed in v10
+     */
+    public function getRouteConfig(Route $route): RouteConfig
+    {
+        return $this->configRepository->routing()->getRouteConfig($route);
+    }
 }

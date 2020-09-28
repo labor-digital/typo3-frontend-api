@@ -25,10 +25,12 @@ use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
 use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigurationInterface;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\ResourceTransformerTrait;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 abstract class AbstractResourceController implements ResourceControllerInterface, ResourceConfigurationInterface
 {
     use ResponseFactoryTrait;
+    use FrontendApiContextAwareTrait;
     use CommonServiceLocatorTrait;
     use ResourceControllerQueryConstraintsTrait;
     use ResourceTransformerTrait;

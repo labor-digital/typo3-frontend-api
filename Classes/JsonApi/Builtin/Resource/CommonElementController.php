@@ -33,10 +33,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class CommonElementController extends AbstractResourceController
 {
-    use SiteConfigAwareTrait {
-        SiteConfigAwareTrait::setLocalSingleton as setLocalSingletonInternal;
-    }
-    
     /**
      * @inheritDoc
      */
@@ -46,13 +42,13 @@ class CommonElementController extends AbstractResourceController
         $configurator->addClass(CommonElement::class);
         $configurator->setPageSize(0);
     }
-    
+
     /**
      * @inheritDoc
      */
     public function resourceAction(ServerRequestInterface $request, $id, ResourceControllerContext $context)
     {
-        $elements = $this->getCurrentSiteConfig()->commonElements;
+        $elements = $this->FrontendApiContext()->getCurrentSiteConfig()->commonElements;
         $layout   = $context->getParams()['layout'];
         // Fallback to default if the layout does not exist
         if (! isset($elements[$layout])) {
@@ -62,10 +58,10 @@ class CommonElementController extends AbstractResourceController
         if (! isset($elements[$layout]) || ! isset($elements[$layout][$key])) {
             throw new NotFoundException('There is no common object with the given key: ' . $key);
         }
-        
+
         return $this->getInstanceOf(CommonElement::class, [$layout, $key]);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -74,9 +70,9 @@ class CommonElementController extends AbstractResourceController
         // Get the allowed keys
         $requestedKeys = Arrays::makeFromStringList(Arrays::getPath($context->getQuery()->getFilters(), 'key', ''));
         $layout        = (string)$context->getQuery()->get('layout', 'default');
-        
+
         // Generate the collection
-        return $this->getCommonElements($layout, $requestedKeys);
+        return $this->FrontendApiContext()->getCurrentSiteConfig()->getCommonElementInstances($layout, $requestedKeys);
     }
-    
+
 }

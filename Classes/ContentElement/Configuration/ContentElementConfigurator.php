@@ -25,6 +25,7 @@ use LaborDigital\Typo3BetterApi\BackendPreview\BackendListLabelRendererInterface
 use LaborDigital\Typo3BetterApi\DataHandler\DataHandlerActionCollectorTrait;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\NamingConvention\Naming;
+use LaborDigital\Typo3FrontendApi\Cache\CacheOptionsTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Configuration\Table\ContentElementForm;
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel;
@@ -36,6 +37,7 @@ use Neunerlei\Inflection\Inflector;
 class ContentElementConfigurator
 {
     use DataHandlerActionCollectorTrait;
+    use CacheOptionsTrait;
 
     /**
      * The given element name for this content element
@@ -109,13 +111,6 @@ class ContentElementConfigurator
      * @var string|null
      */
     protected $wizardTabLabel;
-
-    /**
-     * Defines if the frontend output of this content element is cached or not
-     *
-     * @var bool
-     */
-    protected $useCache = true;
 
     /**
      * Optional path like EXT:extkey... to a icon for this element.
@@ -469,10 +464,11 @@ class ContentElementConfigurator
      * Returns true if the content element should be cached, false if not
      *
      * @return bool
+     * @deprecated will be removed in v10, use isCacheEnabled() instead
      */
     public function isUseCache(): bool
     {
-        return $this->useCache;
+        return $this->isCacheEnabled();
     }
 
     /**
@@ -481,10 +477,11 @@ class ContentElementConfigurator
      * @param   bool  $useCache
      *
      * @return ContentElementConfigurator
+     * @deprecated will be removed in v10, use setCacheEnabled() instead
      */
     public function setUseCache(bool $useCache): ContentElementConfigurator
     {
-        $this->useCache = $useCache;
+        $this->setCacheEnabled($useCache);
 
         return $this;
     }

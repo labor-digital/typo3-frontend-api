@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -47,7 +48,10 @@ class PageDataController extends AbstractResourceController
      */
     public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
     {
-        return $this->getInstanceOf(PageData::class, [$id]);
+        return $this->FrontendApiContext()->getInstanceWithoutDi(
+            PageData::class,
+            [$id, $this->FrontendApiContext()->getLanguageCode()]
+        );
     }
 
     /**

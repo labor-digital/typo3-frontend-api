@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2019 LABOR.digital
  *
@@ -19,59 +20,68 @@
 
 namespace LaborDigital\Typo3FrontendApi\ContentElement\Configuration;
 
-class ContentElementConfig {
-	
-	/**
-	 * The typoScript configuration required for the registered content objects
-	 * @var string
-	 */
-	public $typoScript;
-	
-	/**
-	 * The changed tt content tca that was updated by the config generator
-	 * @var array
-	 */
-	public $ttContentTca = [];
-	
-	/**
-	 * Contains the list of virtual columns for each content element
-	 * @var array
-	 */
-	public $virtualColumns = [];
-	
-	/**
-	 * Contains the sql definitions for additional tables this element requires
-	 * @var string
-	 */
-	public $sql = "";
-	
-	/**
-	 * The list of backend action handlers that are registered for our content elements
-	 * @var array
-	 */
-	public $dataHandlerActionHandlers = [];
-	
-	/**
-	 * The ts config string required for the registered elements
-	 * @var string
-	 */
-	public $tsConfig = "";
-	
-	/**
-	 * The list of icon definitions to register
-	 * @var array
-	 */
-	public $iconDefinitionArgs = [];
-	
-	/**
-	 * The list of backend preview renderer registration arguments
-	 * @var array
-	 */
-	public $backendPreviewRenderers = [];
-	
-	/**
-	 * The list of backend list label renderer registration arguments
-	 * @var array
-	 */
-	public $backendListLabelRenderers = [];
+class ContentElementConfig
+{
+    /**
+     * The typoScript configuration required for the registered content objects
+     *
+     * @var string
+     */
+    public $typoScript;
+
+    /**
+     * The changed tt content tca that was updated by the config generator
+     *
+     * @var array
+     */
+    public $ttContentTca = [];
+
+    /**
+     * Contains the list of virtual columns for each content element
+     *
+     * @var array
+     */
+    public $virtualColumns = [];
+
+    /**
+     * Contains the sql definitions for additional tables this element requires
+     *
+     * @var string
+     */
+    public $sql = "";
+
+    /**
+     * The list of backend action handlers that are registered for our content elements
+     *
+     * @var array
+     */
+    public $dataHandlerActionHandlers = [];
+
+    /**
+     * The ts config string required for the registered elements
+     *
+     * @var string
+     */
+    public $tsConfig = "";
+
+    /**
+     * The list of icon definitions to register
+     *
+     * @var array
+     */
+    public $iconDefinitionArgs = [];
+
+    /**
+     * The list of backend preview renderer registration arguments
+     *
+     * @var array
+     */
+    public $backendPreviewRenderers = [];
+
+    /**
+     * The list of backend list label renderer registration arguments
+     *
+     * @var array
+     */
+    public $backendListLabelRenderers = [];
 }
