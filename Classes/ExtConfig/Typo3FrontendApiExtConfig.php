@@ -90,7 +90,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
             ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
                 ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
             ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
-            ->registerGlobalMiddleware(CacheMiddleware::class, ['middlewareStack' => 'external']);;
+            ->registerGlobalMiddleware(CacheMiddleware::class, ['middlewareStack' => 'external', 'after' => FrontendSimulationMiddleware::class]);
 
         // Register the default resources
         $frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");

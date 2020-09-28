@@ -21,8 +21,10 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation;
 
 
-use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Utility\CallbackMiddleware;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Utility\DelegateMiddleware;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Utility\MiniDispatcher;
 use LaborDigital\Typo3FrontendApi\Event\FrontendSimulationMiddlewareFilterEvent;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use League\Route\Http\Exception\BadRequestException;
@@ -33,39 +35,51 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Throwable;
 use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\Routing\RouteNotFoundException;
 use TYPO3\CMS\Core\Routing\SiteMatcher;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Site\Entity\NullSite;
+use TYPO3\CMS\Core\Site\Entity\SiteInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Frontend\Middleware\PageResolver;
+use TYPO3\CMS\Frontend\Page\CacheHashCalculator;
 
 class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInterface
 {
-    
     /**
      * The list of dokTypes we allow in our lookups
      *
      * @var array
      */
     public static $allowedDokTypes = [1, 6];
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator
      */
     protected $simulator;
-    
+
     /**
      * @var \TYPO3\CMS\Core\Routing\SiteMatcher
      */
     protected $siteMatcher;
-    
+
     /**
      * @var \Neunerlei\EventBus\EventBusInterface
      */
     protected $eventBus;
-    
+
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     */
+    protected $configRepository;
+
+    /**
+     * @var \TYPO3\CMS\Frontend\Page\CacheHashCalculator
+     */
+    protected $cacheHashCalculator;
+
     /**
      * A cache object to hold the resolved pid by the slug name
      * this should lessen the load when multiple chained api requests are handled.
@@ -73,12 +87,8 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
      * @var array
      */
     protected $slugCache = [];
-    
-    /**
-     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
-     */
-    protected $configRepository;
-    
+
+
     /**
      * FrontendSimulationMiddleware constructor.
      *
@@ -86,32 +96,104 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
      * @param   \TYPO3\CMS\Core\Routing\SiteMatcher                                   $siteMatcher
      * @param   \Neunerlei\EventBus\EventBusInterface                                 $eventBus
      * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     * @param   \TYPO3\CMS\Frontend\Page\CacheHashCalculator                          $cacheHashCalculator
      */
     public function __construct(
         EnvironmentSimulator $simulator,
         SiteMatcher $siteMatcher,
         EventBusInterface $eventBus,
-        FrontendApiConfigRepository $configRepository
+        FrontendApiConfigRepository $configRepository,
+        CacheHashCalculator $cacheHashCalculator
     ) {
-        $this->simulator        = $simulator;
-        $this->siteMatcher      = $siteMatcher;
-        $this->eventBus         = $eventBus;
-        $this->configRepository = $configRepository;
+        $this->simulator           = $simulator;
+        $this->siteMatcher         = $siteMatcher;
+        $this->eventBus            = $eventBus;
+        $this->configRepository    = $configRepository;
+        $this->cacheHashCalculator = $cacheHashCalculator;
     }
-    
+
     /**
      * @inheritDoc
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Get the current language
-        /** @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage $language */
-        $language = $request->getAttribute('language');
-        
         // Preset the page id
+        $site = $this->findSite($request);
+
+        // Update the query parameters in the request
+        $request = $this->findRouteAttributes($request, $site);
+
+        // Run the outer dispatcher
+        $dispatcher                    = GeneralUtility::makeInstance(MiniDispatcher::class);
+        $updateGlobalRequestMiddleware = GeneralUtility::makeInstance(UpdateGlobalRequestMiddleware::class);
+        $dispatcher->middlewares[]     = $updateGlobalRequestMiddleware;
+        $dispatcher->middlewares[]     = GeneralUtility::makeInstance(CallbackMiddleware::class,
+            function (ServerRequestInterface $request) {
+                $this->eventBus->dispatch(($e = new FrontendSimulationMiddlewareFilterEvent(
+                    $request->getAttribute('t3fa.language'),
+                    $request->getAttribute('t3fa.pid'),
+                    $request
+                )));
+
+                $request = $e->getRequest();
+                $request = $request->withAttribute('t3fa.pid', $e->getPid());
+                $request = $request->withAttribute('t3fa.language', $e->getLanguage());
+
+                return $request;
+            });
+        $dispatcher->middlewares[]     = $updateGlobalRequestMiddleware;
+        $dispatcher->middlewares[]     = GeneralUtility::makeInstance(CallbackMiddleware::class,
+            function (ServerRequestInterface $request) use ($handler) {
+                return $this->simulator->runWithEnvironment([
+                    'pid'      => $request->getAttribute('t3fa.pid'),
+                    'language' => $request->getAttribute('t3fa.language'),
+                ], function () use ($request, $handler) {
+                    try {
+                        // Run the inner dispatcher
+                        $dispatcher                = GeneralUtility::makeInstance(MiniDispatcher::class);
+                        $dispatcher->middlewares[] = GeneralUtility::makeInstance(PageResolver::class);
+                        $dispatcher->middlewares[] = GeneralUtility::makeInstance(CallbackMiddleware::class,
+                            function (ServerRequestInterface $request) {
+                                // Update tsfe controller chash array
+                                /** @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $tsfe */
+                                $tsfe              = $GLOBALS['TSFE'];
+                                $tsfe->cHash_array = $this->cacheHashCalculator
+                                    ->getRelevantParameters(
+                                        HttpUtility::buildQueryString($request->getQueryParams())
+                                    );
+
+                                return $request;
+                            });
+                        $dispatcher->middlewares[] = GeneralUtility::makeInstance(UpdateGlobalRequestMiddleware::class);
+                        $dispatcher->middlewares[] = GeneralUtility::makeInstance(DelegateMiddleware::class, $handler);
+
+                        return $dispatcher->handle($request);
+                    } catch (ImmediateResponseException $exception) {
+                        // Handle 403 exceptions on pages (access denied) as 404 -> Page not found
+                        if ($exception->getResponse()->getStatusCode() === 403) {
+                            throw new NotFoundException($exception->getResponse()->getReasonPhrase(), $exception);
+                        }
+                        throw $exception;
+                    }
+                });
+            });
+
+        return $dispatcher->handle($request);
+    }
+
+    /**
+     * Finds the current site based on the given request
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     *
+     * @return \TYPO3\CMS\Core\Site\Entity\SiteInterface
+     * @throws \League\Route\Http\Exception\BadRequestException
+     */
+    protected function findSite(ServerRequestInterface $request): SiteInterface
+    {
         /** @var \TYPO3\CMS\Core\Site\Entity\Site $site */
         $site = $request->getAttribute('site');
-        
+
         // Try again with changed http/https scheme if we did not get a site
         if ($site instanceof NullSite) {
             // Check if we can find a forwarded site for a proxy
@@ -121,11 +203,11 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                 // Update the host
                 $uri = $request->getUri();
                 $uri = $uri->withHost($server['HTTP_X_HOST']);
-                
+
                 // Try to find the site again
                 $subRequest      = $request->withUri($uri);
                 $siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
-                
+
                 // Try to modify the scheme if we did not find the site
                 if ($siteRouteResult->getSite() instanceof NullSite) {
                     // Check if we also got a HTTP_X_FORWARDED_PROTO
@@ -135,27 +217,44 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                         // Try again with changed http/https scheme if we did not get a site
                         $uri = $uri->withScheme($uri->getScheme() === 'http' ? 'https' : 'http');
                     }
-                    
+
                     // Try to find the site again
                     $subRequest      = $request->withUri($uri);
                     $siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
                 }
-                
+
                 // Update the site if we got it correctly now
                 if (! $siteRouteResult->getSite() instanceof NullSite) {
-                    $site    = $siteRouteResult->getSite();
-                    $request = $request->withAttribute('site', $site);
+                    $site = $siteRouteResult->getSite();
                 } else {
                     // I can't help you here, pal!
                     throw new BadRequestException('Could not find a site for the given uri!');
                 }
             }
         }
-        
-        // Get the query params
+
+        return $site;
+    }
+
+    /**
+     * Reads the incoming request and adds additional attributes based on the parameters.
+     * This will handle the slug resolution as well.
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface   $request
+     * @param   \TYPO3\CMS\Core\Site\Entity\SiteInterface  $site
+     *
+     * @return \Psr\Http\Message\ServerRequestInterface
+     * @throws \League\Route\Http\Exception\BadRequestException
+     * @throws \League\Route\Http\Exception\NotFoundException
+     */
+    protected function findRouteAttributes(ServerRequestInterface $request, SiteInterface $site): ServerRequestInterface
+    {
+        // Get the current language
+        /** @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage $language */
+        $language = $request->getAttribute('language');
+
+        // Inherit information based on a given slug
         $queryParams = $request->getQueryParams();
-        
-        // Check if we got a slug
         if (! empty($queryParams['slug'])) {
             $slug = $queryParams['slug'];
             if (! isset($this->slugCache[$slug])) {
@@ -165,7 +264,7 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                     /** @var \TYPO3\CMS\Core\Routing\SiteRouteResult $siteRouteResult */
                     $siteRouteResult = $this->siteMatcher->matchRequest($subRequest);
                     $site            = $siteRouteResult->getSite();
-                    
+
                     // Fail if we could not find a matching site
                     if (! method_exists($site, 'getRouter')) {
                         throw new BadRequestException('Could not find the getRouter method on the site object!');
@@ -177,21 +276,22 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                     if (! $pageArguments->getPageId()) {
                         throw new NotFoundException();
                     }
-                    
+
                     // Merge route arguments into the incoming query
-                    $request     = $request->withQueryParams(Arrays::merge(
-                        $queryParams, $pageArguments->getRouteArguments()));
+                    $request     = $request->withQueryParams(
+                        Arrays::merge($queryParams, $pageArguments->getRouteArguments())
+                    );
                     $queryParams = $request->getQueryParams();
-                    
+
                     // Update language
                     $language = $siteRouteResult->getLanguage();
-                    
+
                     // Update pid
                     $pageId = $pageArguments->getPageId();
                 } catch (RouteNotFoundException $exception) {
                     throw new NotFoundException('Not Found', $exception);
                 }
-                
+
                 // Store the cache
                 $this->slugCache[$slug] = [$language, $pageId];
             } else {
@@ -210,10 +310,7 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                 $pageId = $site->getRootPageId();
             }
         }
-        
-        // Update the id in the query parameters
-        $queryParams['id'] = $pageId;
-        
+
         // Check if we got an L parameter
         if (isset($queryParams['L'])) {
             if (! is_numeric($queryParams['L']) && strlen($queryParams['L']) > 2) {
@@ -221,90 +318,14 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
             }
             $language = $queryParams['L'];
         }
-        
-        // Update the query parameters in the request
-        $request = $request->withQueryParams($queryParams);
-        
-        // Update global request
-        $GLOBALS['TYPO3_REQUEST']          = $request;
-        $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
-        
-        // Allow filtering
-        $this->eventBus->dispatch(($e = new FrontendSimulationMiddlewareFilterEvent($language, $pageId, $request)));
-        $language = $e->getLanguage();
-        $pageId   = $e->getPid();
-        $request  = $e->getRequest();
-        
-        // Update global request, again
-        $GLOBALS['TYPO3_REQUEST']          = $request;
-        $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
-        
-        // Simulate the request
-        try {
-            return $this->simulator->runWithEnvironment([
-                'pid'      => $pageId,
-                'language' => $language,
-            ], function () use ($handler, $request) {
-                // Reroute the request through the page resolver
-                $dummyHandler = new class(static::$allowedDokTypes, $handler) implements RequestHandlerInterface
-                {
-                    /**
-                     * @var array
-                     */
-                    protected $allowedDokTypes;
-                    
-                    /**
-                     * @var \Psr\Http\Server\RequestHandlerInterface
-                     */
-                    protected $handler;
-                    
-                    /**
-                     * Dummy handler constructor.
-                     *
-                     * @param   array                                     $allowedDokTypes
-                     * @param   \Psr\Http\Server\RequestHandlerInterface  $handler
-                     */
-                    public function __construct(array $allowedDokTypes, RequestHandlerInterface $handler)
-                    {
-                        $this->allowedDokTypes = $allowedDokTypes;
-                        $this->handler         = $handler;
-                    }
-                    
-                    /**
-                     * @inheritDoc
-                     */
-                    public function handle(ServerRequestInterface $request): ResponseInterface
-                    {
-                        // Update global request, one last time
-                        $GLOBALS['TYPO3_REQUEST']          = $request;
-                        $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
-                        
-                        // Check if this is an allowed page type
-                        $dokType = (int)$GLOBALS['TSFE']->page['doktype'];
-                        if (! in_array($dokType, $this->allowedDokTypes, true)) {
-                            throw new BadRequestException('The dokType of the given page is not allowed!');
-                        }
-                        
-                        // Handle the request
-                        return $this->handler->handle($request);
-                    }
-                };
-                
-                // Let the page resolver handle the new, updated frontend page
-                $handler = TypoContainer::getInstance()->get(PageResolver::class);
-                
-                return $handler->process($request, $dummyHandler);
-                
-            });
-        } catch (ImmediateResponseException $exception) {
-            // Handle 403 exceptions on pages (access denied) as 404 -> Page not found
-            if ($exception->getResponse()->getStatusCode() === 403) {
-                throw new NotFoundException($exception->getResponse()->getReasonPhrase());
-            }
-            throw $exception;
-        } catch (Throwable $exception) {
-            throw $exception;
-        }
+
+        // Update the request
+        $queryParams['id'] = $pageId;
+        $request           = $request->withAttribute('site', $site);
+        $request           = $request->withAttribute('t3fa.pid', $pageId);
+        $request           = $request->withAttribute('t3fa.language', $language);
+        $request           = $request->withQueryParams($queryParams);
+
+        return $request;
     }
-    
 }
