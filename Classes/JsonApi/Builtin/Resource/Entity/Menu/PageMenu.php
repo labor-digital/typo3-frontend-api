@@ -163,6 +163,7 @@ class PageMenu implements SelfTransformingInterface
             'expandAll'        => '1',
             'titleField'       => 'nav_title // title',
             'dataProcessing.'  => [],
+            'levels'           => $this->options['levels'],
         ];
 
         // Build the type based definition
@@ -175,7 +176,6 @@ class PageMenu implements SelfTransformingInterface
                             'field' => 'pages',
                         ],
                     ],
-                    'levels'   => $this->options['levels'],
                 ];
                 break;
             case static::TYPE_MENU_DIRECTORY:
