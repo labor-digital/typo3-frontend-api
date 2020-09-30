@@ -42,6 +42,9 @@ class DefaultSpecialObjectTransformer extends AbstractSpecialObjectTransformer
 
         // Handle link objects
         if ($value instanceof TypoLink) {
+            // Announce argument instances as tags for the caching system
+            $this->FrontendApiContext()->CacheService()->announceTags($value->getArgs());
+
             return $value->build();
         }
         if ($value instanceof UriInterface) {
