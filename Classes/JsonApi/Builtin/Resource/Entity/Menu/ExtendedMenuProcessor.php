@@ -28,23 +28,31 @@ use TYPO3\CMS\Frontend\DataProcessing\MenuProcessor;
 class ExtendedMenuProcessor extends MenuProcessor
 {
     /**
+     * Allows external scripts to offset the level counter by a certain margin
+     *
+     * @var int
+     */
+    public static $levelOffset = 0;
+
+    /**
      * @inheritDoc
      * @noinspection UnsupportedStringOffsetOperationsInspection
      */
-    public function buildConfiguration()
+    public function buildConfiguration(): void
     {
         parent::buildConfiguration();
 
         // Rewrite the menu configuration in order to provide the current menu layer to the menu item
         $tMenuKeys = array_keys($this->menuConfig, 'TMENU', true);
         foreach ($tMenuKeys as $TMenuKey) {
-            foreach (['NO.', 'ACT.', 'ACTIFSUB.', 'CUR.', 'CURIFSUB.'] as $configKey) {
-                if (! is_array($this->menuConfig[$TMenuKey . '.'][$configKey]['stdWrap.']['cObject.'])) {
+            foreach (['NO.', 'SPC.', 'ACT.', 'IFSUB.', 'ACTIFSUB.', 'CUR.', 'CURIFSUB.'] as $configKey) {
+                if (! isset($this->menuConfig[$TMenuKey . '.'][$configKey]) ||
+                    ! is_array($this->menuConfig[$TMenuKey . '.'][$configKey]['stdWrap.']['cObject.'])) {
                     continue;
                 }
                 $this->menuConfig[$TMenuKey . '.'][$configKey]['stdWrap.']['cObject.'][800]    = 'TEXT';
                 $this->menuConfig[$TMenuKey . '.'][$configKey]['stdWrap.']['cObject.']['800.'] = [
-                    'value' => (string)$TMenuKey,
+                    'value' => (string)((int)$TMenuKey + (int)static::$levelOffset),
                     'wrap'  => ',"level":|',
                 ];
             }

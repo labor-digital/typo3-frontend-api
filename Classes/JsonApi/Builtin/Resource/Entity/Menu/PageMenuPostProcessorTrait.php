@@ -40,13 +40,16 @@ trait PageMenuPostProcessorTrait
      * @param   array   $options        Additional options for the renderer {@see SiteConfigurator::registerPageMenu()}
      *                                  and the other menu functions for more details
      *
+     *                                  - levelOffset int: Allows you to offset the menu level automatically,
+     *                                  this is useful if you render submenus
+     *
      * @return array
      * @throws \LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException
      * @throws \Neunerlei\Arrays\ArrayException
      */
     protected function renderMenu(string $key, string $rendererClass, array $options): array
     {
-        if (! class_exists($rendererClass) || ! in_array(AbstractMenuRenderer::class, class_parents($rendererClass))) {
+        if (! class_exists($rendererClass) || ! in_array(AbstractMenuRenderer::class, class_parents($rendererClass), true)) {
             throw new InvalidArgumentException(
                 'The given renderer class: "' . $rendererClass . '" is invalid! The class must exist and extend: "' .
                 AbstractMenuRenderer::class . '"!');
@@ -55,6 +58,15 @@ trait PageMenuPostProcessorTrait
         /** @var AbstractMenuRenderer $renderer */
         $renderer = $this->FrontendApiContext()->getSingletonOf($rendererClass);
 
-        return $renderer->render($key, $options);
+        // Render the menu including the level offset
+        $levelOffsetBackup = ExtendedMenuProcessor::$levelOffset;
+        try {
+            ExtendedMenuProcessor::$levelOffset = (int)$options['levelOffset'] ?? 0;
+            unset($options['levelOffset']);
+
+            return $renderer->render($key, $options);
+        } finally {
+            ExtendedMenuProcessor::$levelOffset = $levelOffsetBackup;
+        }
     }
 }
