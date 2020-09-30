@@ -100,8 +100,18 @@ class SiteConfig
      * If this is 0 There will be no browser caching!
      *
      * @var float|int
+     * @deprecated will be removed in v10 -> has no actual use anymore
      */
     public $browserCacheTtl = 15 * 60;
+
+    /**
+     * The list of registered site link provider classes.
+     * The classes are used to generate static links that will be provided to the frontend
+     *
+     * @var array
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteLinkProviderInterface
+     */
+    public $linkProviders = [];
 
     /**
      * Generates the list of all common element instances for this site.

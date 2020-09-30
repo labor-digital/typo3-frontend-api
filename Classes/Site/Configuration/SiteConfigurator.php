@@ -82,6 +82,30 @@ class SiteConfigurator
     }
 
     /**
+     * Allows you to register a static link provider. The provider is called when the page data is rendered.
+     * It allows you to add additional links to the "link" node of the "page" resource. This can be used
+     * to provide static urls for your project. The given class has to implement the SiteLinkProviderInterface.
+     *
+     * @param   string  $linkProviderClass
+     *
+     * @return $this
+     * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
+     *
+     * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteLinkProviderInterface
+     */
+    public function registerLinkProvider(string $linkProviderClass): self
+    {
+        if (! class_exists($linkProviderClass) || ! in_array(SiteLinkProviderInterface::class, class_implements($linkProviderClass), true)) {
+            throw new FrontendApiException(
+                'Invalid link provider "' . $linkProviderClass . '" given! The class has to exist, and implement: "' .
+                SiteLinkProviderInterface::class . '"');
+        }
+        $this->config->linkProviders[md5($linkProviderClass)] = $linkProviderClass;
+
+        return $this;
+    }
+
+    /**
      * Renders a typoScript element using the TSFE and provides it as a "common element" for the pages
      *
      * @param   string  $key                   A unique key that identifies this object. Note that
@@ -209,6 +233,7 @@ class SiteConfigurator
      * @param   int  $ttl
      *
      * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
+     * @deprecated will be removed in v10 -> has no actual use anymore
      */
     public function setBrowserCacheTtl(int $ttl): SiteConfigurator
     {

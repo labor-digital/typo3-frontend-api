@@ -121,13 +121,19 @@ class Page
      */
     public function getLinks(): array
     {
+        // Find the Page links
+        $pageLinks = $this->FrontendApiContext()->getInstanceWithoutDi(
+            PageLinks::class, [$this->id]
+        )->asArray();
+
         // Prepare the link
         $link = $this->FrontendApiContext()->Links()->getLink()->withPid($this->getId());
 
-        return [
+        return array_merge($pageLinks, [
             'frontend' => $link->build(),
+            // @todo rename slug to "relative" in v10
             'slug'     => $link->build(['relative']),
-        ];
+        ]);
     }
 
     /**
