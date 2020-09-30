@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.26.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.25.1...v9.26.0) (2020-09-30)
+
+
+### Features
+
+* **Page:** implement link provider handling to serve static page links ([8185630](https://github.com/labor-digital/typo3-frontend-api/commit/8185630f81d02b9cdf5e8c4f37eeae2804fc7956))
+
+
+### Bug Fixes
+
+* **PageMenu:** allow menu level generation offset for child menus ([69de2da](https://github.com/labor-digital/typo3-frontend-api/commit/69de2daa02fff2b68064f40a989bad3100a43389))
+* **PageMenu:** split menu rendering into sub-classes + add post processor trait ([d214d94](https://github.com/labor-digital/typo3-frontend-api/commit/d214d94243db569427e2c6438aa353dd2ab40198))
+* **Transformer:** announce typo link args as cache tags ([1fa8d63](https://github.com/labor-digital/typo3-frontend-api/commit/1fa8d6342643375922efe34ed02b1274f7668cb5))
+* **Transformer:** announce typo link pid as cache tag ([16eedf0](https://github.com/labor-digital/typo3-frontend-api/commit/16eedf015e759e15b32cec9e1aeca25c51ca7bc1))
+
 ### [9.25.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.25.0...v9.25.1) (2020-09-29)
 
 
