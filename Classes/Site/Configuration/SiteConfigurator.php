@@ -24,19 +24,10 @@ use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\PageMenu;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
-use Neunerlei\Options\Options;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class SiteConfigurator
 {
-
-    /**
-     * The default options for the menu generation
-     *
-     * @var array
-     */
-    protected $menuDefaultOptions;
-
     /**
      * @var \LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext
      */
@@ -55,81 +46,8 @@ class SiteConfigurator
      */
     public function __construct(ExtConfigContext $context, SiteConfig $config)
     {
-        $this->context            = $context;
-        $this->config             = $config;
-        $this->menuDefaultOptions = [
-            'entryLevel'        => [
-                'type'    => 'int',
-                'default' => 0,
-            ],
-            'excludeUidList'    => [
-                'type'      => 'array',
-                'default'   => [],
-                'preFilter' => function ($v) {
-                    return $this->convertPids($v);
-                },
-            ],
-            'includeNotInMenu'  => [
-                'type'    => 'bool',
-                'default' => false,
-            ],
-            'levels'            => [
-                'type'    => 'int',
-                'default' => 2,
-            ],
-            'additionalFields'  => [
-                'type'    => 'array',
-                'default' => [],
-            ],
-            'fileFields'        => [
-                'type'    => 'array',
-                'default' => [],
-            ],
-            'loadForLayouts'    => [
-                'type'    => 'array',
-                'default' => [],
-            ],
-            'useV10Renderer'    => [
-                'type'    => 'bool',
-                'default' => false,
-            ],
-            'postProcessor'     => [
-                'type'      => ['string', 'null'],
-                'default'   => null,
-                'validator' => static function (?string $class) {
-                    if ($class === null) {
-                        return true;
-                    }
-                    if (! class_exists($class)) {
-                        return 'The given post processor class: "' . $class . '" does not exist!';
-                    }
-                    if (! in_array(PageMenuPostProcessorInterface::class, class_implements($class), true)) {
-                        return 'The given post processor "' . $class . '" must implement the required interface: ' .
-                               PageMenuPostProcessorInterface::class;
-                    }
-
-                    return true;
-                },
-            ],
-            'itemPostProcessor' => [
-                'type'      => ['string', 'null'],
-                'default'   => null,
-                'validator' => static function (?string $class) {
-                    if ($class === null) {
-                        return true;
-                    }
-                    if (! class_exists($class)) {
-                        return 'The given item post processor class: "' . $class . '" does not exist!';
-                    }
-                    if (! in_array(PageMenuItemPostProcessorInterface::class, class_implements($class), true)) {
-                        return 'The given item post processor "' . $class . '" must implement the required interface: ' .
-                               PageMenuItemPostProcessorInterface::class;
-                    }
-
-                    return true;
-                },
-            ],
-        ];
+        $this->context = $context;
+        $this->config  = $config;
     }
 
     /**
@@ -338,19 +256,12 @@ class SiteConfigurator
      */
     public function registerPageMenu(string $key, array $options = []): self
     {
-        // Prepare options
-        $optionDefinition                = $this->menuDefaultOptions;
-        $optionDefinition['showSpacers'] = [
-            'type'    => 'bool',
-            'default' => false,
-        ];
-        $options                         = Options::make($options, $optionDefinition);
-
-        // Store the menu
-        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
-            'type'    => PageMenu::TYPE_MENU_PAGE,
-            'options' => $options,
-        ]);
+        return $this->addToCommonElements('menu', $key,
+            is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
+            [
+                'type'    => PageMenu::TYPE_MENU_PAGE,
+                'options' => $options,
+            ]);
     }
 
     /**
@@ -389,24 +300,12 @@ class SiteConfigurator
      */
     public function registerRootLineMenu(string $key, array $options = []): SiteConfigurator
     {
-        // Prepare options
-        $optionDefinition = $this->menuDefaultOptions;
-        unset($optionDefinition['levels']);
-        $optionDefinition['offsetStart'] = [
-            'type'    => 'int',
-            'default' => 0,
-        ];
-        $optionDefinition['offsetEnd']   = [
-            'type'    => 'int',
-            'default' => 0,
-        ];
-        $options                         = Options::make($options, $optionDefinition);
-
-        // Store the menu
-        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
-            'type'    => PageMenu::TYPE_MENU_ROOT_LINE,
-            'options' => $options,
-        ]);
+        return $this->addToCommonElements('menu', $key,
+            is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
+            [
+                'type'    => PageMenu::TYPE_MENU_ROOT_LINE,
+                'options' => $options,
+            ]);
     }
 
     /**
@@ -447,27 +346,14 @@ class SiteConfigurator
      */
     public function registerDirectoryMenu(string $key, $pid, array $options = []): SiteConfigurator
     {
-        // Prepare options
-        $optionDefinition                      = $this->menuDefaultOptions;
-        $optionDefinition['showSpacers']       = [
-            'type'    => 'bool',
-            'default' => false,
-        ];
-        $optionDefinition['pid']               = [
-            'type'      => 'int',
-            'default'   => $pid,
-            'preFilter' => function ($v) {
-                return $this->convertPids($v);
-            },
-        ];
-        $optionDefinition['levels']['default'] = 1;
-        $options                               = Options::make($options, $optionDefinition);
+        $options['pid'] = $pid;
 
-        // Store the menu
-        return $this->addToCommonElements('menu', $key, $options['loadForLayouts'], [
-            'type'    => PageMenu::TYPE_MENU_DIRECTORY,
-            'options' => $options,
-        ]);
+        return $this->addToCommonElements('menu', $key,
+            is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
+            [
+                'type'    => PageMenu::TYPE_MENU_DIRECTORY,
+                'options' => $options,
+            ]);
     }
 
     /**
@@ -536,30 +422,6 @@ class SiteConfigurator
     public function getConfig(): SiteConfig
     {
         return $this->config;
-    }
-
-    /**
-     * Internal helper to pre-filter the pid's in option values
-     *
-     * @param $pids
-     *
-     * @return array|mixed|string
-     */
-    protected function convertPids($pids)
-    {
-        $pidAspect = $this->context->TypoContext->getPidAspect();
-        if (is_string($pids) && $pidAspect->hasPid($pids)) {
-            return $pidAspect->getPid($pids);
-        }
-        if (is_array($pids)) {
-            foreach ($pids as $k => $pid) {
-                if (is_string($pid) && $pidAspect->hasPid($pid)) {
-                    $pids[$k] = $pidAspect->getPid($pid);
-                }
-            }
-        }
-
-        return $pids;
     }
 
     /**

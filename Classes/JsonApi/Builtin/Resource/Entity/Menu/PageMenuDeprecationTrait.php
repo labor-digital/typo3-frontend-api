@@ -27,6 +27,7 @@ use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\Page\PageService;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
 use LaborDigital\Typo3FrontendApi\Event\SiteMenuHtmlFilterEvent;
+use LaborDigital\Typo3FrontendApi\Event\SiteMenuPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\SiteMenuPreProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use Neunerlei\Inflection\Inflector;
@@ -56,6 +57,10 @@ trait PageMenuDeprecationTrait
         return TypoContainer::getInstance()->get(static::class, ['args' => [$key, $options['type'], $options['options']]]);
     }
 
+    /**
+     * @return array
+     * @deprecated
+     */
     protected function renderLegacyPageMenu(): array
     {
         // Build the menu
@@ -67,6 +72,10 @@ trait PageMenuDeprecationTrait
         return $this->runPostProcessing($menuParsed);
     }
 
+    /**
+     * @return array
+     * @deprecated
+     */
     protected function renderLegacyRootLineMenu(): array
     {
         // Build the menu html
@@ -107,6 +116,10 @@ trait PageMenuDeprecationTrait
         return $this->runPostProcessing($menuParsed);
     }
 
+    /**
+     * @return array
+     * @deprecated
+     */
     protected function renderLegacyDirectoryMenu(): array
     {
         // Prepare the definition
@@ -122,6 +135,10 @@ trait PageMenuDeprecationTrait
         return $this->runPostProcessing($menuParsed);
     }
 
+    /**
+     * @return array[]
+     * @deprecated
+     */
     protected function getEntryMetaBefore(): array
     {
         return [
@@ -149,6 +166,7 @@ trait PageMenuDeprecationTrait
      * @param   string  $break    The break marker which separates the field from the children
      *
      * @return array
+     * @deprecated
      */
     protected function getRecursiveMenuDefinition(string $break): array
     {
@@ -192,6 +210,7 @@ trait PageMenuDeprecationTrait
      * Returns a random break marker
      *
      * @return string
+     * @deprecated
      */
     protected function getUniqueBreak(): string
     {
@@ -206,6 +225,7 @@ trait PageMenuDeprecationTrait
      * @param   array   $options  The list of options for the processed menu
      *
      * @return array
+     * @deprecated
      */
     protected function processRecursiveMenu(string $html, string $break): array
     {
@@ -247,6 +267,7 @@ trait PageMenuDeprecationTrait
      * @param   array   $additionalFields  A list of additional fields we should fetch from the database
      *
      * @return array
+     * @deprecated
      */
     protected function processSingleLegacyMenuItem(string $html, array $additionalFields = []): array
     {
@@ -300,6 +321,7 @@ trait PageMenuDeprecationTrait
      * @param   array  $menuDefinition  The prepared typo script definition of the menu
      *
      * @return string
+     * @deprecated
      */
     protected function processMenuDefinition(array $menuDefinition): string
     {
@@ -323,5 +345,30 @@ trait PageMenuDeprecationTrait
 
         // Done
         return $menu;
+    }
+
+    /**
+     * Internal helper to allow the event based post processing to occur.
+     *
+     * @param   array  $menu  The generated menu array
+     *
+     * @return array
+     * @deprecated will be removed in v10
+     */
+    protected function runPostProcessing(array $menu): array
+    {
+        $context = $this->FrontendApiContext();
+
+        // Check if we have a post processor
+        if (! empty($this->options['postProcessor']) && class_exists($this->options['postProcessor'])) {
+            /** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface $processor */
+            $processor = $context->getInstanceOf($this->options['postProcessor']);
+            $menu      = $processor->process($this->key, $menu, $this->options, $this->type);
+        }
+
+        // Allow event based processing
+        return $context->EventBus()->dispatch(
+            new SiteMenuPostProcessorEvent($this->key, $menu, $this->type, $this->options)
+        )->getMenu();
     }
 }

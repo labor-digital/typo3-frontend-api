@@ -39,23 +39,31 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu;
 
 
-use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
-use LaborDigital\Typo3FrontendApi\Event\SiteMenuPostProcessorEvent;
-use LaborDigital\Typo3FrontendApi\Event\SiteMenuPreProcessorEvent;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\AbstractMenuRenderer;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\DirectoryMenuRenderer;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\LegacyOptionRenderer;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\PageMenuRenderer;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\RootLineMenuRenderer;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
-use Neunerlei\Arrays\Arrays;
-use TYPO3\CMS\Frontend\DataProcessing\FilesProcessor;
-use TYPO3\CMS\Frontend\DataProcessing\MenuProcessor;
 
 class PageMenu implements SelfTransformingInterface
 {
     use FrontendApiContextAwareTrait;
     use PageMenuDeprecationTrait;
 
+    /**
+     * @deprecated will be removed in v10
+     */
     public const TYPE_MENU_ROOT_LINE = 'rootLineMenu';
-    public const TYPE_MENU_PAGE      = 'pageMenu';
+    /**
+     * @deprecated will be removed in v10
+     */
+    public const TYPE_MENU_PAGE = 'pageMenu';
+    /**
+     * @deprecated will be removed in v10
+     */
     public const TYPE_MENU_DIRECTORY = 'dirMenu';
 
     /**
@@ -120,10 +128,14 @@ class PageMenu implements SelfTransformingInterface
      */
     public function asArray(): array
     {
-        $context = $this->FrontendApiContext();
         // Handle legacy definitions
         // @todo remove this in v10
-        if ($this->options['useV10Renderer'] !== true) {
+        if ($this->options['useV10Renderer'] !== true && ! in_array('useV10Renderer', $this->options, true)) {
+            // Build the legacy options using the v10 options
+            $this->options = $this->FrontendApiContext()->getInstanceWithoutDi(
+                LegacyOptionRenderer::class, [$this->type]
+            )->getOptions($this->options);
+
             switch ($this->type) {
                 case static::TYPE_MENU_PAGE:
                     return $this->renderLegacyPageMenu();
@@ -136,125 +148,17 @@ class PageMenu implements SelfTransformingInterface
             }
         }
 
+        // Translate type to renderer class
+        $class = ([
+            static::TYPE_MENU_PAGE      => PageMenuRenderer::class,
+            static::TYPE_MENU_DIRECTORY => DirectoryMenuRenderer::class,
+            static::TYPE_MENU_ROOT_LINE => RootLineMenuRenderer::class,
+        ])[$this->type];
+
         // Render the menu
-        $definition = $this->makeMenuDefinition();
-        $processor  = $context->getInstanceOf(MenuProcessor::class);
-        $result     = $processor->process($context->getSingletonOf(TsfeService::class)->getContentObjectRenderer(), [], $definition, []);
-        $result     = $result['menu'];
+        /** @var AbstractMenuRenderer $renderer */
+        $renderer = $this->FrontendApiContext()->getSingletonOf($class);
 
-        return $this->runPostProcessing($result);
-    }
-
-    /**
-     * Generates the typoScript definition of the menu to render based on the current type and options
-     *
-     * @return array
-     * @throws \LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException
-     */
-    protected function makeMenuDefinition(): array
-    {
-        // Prepare the basic definition
-        $definition = [
-            'entryLevel'       => $this->options['entryLevel'],
-            'excludeUidList'   => implode(',', $this->options['excludeUidList']),
-            'includeNotInMenu' => $this->options['includeNotInMenu'],
-            'includeSpacer'    => $this->options['showSpacers'],
-            'as'               => 'menu',
-            'expandAll'        => '1',
-            'titleField'       => 'nav_title // title',
-            'dataProcessing.'  => [],
-            'levels'           => $this->options['levels'],
-        ];
-
-        // Build the type based definition
-        switch ($this->type) {
-            case static::TYPE_MENU_PAGE:
-                $typeDefinition = [
-                    'special'  => 'list',
-                    'special.' => [
-                        'value.' => [
-                            'field' => 'pages',
-                        ],
-                    ],
-                ];
-                break;
-            case static::TYPE_MENU_DIRECTORY:
-                $typeDefinition = [
-                    'special'  => 'directory',
-                    'special.' => [
-                        'value' => $this->options['pid'],
-                    ],
-                ];
-                break;
-            case static::TYPE_MENU_ROOT_LINE:
-                $typeDefinition = [
-                    'entryLevel' => $this->options['entryLevel'],
-                    'special'    => 'rootline',
-                    'special.'   => [
-                        'range' => $this->options['offsetStart'] . '|' . (empty($this->options['offsetEnd']) ? '999' : (-abs($this->options['offsetEnd']) - 1)),
-                    ],
-                ];
-                break;
-            default:
-                throw new JsonApiException('The menu is not configured correctly! There is no menu type: ' . $this->type);
-        }
-
-        // Build file field definition
-        $processorCount = 0;
-        if (! empty($this->options['fileFields'])) {
-            foreach ($this->options['fileFields'] as $fileField) {
-                $definition['dataProcessing.'][++$processorCount]     = FilesProcessor::class;
-                $definition['dataProcessing.'][$processorCount . '.'] = [
-                    'references.' => [
-                        'fieldName' => $fileField,
-                    ],
-                    'as'          => 'fileField.' . $fileField,
-                ];
-            }
-        }
-
-        // Add item processor
-        $definition['dataProcessing.'][++$processorCount]     = PageMenuItemDataProcessor::class;
-        $definition['dataProcessing.'][$processorCount . '.'] = [
-            'key'              => $this->key,
-            'type'             => $this->type,
-            'options'          => $this->options,
-            'additionalFields' => $this->options['additionalFields'],
-            'fileFields'       => $this->options['fileFields'],
-            'context'          => $this->FrontendApiContext(),
-            'postProcessor'    => empty($this->options['itemPostProcessor']) ? null
-                : $this->FrontendApiContext()->getInstanceOf($this->options['itemPostProcessor']),
-        ];
-
-        // Build the final definition
-        $definition = Arrays::merge($definition, $typeDefinition);
-
-        return $this->FrontendApiContext()->EventBus()->dispatch(
-            new SiteMenuPreProcessorEvent($definition, $this->type, $this->key, $this->options)
-        )->getDefinition();
-    }
-
-    /**
-     * Internal helper to allow the event based post processing to occur.
-     *
-     * @param   array  $menu  The generated menu array
-     *
-     * @return array
-     */
-    protected function runPostProcessing(array $menu): array
-    {
-        $context = $this->FrontendApiContext();
-
-        // Check if we have a post processor
-        if (! empty($this->options['postProcessor']) && class_exists($this->options['postProcessor'])) {
-            /** @var \LaborDigital\Typo3FrontendApi\Site\Configuration\PageMenuPostProcessorInterface $processor */
-            $processor = $context->getInstanceOf($this->options['postProcessor']);
-            $menu      = $processor->process($this->key, $menu, $this->options, $this->type);
-        }
-
-        // Allow event based processing
-        return $context->EventBus()->dispatch(
-            new SiteMenuPostProcessorEvent($this->key, $menu, $this->type, $this->options)
-        )->getMenu();
+        return $renderer->render($this->key, $this->options);
     }
 }
