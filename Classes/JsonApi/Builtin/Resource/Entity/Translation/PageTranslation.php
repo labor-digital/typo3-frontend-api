@@ -63,7 +63,7 @@ class PageTranslation extends AbstractTranslation implements SelfTransformingInt
                 ['language' => $this->languageId, 'fallbackLanguage' => true],
                 function () use ($context, $siteConfig) {
                     return [
-                        'id'      => $context->getLanguageCode(),
+                        'id'      => $this->languageId,
                         'message' => $this->getLabelTranslations($siteConfig->translationLabels),
                     ];
                 }

@@ -36,14 +36,16 @@ class UpdateGlobalRequestMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $backup = $GLOBALS['TYPO3_REQUEST'];
+
         try {
             $GLOBALS['TYPO3_REQUEST']          = $request;
             $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
 
             return $handler->handle($request);
         } finally {
-            $GLOBALS['TYPO3_REQUEST']          = $request;
-            $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
+            $GLOBALS['TYPO3_REQUEST']          = $backup;
+            $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $backup;
         }
     }
 }

@@ -51,10 +51,6 @@ class DokTypeValidationMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Update global request, one last time
-        $GLOBALS['TYPO3_REQUEST']          = $request;
-        $GLOBALS['TYPO3_REQUEST_FALLBACK'] = $request;
-
         // Check if this is an allowed page type
         /** @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $tsfe */
         $tsfe    = $GLOBALS['TSFE'];

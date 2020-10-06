@@ -147,7 +147,7 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                 return $this->simulator->runWithEnvironment([
                     'pid'      => $request->getAttribute('t3fa.pid'),
                     'language' => $request->getAttribute('t3fa.language'),
-                ], function () use ($request, $handler) {
+                ], function () use ($handler) {
                     try {
                         // Run the inner dispatcher
                         $dispatcher                = GeneralUtility::makeInstance(MiniDispatcher::class);
@@ -167,7 +167,7 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
                         $dispatcher->middlewares[] = GeneralUtility::makeInstance(UpdateGlobalRequestMiddleware::class);
                         $dispatcher->middlewares[] = GeneralUtility::makeInstance(DelegateMiddleware::class, $handler);
 
-                        return $dispatcher->handle($request);
+                        return $dispatcher->handle($GLOBALS['TYPO3_REQUEST']);
                     } catch (ImmediateResponseException $exception) {
                         // Handle 403 exceptions on pages (access denied) as 404 -> Page not found
                         if ($exception->getResponse()->getStatusCode() === 403) {
