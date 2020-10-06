@@ -33,34 +33,34 @@ use TYPO3\CMS\Core\SingletonInterface;
 
 class RteContentParser implements SingletonInterface
 {
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService
      */
     protected $typoScriptService;
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator
      */
     protected $simulator;
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\Tsfe\TsfeService
      */
     protected $tsfeService;
-    
+
     /**
      * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
      */
     protected $typoContext;
-    
+
     /**
      * The prepared parser configuration or null if we don't have it loaded yet
      *
      * @var array|null
      */
     protected $preparedParserConfig;
-    
+
     /**
      * RteContentParser constructor.
      *
@@ -80,7 +80,7 @@ class RteContentParser implements SingletonInterface
         $this->tsfeService       = $tsfeService;
         $this->typoContext       = $typoContext;
     }
-    
+
     /**
      * Parses the content of an RTE field from the database to a valid frontend output
      * It utilizes the frontend parseFunc you know from fluid_styled_contents with all typo script constants
@@ -93,16 +93,16 @@ class RteContentParser implements SingletonInterface
     public function parseContent(string $content): string
     {
         // Check if we have the config already loaded
-        if (is_null($this->preparedParserConfig)) {
+        if ($this->preparedParserConfig === null) {
             $this->preparedParserConfig = $this->loadParserConfig();
         }
-        
+
         // Parse the string using the simulator
         return (string)$this->simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($content) {
             return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, $this->preparedParserConfig);
         });
     }
-    
+
     /**
      * Loads the parser configuration either directly from typo script, imports it from the fluid_styled_content
      * extension or uses the internal shipped fallback if we can't find neither of both
@@ -116,7 +116,7 @@ class RteContentParser implements SingletonInterface
         if (is_array($config)) {
             return $config;
         }
-        
+
         // Load the required constants
         $constantDefaults = [
             'styles.content.links.keep'      => 'path',
@@ -125,16 +125,16 @@ class RteContentParser implements SingletonInterface
         ];
         $constants        = [];
         foreach ($constantDefaults as $path => $default) {
-            $constants['{\$$path}'] = $this->typoScriptService->getConstants($path, [
+            $constants['{$' . $path . '}'] = $this->typoScriptService->getConstants($path, [
                 'pid'     => $this->typoContext->Pid()->getCurrent(),
                 'default' => $default,
             ]);
         }
-        
+
         // Check if we can use the typo script shipped with fluid styled content
         try {
             $path = $this->typoContext->Path()->typoPathToRealPath('EXT:fluid_styled_content/Configuration/TypoScript/Helper/ParseFunc.typoscript');
-            if (Fs::exists($path . 'foo')) {
+            if (Fs::exists($path)) {
                 $content = Fs::readFile($path);
                 $content = str_replace(array_keys($constants), array_values($constants), $content);
                 $ts      = $this->typoScriptService->parse($content);
@@ -145,12 +145,12 @@ class RteContentParser implements SingletonInterface
             }
         } catch (Throwable $e) {
         }
-        
+
         // Load the fallback file
         $content = Fs::readFile(__DIR__ . DIRECTORY_SEPARATOR . 'RteContentParserFallbackParseFunc.typoscript');
         $content = str_replace(array_keys($constants), array_values($constants), $content);
         $ts      = $this->typoScriptService->parse($content);
-        
+
         return Arrays::getPath($ts, ['lib.', 'parseFunc_RTE.'], []);
     }
 }
