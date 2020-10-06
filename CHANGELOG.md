@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.27.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.26.0...v9.27.0) (2020-10-06)
+
+
+### Features
+
+* **PageData:** add hrefLang support + move pageData generators into separate classes ([e9615d2](https://github.com/labor-digital/typo3-frontend-api/commit/e9615d26c6da032252bfc54e745fcb44564ced50))
+* **Strategy:** make the json api format serialization aware of the frontend language ([dd8a5e8](https://github.com/labor-digital/typo3-frontend-api/commit/dd8a5e869f252c7884468b3cd068024de0ad7efc))
+
+
+### Bug Fixes
+
+* **Page:** generate baseUrl more reliably ([d32cb3f](https://github.com/labor-digital/typo3-frontend-api/commit/d32cb3f5cf816797ebb3676e9ae5201ae21b9e13))
+* **Page:** implement better handling of language changes ([435870f](https://github.com/labor-digital/typo3-frontend-api/commit/435870f5eb58d643999dd55858cab4f308c0d4ef))
+* **PageData:** remove SelfTransformingInterface ([3f1853f](https://github.com/labor-digital/typo3-frontend-api/commit/3f1853f78bd1a23f36944036537b021624a3176a))
+* make sure the request translation is correctly updated ([4689f95](https://github.com/labor-digital/typo3-frontend-api/commit/4689f956d2f562e750f525e1cac66f5b5d0e3368))
+* **PageTransformer:** add "baseUrl" and deprecate "siteUrl" ([c03bfad](https://github.com/labor-digital/typo3-frontend-api/commit/c03bfad55cc0d5dc68263dd3430f6f371fbfca4d))
+* **RteContentParser:** fix broken link parsing ([9fefdb6](https://github.com/labor-digital/typo3-frontend-api/commit/9fefdb61c655ab41bb84e13f0402ccafb9927c17))
+
 ## [9.26.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.25.1...v9.26.0) (2020-09-30)
 
 
