@@ -22,12 +22,10 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\Event\PageDataPageInfoFilterEvent;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page\PageDataLinkGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page\PageDataMetaTagGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
-use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ModelHydrationTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
@@ -35,7 +33,7 @@ use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Inflection\Inflector;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
-class PageData implements SelfTransformingInterface
+class PageData
 {
     use FrontendApiContextAwareTrait;
     use ModelHydrationTrait;
@@ -79,31 +77,6 @@ class PageData implements SelfTransformingInterface
     {
         $this->id           = $id;
         $this->languageCode = $languageCode;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function asArray(): array
-    {
-        /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData $value */
-        $context = $this->FrontendApiContext();
-
-        return $context->CacheService()->remember(
-            function () use ($value) {
-                $result                 = $this->autoTransform($value->getData(), ['allIncludes']);
-                $result['metaTags']     = $this->getMetaTags($value);
-                $result['canonicalUrl'] = $this->getCleanCanonicalUrl();
-
-                return $result;
-            },
-            [
-                'tags'         => ['page_' . $value->getId(), 'pages_' . $value->getId()],
-                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                    [__CLASS__, $value->getId(), $value->getLanguageCode()],
-                ]),
-            ]
-        );
     }
 
     /**
