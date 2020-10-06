@@ -30,7 +30,6 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Pagination\Paginator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
-use League\Fractal\Serializer\JsonApiSerializer;
 use League\Route\ContainerAwareInterface;
 use League\Route\ContainerAwareTrait;
 use League\Route\Http\Exception as HttpException;
@@ -276,7 +275,10 @@ abstract class AbstractResourceStrategy extends AbstractStrategy implements Cont
         $baseUrl    = $request->getUri()->getScheme() . "://" . $request->getUri()->getHost() . "/" .
                       $configRepo->routing()->getRootUriPart() . "/" .
                       $configRepo->routing()->getResourceBaseUriPart() . "";
-        $serializer = new JsonApiSerializer($baseUrl);
+        $serializer = new Typo3AwareJsonApiSerializer(
+            $this->FrontendApiContext()->TypoContext()->Language()->getCurrentFrontendLanguage(),
+            $baseUrl
+        );
         $manager->setSerializer($serializer);
 
         // Done

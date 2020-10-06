@@ -26,7 +26,6 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataResult;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
-use League\Fractal\Serializer\JsonApiSerializer;
 use League\Route\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -90,7 +89,10 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy
         // Make the manager
         $manager = $this->getManager($request, $context->getResourceType(), $response);
         if (is_string($attributes["asResource"])) {
-            $manager->setSerializer(new JsonApiSerializer());
+            $manager->setSerializer(new Typo3AwareJsonApiSerializer(
+                    $this->FrontendApiContext()->TypoContext()->Language()->getCurrentFrontendLanguage()->getLanguageId()
+                )
+            );
         }
 
         // Build the response
