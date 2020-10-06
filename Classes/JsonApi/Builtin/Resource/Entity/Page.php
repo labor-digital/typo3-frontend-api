@@ -140,10 +140,21 @@ class Page
      * Returns the base url for the site that contains this page
      *
      * @return string
+     * @deprecated will be removed in v10 use getBaseUrl() instead
      */
     public function getSiteUrl(): string
     {
-        return $this->FrontendApiContext()->TypoContext()->Site()->getCurrent()->getBase()->__toString();
+        return $this->FrontendApiContext()->Links()->getLink()->build();
+    }
+
+    /**
+     * Returns the base url for the site that contains this page
+     *
+     * @return string
+     */
+    public function getBaseUrl(): string
+    {
+        return $this->FrontendApiContext()->Links()->getLink()->build();
     }
 
     /**
@@ -223,6 +234,7 @@ class Page
             // Merge in additional fields
             $pageInfo = null;
             if (! empty($additionalFields)) {
+                // @todo let the root line options handle this
                 $pageInfo = $context->Page()->getPageInfo($pageDataPrepared['id']);
                 foreach ($additionalFields as $field) {
                     $propertyName = Inflector::toCamelBack($field);

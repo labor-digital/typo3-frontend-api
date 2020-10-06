@@ -66,6 +66,17 @@ class PageLinks implements SelfTransformingInterface
         return $this->pid;
     }
 
+    /**
+     * Adds a new, static link for your frontend to use.
+     * The kind of link generated is up to you, you can either provide a "linkSet" key
+     * and omit $link, or provide a unique link and define your link using the TypoLink interface
+     *
+     * @param   string         $key   The key of a link set or a unique id for the generated link
+     * @param   TypoLink|null  $link  Can be omitted if a link set should be used or a link if one was
+     *                                defined manually
+     *
+     * @return $this
+     */
     public function addLink(string $key, ?TypoLink $link = null): self
     {
         $this->links[$key] = $link ?? $this->FrontendApiContext()->Links()->getLink($key);

@@ -22,8 +22,12 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\Event\PageDataPageInfoFilterEvent;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page\PageDataLinkGenerator;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page\PageDataMetaTagGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
+use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ModelHydrationTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
@@ -31,7 +35,7 @@ use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Inflection\Inflector;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
-class PageData
+class PageData implements SelfTransformingInterface
 {
     use FrontendApiContextAwareTrait;
     use ModelHydrationTrait;
@@ -78,6 +82,31 @@ class PageData
     }
 
     /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        /** @var \LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\PageData $value */
+        $context = $this->FrontendApiContext();
+
+        return $context->CacheService()->remember(
+            function () use ($value) {
+                $result                 = $this->autoTransform($value->getData(), ['allIncludes']);
+                $result['metaTags']     = $this->getMetaTags($value);
+                $result['canonicalUrl'] = $this->getCleanCanonicalUrl();
+
+                return $result;
+            },
+            [
+                'tags'         => ['page_' . $value->getId(), 'pages_' . $value->getId()],
+                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
+                    [__CLASS__, $value->getId(), $value->getLanguageCode()],
+                ]),
+            ]
+        );
+    }
+
+    /**
      * Returns the page id we hold the data for
      *
      * @return int
@@ -119,7 +148,7 @@ class PageData
             }
 
             return $model;
-        }, 'model');
+        }, __FUNCTION__);
     }
 
     /**
@@ -148,7 +177,7 @@ class PageData
             return $context->EventBus()->dispatch(
                 new PageDataPageInfoFilterEvent($this->id, $pageInfo, $this->slideFieldPidMap)
             )->getRow();
-        }, 'pageInfo');
+        }, __FUNCTION__);
     }
 
     /**
@@ -163,7 +192,7 @@ class PageData
             $this->getPageInfo();
 
             return $this->slideFieldPidMap;
-        }, 'slideFieldPidMap');
+        }, __FUNCTION__);
     }
 
     /**
@@ -178,7 +207,43 @@ class PageData
             $this->getPageInfo();
 
             return $this->slideParentPageInfoMap;
-        }, 'slideParentPageInfoMap');
+        }, __FUNCTION__);
+    }
+
+    /**
+     * Returns the list of generated meta tags for this page
+     *
+     * @return array
+     */
+    public function getMetaTags(): array
+    {
+        return $this->remember(function () {
+            return $this->FrontendApiContext()->getSingletonOf(PageDataMetaTagGenerator::class)->getMetaTags($this);
+        }, __FUNCTION__);
+    }
+
+    /**
+     * Returns the canonical url for this data object
+     *
+     * @return string
+     */
+    public function getCanonicalUrl(): string
+    {
+        return $this->remember(function () {
+            return $this->FrontendApiContext()->getSingletonOf(PageDataLinkGenerator::class)->makeCanonicalUrl($this);
+        }, __FUNCTION__);
+    }
+
+    /**
+     * Returns the list of href lang tags for this data object
+     *
+     * @return array
+     */
+    public function getHrefLangUrls(): array
+    {
+        return $this->remember(function () {
+            return $this->FrontendApiContext()->getSingletonOf(PageDataLinkGenerator::class)->makeHrefLangUrls($this);
+        }, __FUNCTION__);
     }
 
     /**
