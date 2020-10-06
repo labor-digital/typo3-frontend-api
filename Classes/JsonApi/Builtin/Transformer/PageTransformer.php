@@ -50,13 +50,13 @@ class PageTransformer extends AbstractResourceTransformer
         }
 
         // Check if the frontend requires the new translation knows this translation
-        if (! in_array($value->getLanguageCode(), $value->getLoadedLanguageCodes(), true)) {
+        if (! $value->isLanguageLoaded()) {
             $this->defaultIncludes[] = 'translation';
         }
 
         // Check if we have to render the common elements, because we changed the layout
         // or check if common elements have to be refreshed
-        if ($value->isLayoutChange() || ! empty($value->getRefreshCommon())) {
+        if ($value->isLanguageChange() || $value->isLayoutChange() || ! empty($value->getRefreshCommon())) {
             $this->defaultIncludes[] = 'common';
         }
 

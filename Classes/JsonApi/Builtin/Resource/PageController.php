@@ -71,14 +71,18 @@ class PageController extends AbstractResourceController
     public function resourceAction(ServerRequestInterface $request, int $id, ResourceControllerContext $context)
     {
         // Extract filters
-        $loadedLanguageCodes = Arrays::makeFromStringList($context->getQuery()->get('loadedLanguageCodes', ''));
         $currentLayout       = $context->getQuery()->get('currentLayout', '');
         $refreshCommon       = Arrays::makeFromStringList($context->getQuery()->get('refreshCommon', ''));
+        $loadedLanguageCodes = Arrays::makeFromStringList(
+        // @todo remove loadedLanguageCodes in v10
+            $context->getQuery()->get('loadedLanguages', $context->getQuery()->get('loadedLanguageCodes', ''))
+        );
         $languageCode        = $this->FrontendApiContext()->getLanguageCode();
+        $currentLanguageCode = $context->getQuery()->get('currentLanguage', $languageCode);
 
         return $this->FrontendApiContext()->getInstanceWithoutDi(
             Page::class,
-            [$id, (string)$currentLayout, $loadedLanguageCodes, $refreshCommon, $languageCode]
+            [$id, (string)$currentLayout, $loadedLanguageCodes, $refreshCommon, $languageCode, $currentLanguageCode]
         );
     }
 

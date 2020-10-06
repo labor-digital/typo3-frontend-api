@@ -87,6 +87,15 @@ class Page
     protected $lastLayout;
 
     /**
+     * The current language code of the frontend.
+     * If this does not match the local language code we must trigger a "language change",
+     * which means we have to re-render all content elements and provide them to the frontend
+     *
+     * @var string
+     */
+    protected $lastLanguageCode;
+
+    /**
      * Page constructor.
      *
      * @param   int     $id
@@ -94,14 +103,22 @@ class Page
      * @param   array   $loadedLanguageCodes
      * @param   array   $refreshCommon
      * @param   string  $languageCode
+     * @param   string  $lastLanguageCode
      */
-    public function __construct(int $id, string $lastLayout, array $loadedLanguageCodes, array $refreshCommon, string $languageCode)
-    {
+    public function __construct(
+        int $id,
+        string $lastLayout,
+        array $loadedLanguageCodes,
+        array $refreshCommon,
+        string $languageCode,
+        string $lastLanguageCode
+    ) {
         $this->id                  = $id;
         $this->lastLayout          = $lastLayout;
         $this->loadedLanguageCodes = $loadedLanguageCodes;
         $this->refreshCommon       = $refreshCommon;
-        $this->languageCode        = $languageCode;
+        $this->languageCode        = strtolower(trim($languageCode));
+        $this->lastLanguageCode    = strtolower(trim($lastLanguageCode));
     }
 
     /**
@@ -287,6 +304,17 @@ class Page
     }
 
     /**
+     * Returns the last loaded language code which is used to determine if we must
+     * regenerate all common elements in order to update the frontend
+     *
+     * @return string
+     */
+    public function getLastLanguageCode(): string
+    {
+        return $this->lastLanguageCode;
+    }
+
+    /**
      * Returns the list of all language codes the frontend may display
      *
      * @return array
@@ -319,6 +347,26 @@ class Page
     public function getLastLayout(): string
     {
         return $this->lastLayout;
+    }
+
+    /**
+     * True if the language was changed
+     *
+     * @return bool
+     */
+    public function isLanguageChange(): bool
+    {
+        return $this->languageCode !== $this->lastLanguageCode;
+    }
+
+    /**
+     * True if the language is already loaded by the frontend
+     *
+     * @return bool
+     */
+    public function isLanguageLoaded(): bool
+    {
+        return in_array($this->getLanguageCode(), $this->getLoadedLanguageCodes(), true);
     }
 
     /**
@@ -380,7 +428,7 @@ class Page
     {
         return $this->FrontendApiContext()->getCurrentSiteConfig()->getCommonElementInstances(
             $this->getPageLayout(),
-            $this->isLayoutChange() ? [] : $this->getRefreshCommon()
+            $this->isLanguageChange() || $this->isLayoutChange() ? [] : $this->getRefreshCommon()
         );
     }
 
