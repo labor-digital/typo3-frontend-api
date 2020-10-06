@@ -144,7 +144,7 @@ class Page
      */
     public function getSiteUrl(): string
     {
-        return $this->FrontendApiContext()->Links()->getLink()->build();
+        return $this->getBaseUrl();
     }
 
     /**
@@ -154,7 +154,15 @@ class Page
      */
     public function getBaseUrl(): string
     {
-        return $this->FrontendApiContext()->Links()->getLink()->build();
+        $uri = $this->FrontendApiContext()->TypoContext()->Site()->getCurrent()->getBase();
+        if ($uri->getHost()) {
+            $uri = $uri->withHost($this->FrontendApiContext()->TypoContext()->Request()->getHost(false));
+        }
+
+        $lang = $this->FrontendApiContext()->TypoContext()->Language()->getCurrentFrontendLanguage();
+        $uri  = $uri->withPath(rtrim($uri->getPath(), '/') . '/' . $lang->getBase()->getPath());
+
+        return (string)$uri;
     }
 
     /**
