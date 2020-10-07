@@ -101,7 +101,11 @@ class CommonElement implements SelfTransformingInterface
             }
 
             if ($type === static::TYPE_CUSTOM) {
-                return $context->getInstanceOf($config['value']['class'])->asArray($key, $config['value']['data']);
+                $transformer = $context->TransformerFactory()->getTransformer();
+
+                return $transformer->transform(
+                    $context->getInstanceOf($config['value']['class'])->asArray($key, $config['value']['data'])
+                );
             }
 
             throw new JsonApiException('Could not render a common element with type: ' . $type);
