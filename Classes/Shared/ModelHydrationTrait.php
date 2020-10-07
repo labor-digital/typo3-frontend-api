@@ -63,12 +63,27 @@ trait ModelHydrationTrait
                 $defaultValue = Arrays::getPath($tmpl->setup, $path);
                 $tmpl->setup  = Arrays::setPath($tmpl->setup, $path, $tableName);
 
+                // Handle localized uid's
+                $uid = $row['uid'];
+                if (isset($row['_LOCALIZED_UID'])) {
+                    $row['uid'] = $row['_LOCALIZED_UID'];
+                } elseif (isset($row['_PAGES_OVERLAY_UID'])) {
+                    $row['uid'] = $row['_PAGES_OVERLAY_UID'];
+                }
+
                 // Perform the mapping
                 /** @var DataMapper $mapper */
                 $mapper = $container->get(DataMapper::class);
                 $mapper->injectDataMapFactory($container->get(CachelessDataMapFactory::class));
                 $mapped = $mapper->map($modelClass, [$row]);
                 $mapped = reset($mapped);
+                /** @var AbstractEntity $mapped */
+
+                // Restore the correct uid
+                if ($uid !== $mapped->getUid()) {
+                    $mapped->_setProperty('uid', $uid);
+                    $mapped->_memorizeCleanState('uid');
+                }
 
                 // Restore dummy config
                 if ($defaultValue !== null) {
