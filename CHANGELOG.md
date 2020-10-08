@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.28.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.27.0...v9.28.0) (2020-10-08)
+
+
+### Features
+
+* **CommonElement:** apply transformation to custom common element output ([7bf1d45](https://github.com/labor-digital/typo3-frontend-api/commit/7bf1d45ed737f29ad3affef06a509b30af616080))
+
+
+### Bug Fixes
+
+* **ModelHydrationTrait:** make sure _PAGES_OVERLAY_UID and _LOCALIZED_UID are taken into account ([90234ed](https://github.com/labor-digital/typo3-frontend-api/commit/90234ed7eacce0decc43911dd0aeab790d55f2fc))
+
 ## [9.27.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.26.0...v9.27.0) (2020-10-06)
 
 
