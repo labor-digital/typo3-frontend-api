@@ -254,8 +254,10 @@ class ErrorHandler implements SingletonInterface
             if ($localNestingLevel > 0) {
                 throw $exception;
             }
-            $exception = $this->translateImmediateResponseException($exception);
-            $response  = $this->getResponse(method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 500);
+            $exception         = $this->translateImmediateResponseException($exception);
+            $responseException = $this->translateTypoError($exception);
+            $response          = $this->getResponse(
+                method_exists($responseException, 'getStatusCode') ? $responseException->getStatusCode() : 500);
             try {
                 $response->getBody()->write($whoops->{Run::EXCEPTION_HANDLER}($exception));
             } catch (Throwable $e) {
@@ -331,6 +333,38 @@ class ErrorHandler implements SingletonInterface
     protected function decorateNonSpeakingError(Throwable $error): ResponseInterface
     {
         // Translate typo3 exceptions
+        $error = $this->translateTypoError($error);
+
+        // Check if this is a http exception
+        if (! $error instanceof HttpExceptionInterface) {
+            $statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : 500;
+            $error      = new Exception($statusCode, '', ($error instanceof \Exception ? $error : null));
+        }
+
+        // Create the response
+        $response = $this->getResponse($error->getStatusCode())
+                         ->withHeader('Content-Type', 'application/vnd.api+json');
+        $body     = [
+            'errors' => [
+                'status' => $error->getStatusCode(),
+                'title'  => $response->getReasonPhrase(),
+            ],
+        ];
+        $response = $response->withBody(stream_for(json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
+
+        // Filter the response
+        return $this->responseFilter($response, $error);
+    }
+
+    /**
+     * Translates some special typo3 exceptions into their http counterparts
+     *
+     * @param   \Throwable  $error
+     *
+     * @return \Throwable
+     */
+    protected function translateTypoError(Throwable $error): Throwable
+    {
         $translations = [
             BadRequestException::class         => Exception\BadRequestException::class,
             ForbiddenException::class          => Exception\ForbiddenException::class,
@@ -354,25 +388,7 @@ class ErrorHandler implements SingletonInterface
             }
         }
 
-        // Check if this is a http exception
-        if (! $error instanceof HttpExceptionInterface) {
-            $statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : 500;
-            $error      = new Exception($statusCode, '', ($error instanceof \Exception ? $error : null));
-        }
-
-        // Create the response
-        $response = $this->getResponse($error->getStatusCode())
-                         ->withHeader('Content-Type', 'application/vnd.api+json');
-        $body     = [
-            'errors' => [
-                'status' => $error->getStatusCode(),
-                'title'  => $response->getReasonPhrase(),
-            ],
-        ];
-        $response = $response->withBody(stream_for(json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
-
-        // Filter the response
-        return $this->responseFilter($response, $error);
+        return $error;
     }
 
     /**
