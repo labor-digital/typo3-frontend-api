@@ -24,12 +24,23 @@ namespace LaborDigital\Typo3FrontendApi\Cache\KeyGeneration;
 
 
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class RequestCacheKeyGenerator implements CacheKeyGeneratorInterface
 {
+    /**
+     * The list of request headers that should be taken into account when the cache key is generated
+     *
+     * @var array
+     */
+    public static $trackedHeaders
+        = [
+            FrontendSimulationMiddleware::REQUEST_LANGUAGE_HEADER,
+        ];
+
     /**
      * @var \Psr\Http\Message\ServerRequestInterface
      */
@@ -56,8 +67,14 @@ class RequestCacheKeyGenerator implements CacheKeyGeneratorInterface
         $params = Arrays::flatten($request->getQueryParams());
         ksort($params);
 
+        $headers = [];
+        foreach (static::$trackedHeaders as $header) {
+            $headers[$header] = $request->getHeaderLine($header);
+        }
+
         return md5(implode('-', [
-            $params,
+            \GuzzleHttp\json_encode($params),
+            \GuzzleHttp\json_encode($headers),
             $request->getMethod(),
             $request->getUri()->getPath(),
             $typoContext->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode(),

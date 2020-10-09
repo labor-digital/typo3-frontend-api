@@ -49,6 +49,11 @@ use TYPO3\CMS\Frontend\Page\CacheHashCalculator;
 class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInterface
 {
     /**
+     * The header where the frontend can submit it's current language to
+     */
+    public const REQUEST_LANGUAGE_HEADER = 'x-t3fa-language';
+
+    /**
      * The list of dokTypes we allow in our lookups
      *
      * @var array
@@ -255,7 +260,8 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
 
         // Inherit information based on a given slug
         $queryParams = $request->getQueryParams();
-        if (! empty($queryParams['slug'])) {
+        $hasSlug     = ! empty($queryParams['slug']);
+        if ($hasSlug) {
             $slug = $queryParams['slug'];
             if (! isset($this->slugCache[$slug])) {
                 try {
@@ -311,12 +317,32 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
             }
         }
 
-        // Check if we got an L parameter
-        if (isset($queryParams['L'])) {
-            if (! is_numeric($queryParams['L']) && strlen($queryParams['L']) > 2) {
-                throw new BadRequestException('The given language parameter seems to be invalid!');
+        // Check if we got an L parameter or a language header
+        if (! $hasSlug) {
+            foreach (
+                [
+                    // The L parameter has precedence over the header -> Therefore it must be checked first
+                    'parameter' => $queryParams['L'] ?? null,
+                    'header'    => $request->getHeaderLine(static::REQUEST_LANGUAGE_HEADER),
+                ] as $type => $provider
+            ) {
+                if (empty($provider) && $provider !== '0') {
+                    continue;
+                }
+                if (is_string($provider)) {
+                    if (is_numeric($provider) && strlen($provider) <= 2) {
+                        $language = (int)$provider;
+                        break;
+                    }
+
+                    if (ctype_alpha($provider) && strlen($provider) === 2) {
+                        $language = strtolower($provider);
+                        break;
+                    }
+
+                    throw new BadRequestException('The given language ' . $type . ' seems to be invalid!');
+                }
             }
-            $language = $queryParams['L'];
         }
 
         // Update the request

@@ -23,6 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource;
 
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3BetterApi\NotImplementedException;
+use LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\FrontendSimulation\FrontendSimulationMiddleware;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Strategy\ResourceStrategy;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer\PageTransformer;
@@ -78,7 +79,18 @@ class PageController extends AbstractResourceController
             $context->getQuery()->get('loadedLanguages', $context->getQuery()->get('loadedLanguageCodes', ''))
         );
         $languageCode        = $this->FrontendApiContext()->getLanguageCode();
-        $currentLanguageCode = $context->getQuery()->get('currentLanguage', $languageCode);
+
+        // The frontend will submit the old language header (EN) even if the new page url given by ?slug=
+        // is actually part of another language (PL). This is because the frontend does not know, the new page
+        // is localized in another language at the point of the request.
+        // We can utilize this behaviour by tracking the given header (EN) and comparing it with the new language
+        // code, which will be the actual language of the page (PL) (because the router resolved the language for us).
+        // With this we save the additional query parameter of "currentLanguage".
+        // If no language header is set we assume there was no language change and fall back to the actual language code
+        $currentLanguageCode = $context->getRequest()->getHeaderLine(FrontendSimulationMiddleware::REQUEST_LANGUAGE_HEADER);
+        if (empty($currentLanguageCode)) {
+            $currentLanguageCode = $languageCode;
+        }
 
         return $this->FrontendApiContext()->getInstanceWithoutDi(
             Page::class,
