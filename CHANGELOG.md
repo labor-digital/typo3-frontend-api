@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.28.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.28.0...v9.28.1) (2020-10-09)
+
+
+### Bug Fixes
+
+* track the current frontend language using the x-t3fa-language header instead of ?currentLanguage ([46d5430](https://github.com/labor-digital/typo3-frontend-api/commit/46d543019278517d6111d989fbfd7323fdb5e0ba))
+* **ErrorHandler:** respond with the correct http code when handling errors speaking ([86c7ca7](https://github.com/labor-digital/typo3-frontend-api/commit/86c7ca7041035fffc62dcc49280df07ecc5265ff))
+* **Transformation:** return "NULL" resource from autoIncludeItem() if $value is empty ([9638f5e](https://github.com/labor-digital/typo3-frontend-api/commit/9638f5ebc4fc328cc8d5f1c6c5dc9cf7e9257a56))
+
 ## [9.28.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.27.0...v9.28.0) (2020-10-08)
 
 
