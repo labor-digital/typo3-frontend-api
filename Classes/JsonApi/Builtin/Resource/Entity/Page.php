@@ -148,8 +148,9 @@ class Page
 
         return array_merge($pageLinks, [
             'frontend' => $link->build(),
-            // @todo rename slug to "relative" in v10
-            'slug'     => $link->build(['relative']),
+            'relative' => $slug = $link->build(['relative']),
+            // @todo remove "slug" in v10
+            'slug'     => $slug,
         ]);
     }
 
