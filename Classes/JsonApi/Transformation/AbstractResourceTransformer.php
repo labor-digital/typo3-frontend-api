@@ -25,7 +25,7 @@ use LaborDigital\Typo3FrontendApi\Cache\Scope\CacheTagAwareInterface;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ResourceTransformerPreProcessorEvent;
 use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
+use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\TransformerAbstract;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -67,11 +67,15 @@ abstract class AbstractResourceTransformer extends TransformerAbstract
      *
      * @param $value
      *
-     * @return \League\Fractal\Resource\Item
+     * @return ResourceAbstract
      */
-    protected function autoIncludeItem($value): Item
+    protected function autoIncludeItem($value): ResourceAbstract
     {
         $factory = $this->TransformerFactory();
+
+        if (empty($value)) {
+            return $this->null();
+        }
 
         return $this->item($value,
             $factory->getTransformer()->getConcreteTransformer($value),
