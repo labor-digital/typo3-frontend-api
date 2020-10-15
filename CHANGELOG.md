@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.28.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.28.2...v9.28.3) (2020-10-15)
+
+
+### Bug Fixes
+
+* **CacheService:** use new table name resolver ([a8a8581](https://github.com/labor-digital/typo3-frontend-api/commit/a8a85815288f62394f872b7d66f6c23e645d76d7))
+* write cache key in lower case to prevent db issues ([99359c9](https://github.com/labor-digital/typo3-frontend-api/commit/99359c92c0725b653941d36cd6014f5e3c31a121))
+
 ### [9.28.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.28.1...v9.28.2) (2020-10-09)
 
 
