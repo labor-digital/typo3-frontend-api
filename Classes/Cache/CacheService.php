@@ -258,7 +258,7 @@ class CacheService implements SingletonInterface
                 $tags[] = 'page_' . $tag->getPid();
             }
             if ($tag instanceof AbstractEntity) {
-                $tags[] = Naming::tableNameFromModelClass(get_class($tag)) . '_' . $tag->getUid();
+                $tags[] = Naming::resolveTableName($tag) . '_' . $tag->getUid();
             } else {
                 $tags[] = Path::classBasename(get_class($tag)) . '_' . md5(get_class($tag));
             }
