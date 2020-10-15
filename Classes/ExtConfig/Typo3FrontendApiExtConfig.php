@@ -59,7 +59,7 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
 
         // Register cache
         $configurator->core()->registerCache(
-            'T3FA', VariableFrontend::class, Typo3DatabaseBackend::class,
+            't3fa', VariableFrontend::class, Typo3DatabaseBackend::class,
             [
                 'options' => [
                     'compression'     => true,

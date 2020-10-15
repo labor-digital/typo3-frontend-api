@@ -81,7 +81,7 @@ class CacheService implements SingletonInterface
     public function __construct(CacheScopeRegistry $scopeRegistry, CacheManager $cacheManager, TsfeService $tsfeService)
     {
         $this->scopeRegistry = $scopeRegistry;
-        $this->cache         = $cacheManager->getCache('T3FA');
+        $this->cache         = $cacheManager->getCache('t3fa');
         $this->tsfeService   = $tsfeService;
     }
 
