@@ -228,7 +228,13 @@ class ContentElementConfigGenerator implements CachedStackGeneratorInterface
             return '';
         }
 
-        return $this->getPersistenceTs([$configurator->getModelClass()], 'tt_content', [$configurator->getModelClass() => array_flip($virtualColumns)]);
+        // Convert the column names into property names
+        $vColPropertyMap = array_flip($virtualColumns);
+        $vColPropertyMap = array_map(function (string $column) {
+            return Inflector::toProperty($column);
+        }, $vColPropertyMap);
+
+        return $this->getPersistenceTs([$configurator->getModelClass()], 'tt_content', [$configurator->getModelClass() => $vColPropertyMap]);
     }
 
     /**
