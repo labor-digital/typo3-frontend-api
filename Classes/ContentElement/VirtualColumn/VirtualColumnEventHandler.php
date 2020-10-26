@@ -199,6 +199,7 @@ class VirtualColumnEventHandler implements SingletonInterface, LazyEventSubscrib
 
             // Add the values to the storage slot
             $row[TtContentOverrides::VIRTUAL_COLUMN_FIELD] = json_encode($virtualFieldArray);
+            $this->currentVirtualValues                    = $virtualFieldArray;
         }
 
         // Remove all virtual columns from the field array
