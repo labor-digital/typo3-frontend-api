@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.29.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.28.3...v9.29.0) (2020-10-26)
+
+
+### Features
+
+* **AbstractContentElementModel:** add $remapVCols to getRaw() ([5cc5190](https://github.com/labor-digital/typo3-frontend-api/commit/5cc51905eeba156206b455423ab6724b99654535))
+
+
+### Bug Fixes
+
+* **ContentElementConfigGenerator:** make sure the vCol names are converted to properties ([8c94fe6](https://github.com/labor-digital/typo3-frontend-api/commit/8c94fe6b58732b04d454284305d2e8bf4196c950))
+* **VirtualColumnEventHandler:** update $currentVirtualValues correctly ([5617fd1](https://github.com/labor-digital/typo3-frontend-api/commit/5617fd11a4642bc32f7c23cafb6ea264f333259a))
+
 ### [9.28.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.28.2...v9.28.3) (2020-10-15)
 
 
