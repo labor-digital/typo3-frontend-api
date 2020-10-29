@@ -409,12 +409,17 @@ class CacheService implements SingletonInterface
         $key = $this->generateCacheKey($options['keyGenerator']);
         if (! $this->isUpdate && $this->cache->has($key)) {
             $result = $this->cache->get($key);
+            $tags   = $result['tags'] ?? [];
+            $result = $result['content'] ?? $result;
+
             if ($options['onWarmup'] !== null) {
                 $result = call_user_func($options['onWarmup'], $result);
             }
 
+            $this->announceTags($tags);
+
             if ($this->metricsTracker !== null) {
-                $this->metricsTracker->triggerHit($callback, $key);
+                $this->metricsTracker->triggerHit($callback, $key, $tags);
             }
 
             return $result;
@@ -468,6 +473,8 @@ class CacheService implements SingletonInterface
         if ($options['onFreeze'] !== null) {
             $frozen = call_user_func($options['onFreeze'], $frozen);
         }
+
+        $frozen = ['content' => $frozen, 'tags' => $scope->tags];
         $this->cache->set($key, $frozen, $scope->tags, $scope->ttl);
 
         return $scope->result;

@@ -80,7 +80,7 @@ class PageTransformer extends AbstractResourceTransformer
      *
      * @param $value
      *
-     * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+     * @return \League\Fractal\Resource\ResourceAbstract
      */
     public function includePidConfig($value)
     {
@@ -96,7 +96,7 @@ class PageTransformer extends AbstractResourceTransformer
      *
      * @param $value
      *
-     * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+     * @return \League\Fractal\Resource\ResourceAbstract
      */
     public function includeData($value)
     {
@@ -112,7 +112,7 @@ class PageTransformer extends AbstractResourceTransformer
      *
      * @param $value
      *
-     * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+     * @return \League\Fractal\Resource\ResourceAbstract
      */
     public function includeContent($value)
     {
@@ -144,7 +144,7 @@ class PageTransformer extends AbstractResourceTransformer
      *
      * @param $value
      *
-     * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+     * @return \League\Fractal\Resource\ResourceAbstract
      */
     public function includeTranslation($value)
     {

@@ -73,7 +73,7 @@ class MetricsRenderer
             $output[] = $prefix . '> GENERATOR: ' . $node['generator'];
         }
 
-        if (isset($node['tags'])) {
+        if (! empty($node['tags'])) {
             sort($node['tags']);
 
             $lines = [];

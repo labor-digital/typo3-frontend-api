@@ -42,7 +42,7 @@ class PageDataTransformer extends AbstractResourceTransformer
 
                 return $result;
             },
-            [__CLASS__, $value->getId(), $value->getLanguageCode()],
+            [__CLASS__, $value->getId(), $value->getLanguageCode(), $context->getCacheRelevantQueryParams()],
             ['tags' => ['page_' . $value->getId(), 'pages_' . $value->getId()]]
         );
     }

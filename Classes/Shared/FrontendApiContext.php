@@ -30,6 +30,7 @@ use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use LaborDigital\Typo3FrontendApi\JsonApi\Retrieval\ResourceDataRepository;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerFactory;
 use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfig;
+use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -144,6 +145,29 @@ class FrontendApiContext implements SingletonInterface
     public function getInstanceWithoutDi(string $class, array $args = [])
     {
         return $this->Container()->getWithoutDi($class, $args);
+    }
+
+    /**
+     * Returns the list of all query parameters that are considered relevant for caching page elements
+     * like content elements or the whole page content array
+     *
+     * @return array
+     */
+    public function getCacheRelevantQueryParams(): array
+    {
+        return Arrays::without($this->getRequest()->getQueryParams(),
+            array_merge(
+                (array)($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'] ?? []),
+                [
+                    'slug',
+                    'include',
+                    'page',
+                    'sort',
+                    'filter',
+                    'fields',
+                ]
+            )
+        );
     }
 
     /**

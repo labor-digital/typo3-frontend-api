@@ -40,13 +40,15 @@ class MetricsTracker
      *
      * @param           $callable
      * @param   string  $key
+     * @param   array   $tags
      */
-    public function triggerHit($callable, string $key): void
+    public function triggerHit($callable, string $key, array $tags): void
     {
         $this->entries[] = [
             'type'      => 'HIT',
             'key'       => $key,
             'generator' => $this->getCallableId($callable),
+            'tags'      => $tags,
         ];
     }
 

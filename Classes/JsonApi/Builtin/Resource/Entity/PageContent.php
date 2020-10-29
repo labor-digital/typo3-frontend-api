@@ -71,7 +71,7 @@ class PageContent implements SelfTransformingInterface
                     'children' => $this->getContents()->asArray(),
                 ];
             },
-            [__CLASS__, $this->id, $this->languageCode],
+            [__CLASS__, $this->id, $this->languageCode, $context->getCacheRelevantQueryParams()],
             ['tags' => ['page_' . $this->id, 'pages_' . $this->id]]
         );
     }

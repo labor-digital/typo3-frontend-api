@@ -206,7 +206,14 @@ class ContentElement implements SelfTransformingInterface
                     'cssClasses'         => $this->cssClasses,
                 ], $this->additionalAttributes);
             },
-            [__CLASS__, $this->uid, $this->source, $this->languageCode, $this->type]
+            [
+                __CLASS__,
+                $this->uid,
+                $this->source,
+                $this->languageCode,
+                $this->type,
+                $context->getCacheRelevantQueryParams(),
+            ]
         );
     }
 
