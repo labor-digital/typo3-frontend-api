@@ -24,6 +24,7 @@ namespace LaborDigital\Typo3FrontendApi\Cache\KeyGeneration;
 
 
 use Neunerlei\Arrays\Arrays;
+use Throwable;
 
 class ArrayBasedCacheKeyGenerator implements CacheKeyGeneratorInterface
 {
@@ -52,7 +53,11 @@ class ArrayBasedCacheKeyGenerator implements CacheKeyGeneratorInterface
         $dataList = Arrays::flatten($this->data);
         ksort($dataList);
 
-        return md5(\GuzzleHttp\json_encode($dataList));
+        try {
+            return md5(serialize($dataList));
+        } catch (Throwable $exception) {
+            return md5(\GuzzleHttp\json_encode($dataList));
+        }
     }
 
 }

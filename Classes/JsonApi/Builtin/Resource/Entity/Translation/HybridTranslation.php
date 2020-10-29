@@ -39,7 +39,6 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Translation;
 
 
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 
 class HybridTranslation extends AbstractTranslation implements SelfTransformingInterface
@@ -71,11 +70,9 @@ class HybridTranslation extends AbstractTranslation implements SelfTransformingI
                     ];
                 }
             );
-        }, [
-            'tags'         => ['translation'],
-            'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                [[__CLASS__, $this->languageId, $siteConfig->translationLabels]],
-            ]),
-        ]);
+        },
+            [__CLASS__, $this->languageId, $siteConfig->translationLabels],
+            ['tags' => ['translation']]
+        );
     }
 }

@@ -24,7 +24,6 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Link\TypoLink;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
@@ -115,15 +114,10 @@ class PageLinks implements SelfTransformingInterface
             $this->links = [];
 
             return $result;
-        }, [
-            'tags'         => ['pageLinks'],
-            'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                [
-                    __CLASS__,
-                    $this->pid,
-                ],
-            ]),
-        ]);
+        },
+            [__CLASS__, $this->pid],
+            ['tags' => ['pageLinks']]
+        );
     }
 
 }

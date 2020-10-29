@@ -361,11 +361,9 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $element->pid                = $controllerContext->getModel()->getPid();
         $element->useLoaderComponent = $controllerContext->useLoaderComponent();
         $element->componentType      = $controllerContext->getType();
-        if ($controllerContext->getInitialStateRequest() !== null) {
-            $element->initialState = $t3faContext->ResourceDataRepository()->findForInitialState($controllerContext->getInitialStateRequest());
-        }
-        $element->data       = $this->generateData($controllerContext->getCType(), $result, $controllerContext);
-        $element->cssClasses = $controllerContext->getCssClasses();
+        $element->initialState       = $this->generateInitialState($controllerContext->getInitialStateRequest());
+        $element->data               = $this->generateData($controllerContext->getCType(), $result, $controllerContext);
+        $element->cssClasses         = $controllerContext->getCssClasses();
 
         return $element;
     }
@@ -409,6 +407,27 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 
         // Done
         return $data;
+    }
+
+    /**
+     * Generates and caches the initial state, so we might re-use it again for other content elements
+     * that reuse the same data
+     *
+     * @param   array|null  $request
+     *
+     * @return array|null
+     */
+    protected function generateInitialState(?array $request): ?array
+    {
+        if ($request === null) {
+            return null;
+        }
+
+        logFile($request);
+
+        return $this->FrontendApiContext()->CacheService()->remember(function () use ($request) {
+            $this->FrontendApiContext()->ResourceDataRepository()->findForInitialState($request);
+        }, [__FUNCTION__, $request]);
     }
 
     /**

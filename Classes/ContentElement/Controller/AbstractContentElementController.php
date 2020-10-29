@@ -23,7 +23,9 @@ namespace LaborDigital\Typo3FrontendApi\ContentElement\Controller;
 
 use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
+use LaborDigital\Typo3FrontendApi\Cache\CacheServiceAwareTrait;
 use LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigurationInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 abstract class AbstractContentElementController implements ContentElementControllerInterface, ContentElementConfigurationInterface
 {
@@ -32,4 +34,6 @@ abstract class AbstractContentElementController implements ContentElementControl
         CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
         CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;
     }
+    use FrontendApiContextAwareTrait;
+    use CacheServiceAwareTrait;
 }

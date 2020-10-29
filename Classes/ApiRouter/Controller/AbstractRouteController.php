@@ -24,11 +24,15 @@ namespace LaborDigital\Typo3FrontendApi\ApiRouter\Controller;
 use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\ApiRouter\Traits\ResponseFactoryTrait;
+use LaborDigital\Typo3FrontendApi\Cache\CacheServiceAwareTrait;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 abstract class AbstractRouteController implements RouteControllerInterface
 {
     use CommonServiceLocatorTrait;
     use ResponseFactoryTrait;
+    use FrontendApiContextAwareTrait;
+    use CacheServiceAwareTrait;
     use CommonDependencyTrait {
         CommonDependencyTrait::getInstanceOf insteadof CommonServiceLocatorTrait;
         CommonDependencyTrait::injectContainer insteadof CommonServiceLocatorTrait;

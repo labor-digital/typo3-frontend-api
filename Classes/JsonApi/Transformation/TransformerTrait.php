@@ -24,6 +24,7 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 use Iterator;
 use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
+use LaborDigital\Typo3FrontendApi\Cache\CacheServiceAwareTrait;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -31,6 +32,7 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 trait TransformerTrait
 {
     use FrontendApiContextAwareTrait;
+    use CacheServiceAwareTrait;
     use CommonServiceLocatorTrait;
 
     /**

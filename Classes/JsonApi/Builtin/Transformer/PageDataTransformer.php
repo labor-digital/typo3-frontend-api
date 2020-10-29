@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer;
 
 
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
 
 class PageDataTransformer extends AbstractResourceTransformer
@@ -43,12 +42,8 @@ class PageDataTransformer extends AbstractResourceTransformer
 
                 return $result;
             },
-            [
-                'tags'         => ['page_' . $value->getId(), 'pages_' . $value->getId()],
-                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                    [__CLASS__, $value->getId(), $value->getLanguageCode()],
-                ]),
-            ]
+            [__CLASS__, $value->getId(), $value->getLanguageCode()],
+            ['tags' => ['page_' . $value->getId(), 'pages_' . $value->getId()]]
         );
     }
 

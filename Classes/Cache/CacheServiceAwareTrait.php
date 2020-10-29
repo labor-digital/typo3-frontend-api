@@ -14,34 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.09.23 at 19:48
+ * Last modified: 2020.10.29 at 11:06
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\Typo3FrontendApi\Cache\KeyGeneration;
+namespace LaborDigital\Typo3FrontendApi\Cache;
 
 
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContext;
 
-/**
- * Class TsfeCacheAdapter
- *
- * @package    LaborDigital\Typo3FrontendApi\Cache\KeyGeneration
- * @deprecated will be removed in v10, as it is no longer required
- */
-class TsfeCacheAdapter extends TypoScriptFrontendController
+trait CacheServiceAwareTrait
 {
     /**
-     * Adapter to calculate the tsfe base cache
+     * Returns the instance of the frontend api cache service
      *
-     * @param   \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController  $tsfe
-     *
-     * @return string
+     * @return \LaborDigital\Typo3FrontendApi\Cache\CacheService
      */
-    public static function getCacheHash(TypoScriptFrontendController $tsfe): string
+    protected function CacheService(): CacheService
     {
-        return $tsfe->getHash();
+        return FrontendApiContext::getInstance()->CacheService();
     }
 }

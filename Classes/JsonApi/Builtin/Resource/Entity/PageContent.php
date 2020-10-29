@@ -22,7 +22,6 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use LaborDigital\Typo3FrontendApi\Shared\ShortTimeMemoryTrait;
@@ -72,12 +71,8 @@ class PageContent implements SelfTransformingInterface
                     'children' => $this->getContents()->asArray(),
                 ];
             },
-            [
-                'tags'         => ['page_' . $this->id, 'pages_' . $this->id],
-                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                    [__CLASS__, $this->id, $this->languageCode],
-                ]),
-            ]
+            [__CLASS__, $this->id, $this->languageCode],
+            ['tags' => ['page_' . $this->id, 'pages_' . $this->id]]
         );
     }
 

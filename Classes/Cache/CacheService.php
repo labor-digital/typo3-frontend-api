@@ -24,10 +24,11 @@ namespace LaborDigital\Typo3FrontendApi\Cache;
 
 
 use LaborDigital\Typo3BetterApi\NamingConvention\Naming;
-use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\CacheKeyGeneratorInterface;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\CallableCacheKeyGenerator;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\TsfeCacheAdapter;
+use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\EnvironmentCacheKeyGenerator;
+use LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsTracker;
 use LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry;
 use LaborDigital\Typo3FrontendApi\Cache\Scope\CacheTagAwareInterface;
 use Neunerlei\Options\Options;
@@ -52,9 +53,14 @@ class CacheService implements SingletonInterface
     protected $cache;
 
     /**
-     * @var \LaborDigital\Typo3BetterApi\Tsfe\TsfeService
+     * @var \LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\EnvironmentCacheKeyGenerator
      */
-    protected $tsfeService;
+    protected $envCacheKeyGenerator;
+
+    /**
+     * @var \LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsTracker|null
+     */
+    protected $metricsTracker;
 
     /**
      * True as long as the cache service is enabled and can be used
@@ -71,18 +77,19 @@ class CacheService implements SingletonInterface
      */
     protected $isUpdate = false;
 
+
     /**
      * CacheService constructor.
      *
-     * @param   \LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry  $scopeRegistry
-     * @param   \TYPO3\CMS\Core\Cache\CacheManager                             $cacheManager
-     * @param   \LaborDigital\Typo3BetterApi\Tsfe\TsfeService                  $tsfeService
+     * @param   \LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry                    $scopeRegistry
+     * @param   \TYPO3\CMS\Core\Cache\CacheManager                                               $cacheManager
+     * @param   \LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\EnvironmentCacheKeyGenerator  $envCacheKeyGenerator
      */
-    public function __construct(CacheScopeRegistry $scopeRegistry, CacheManager $cacheManager, TsfeService $tsfeService)
+    public function __construct(CacheScopeRegistry $scopeRegistry, CacheManager $cacheManager, EnvironmentCacheKeyGenerator $envCacheKeyGenerator)
     {
-        $this->scopeRegistry = $scopeRegistry;
-        $this->cache         = $cacheManager->getCache('t3fa');
-        $this->tsfeService   = $tsfeService;
+        $this->scopeRegistry        = $scopeRegistry;
+        $this->cache                = $cacheManager->getCache('t3fa');
+        $this->envCacheKeyGenerator = $envCacheKeyGenerator;
     }
 
     /**
@@ -306,6 +313,16 @@ class CacheService implements SingletonInterface
     }
 
     /**
+     * Allows the outside world to inject a metrics tracker instance
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsTracker  $tracker
+     */
+    public function setMetricsTracker(MetricsTracker $tracker): void
+    {
+        $this->metricsTracker = $tracker;
+    }
+
+    /**
      * The given $callback is called once and then cached. All subsequent calls
      * will then first try to serve the cached value instead of calling $callback again.
      *
@@ -313,28 +330,43 @@ class CacheService implements SingletonInterface
      * This also means that outer executions will inherit the cache options like ttl, tags and "enabled" state
      * from the inner executions.
      *
-     * @param   callable  $callback  The callable to generate the value to be cached
-     * @param   array     $options   Additional options
-     *                               - ttl int|callable: The numeric value in seconds for how long the cache entry
-     *                               should be stored. Can be a callable which receives the $callback result,
-     *                               to create a ttl based on the output. Is inherited to outer scopes.
-     *                               - enabled bool|callable (true): Allows you to dynamically disable the cache
-     *                               for this execution. Can be a callable which receives the $callback result,
-     *                               to enable/disable the cache based on the output. Is inherited to outer scopes.
-     *                               - keyGenerator CacheKeyGeneratorInterface: The generator instance
-     *                               which is used to generate a cache key for this entry.
-     *                               - tags array: A list of tags that should be added to this cache entry.
-     *                               The tags will be inherited to outer scopes.
-     *                               - onFreeze callable: A callback to execute before the result of $callback is written
-     *                               into the cache. Allows you to perform additional post processing on the fly. The
-     *                               callback receives the result as parameter.
-     *                               - onWarmup callable: A callback to execute when the cached value is read from the caching system.
-     *                               Allows you to rehydrate objects on the fly. The callback receives the value as parameter.
+     * @param   callable    $callback  The callable to generate the value to be cached
+     * @param   array|null  $keyArgs   Allows you to pass key arguments to generate the cache key with
+     *                                 You can omit this parameter if you are supplying your own keyGenerator
+     *                                 implementation in the options
+     * @param   array       $options   Additional options
+     *                                 - ttl int|callable: The numeric value in seconds for how long the cache entry
+     *                                 should be stored. Can be a callable which receives the $callback result,
+     *                                 to create a ttl based on the output. Is inherited to outer scopes.
+     *                                 - enabled bool|callable (true): Allows you to dynamically disable the cache
+     *                                 for this execution. Can be a callable which receives the $callback result,
+     *                                 to enable/disable the cache based on the output. Is inherited to outer scopes.
+     *                                 - keyGenerator CacheKeyGeneratorInterface: The generator instance
+     *                                 which is used to generate a cache key for this entry.
+     *                                 - tags array: A list of tags that should be added to this cache entry.
+     *                                 The tags will be inherited to outer scopes.
+     *                                 - onFreeze callable: A callback to execute before the result of $callback is written
+     *                                 into the cache. Allows you to perform additional post processing on the fly. The
+     *                                 callback receives the result as parameter.
+     *                                 - onWarmup callable: A callback to execute when the cached value is read from the caching system.
+     *                                 Allows you to rehydrate objects on the fly. The callback receives the value as parameter.
      *
      * @return false|mixed
      */
-    public function remember(callable $callback, array $options = [])
+    public function remember(callable $callback, ?array $keyArgs = null, array $options = [])
     {
+        // @todo remove this in v10
+        // Legacy adapter if the options are passed as keyArgs
+        if (empty($options) && is_array($keyArgs)) {
+            foreach (['ttl', 'enabled', 'keyGenerator', 'tags', 'onFreeze', 'onWarmup'] as $optionKey) {
+                if (isset($keyArgs[$optionKey])) {
+                    $options = $keyArgs;
+                    $keyArgs = null;
+                    break;
+                }
+            }
+        }
+
         $options = Options::make($options, [
             'ttl'          => [
                 'type'    => ['int', 'null', 'callable'],
@@ -346,7 +378,11 @@ class CacheService implements SingletonInterface
             ],
             'keyGenerator' => [
                 'type'    => CacheKeyGeneratorInterface::class,
-                'default' => static function () use ($callback) {
+                'default' => static function () use ($callback, $keyArgs) {
+                    if (is_array($keyArgs)) {
+                        return GeneralUtility::makeInstance(ArrayBasedCacheKeyGenerator::class, $keyArgs);
+                    }
+
                     return GeneralUtility::makeInstance(CallableCacheKeyGenerator::class, $callback);
                 },
             ],
@@ -377,11 +413,15 @@ class CacheService implements SingletonInterface
                 $result = call_user_func($options['onWarmup'], $result);
             }
 
+            if ($this->metricsTracker !== null) {
+                $this->metricsTracker->triggerHit($callback, $key);
+            }
+
             return $result;
         }
 
         // Create new value
-        $scope = $this->scopeRegistry->runInScope(function () use ($callback, $options) {
+        $runner = function () use ($callback, $options) {
             // Announce the configured tags
             $this->announceTags($options['tags']);
 
@@ -404,7 +444,19 @@ class CacheService implements SingletonInterface
             }
 
             return $result;
-        });
+        };
+
+        // Handle metrics tracker
+        if ($this->metricsTracker !== null) {
+            $scope = $this->metricsTracker->recordScope(
+                $callback, $key,
+                function () use ($runner) {
+                    return $this->scopeRegistry->runInScope($runner);
+                }
+            );
+        } else {
+            $scope = $this->scopeRegistry->runInScope($runner);
+        }
 
         // Skip, if the the caching was disabled on the fly
         if (! $scope->enabled) {
@@ -432,7 +484,7 @@ class CacheService implements SingletonInterface
     {
         return md5(implode('.', [
             $generator->makeCacheKey(),
-            TsfeCacheAdapter::getCacheHash($this->tsfeService->getTsfe()),
+            $this->envCacheKeyGenerator->makeCacheKey(),
         ]));
     }
 

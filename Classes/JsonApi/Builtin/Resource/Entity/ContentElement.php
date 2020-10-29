@@ -25,7 +25,6 @@ use Closure;
 use InvalidArgumentException;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementHandler;
 use LaborDigital\Typo3FrontendApi\ContentElement\SpaContentPreparedException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
@@ -207,11 +206,8 @@ class ContentElement implements SelfTransformingInterface
                     'cssClasses'         => $this->cssClasses,
                 ], $this->additionalAttributes);
             },
-            [
-                'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class, [
-                    [[__CLASS__, $this->uid, $this->source, $this->languageCode, $this->type]],
-                ]),
-            ]);
+            [__CLASS__, $this->uid, $this->source, $this->languageCode, $this->type]
+        );
     }
 
     /**

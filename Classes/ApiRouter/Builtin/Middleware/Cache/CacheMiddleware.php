@@ -26,11 +26,14 @@ namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Cache;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\Cache\CacheService;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\RequestCacheKeyGenerator;
+use LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsRenderer;
+use LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsTracker;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use function GuzzleHttp\Psr7\stream_for;
 
 class CacheMiddleware implements MiddlewareInterface
@@ -52,6 +55,13 @@ class CacheMiddleware implements MiddlewareInterface
      * If the response contains this header, the cache ttl will be set to the given value in seconds
      */
     public const RESPONSE_CACHE_TTL_HEADER = 'X-T3FA-Cache-TTL';
+
+    /**
+     * If this parameter is present in the get parameters of a request
+     * the middleware will render a list of cache metrics for debugging purposes.
+     * With the metrics you can see exactly how long each caching step took and what it was tagged with.
+     */
+    public const REQUEST_QUERY_METRICS_ARG = 'renderCacheMetrics';
 
     /**
      * @var \LaborDigital\Typo3FrontendApi\Cache\CacheService
@@ -87,13 +97,23 @@ class CacheMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $isCacheable = in_array(strtoupper($request->getMethod()), ['GET', 'HEAD']);
+        $collectMetrics = isset($request->getQueryParams()[static::REQUEST_QUERY_METRICS_ARG])
+                          && $this->typoContext->Env()->isDev();
+        $isCacheable    = in_array(strtoupper($request->getMethod()), ['GET', 'HEAD']);
         $this->cacheService->setUpdate(
             $this->typoContext->BeUser()->isLoggedIn() && (
                 stripos($request->getHeaderLine('cache-control'), 'no-cache') !== false
                 || stripos($request->getHeaderLine('pragma'), 'no-cache') !== false
             )
         );
+
+        if ($collectMetrics) {
+            $metricsTracker = GeneralUtility::makeInstance(MetricsTracker::class);
+            $this->cacheService->setMetricsTracker($metricsTracker);
+            $params = $request->getQueryParams();
+            unset($params[static::REQUEST_QUERY_METRICS_ARG]);
+            $request = $request->withQueryParams($params);
+        }
 
         // Make sure to remove typos cache headers to ensure we have a blank slate to work with
         foreach (['Expires', 'Last-Modified', 'Cache-Control', 'Pragma'] as $key) {
@@ -108,7 +128,7 @@ class CacheMiddleware implements MiddlewareInterface
             $response = $response->withHeader(static::CACHE_GENERATED_HEADER, gmdate("D, d M Y H:i:s \G\M\T"));
 
             return $response;
-        }, [
+        }, null, [
             'keyGenerator' => new RequestCacheKeyGenerator($request),
             'enabled'      => static function (ResponseInterface $response) use (&$isCacheable) {
                 return $isCacheable = $isCacheable
@@ -139,6 +159,12 @@ class CacheMiddleware implements MiddlewareInterface
                 return $response;
             },
         ]);
+
+        if (isset($metricsTracker)) {
+            $metricsRenderer = GeneralUtility::makeInstance(MetricsRenderer::class);
+            $response        = $response->withBody(stream_for($metricsRenderer->render($metricsTracker)));
+            $response        = $response->withHeader('Content-Type', 'text/plain');
+        }
 
         // Post-Process non cacheable responses
         if (! $isCacheable) {

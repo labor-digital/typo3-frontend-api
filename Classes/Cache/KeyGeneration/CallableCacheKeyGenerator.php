@@ -23,13 +23,12 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Cache\KeyGeneration;
 
 
-use LaborDigital\Typo3FrontendApi\Cache\CacheException;
-use ReflectionClass;
-use ReflectionFunction;
-use ReflectionObject;
+use LaborDigital\Typo3FrontendApi\Cache\CallableReflectionTrait;
 
 class CallableCacheKeyGenerator implements CacheKeyGeneratorInterface
 {
+    use CallableReflectionTrait;
+
     /**
      * @var callable
      */
@@ -50,35 +49,8 @@ class CallableCacheKeyGenerator implements CacheKeyGeneratorInterface
      */
     public function makeCacheKey(): string
     {
-        $ref = null;
-        if (is_object($this->callable)) {
-            if ($this->callable instanceof \Closure) {
-                $ref = new ReflectionFunction($this->callable);
-            } else {
-                $ref = new ReflectionObject((object)$this->callable);
-            }
-        }
-        if ($ref === null && is_string($this->callable)) {
-            if (class_exists($this->callable)) {
-                $ref = new ReflectionClass($this->callable);
-            } else {
-                $ref = new ReflectionFunction($this->callable);
-            }
-        }
-        if ($ref === null && is_array($this->callable) && count($this->callable) === 2) {
-            if (is_string($this->callable[0])) {
-                $ref = new ReflectionClass($this->callable[0]);
-            } else {
-                $ref = new ReflectionObject($this->callable[0]);
-            }
-            $ref = $ref->getMethod($this->callable[1]);
-        }
-        if ($ref === null) {
-            throw new CacheException('Could not generate a key for your given callable!');
-        }
+        $ref = $this->makeReflectionForCallable($this->callable);
 
         return md5($ref->getFileName() . '_' . $ref->getStartLine() . '_' . $ref->getEndLine());
     }
-
-
 }

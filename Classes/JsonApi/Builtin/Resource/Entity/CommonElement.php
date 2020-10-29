@@ -22,7 +22,6 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity;
 
 
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
-use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\PageMenu;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\SelfTransformingInterface;
@@ -110,11 +109,10 @@ class CommonElement implements SelfTransformingInterface
 
             throw new JsonApiException('Could not render a common element with type: ' . $type);
 
-        }, [
-            'tags'         => ['commonElement_' . $layout . '_' . $key],
-            'keyGenerator' => $context->getInstanceWithoutDi(ArrayBasedCacheKeyGenerator::class,
-                [[__CLASS__, $siteConfig->siteIdentifier, $key, $layout, $type, $config]]),
-        ]);
+        },
+            [__CLASS__, $siteConfig->siteIdentifier, $key, $layout, $type, $config],
+            ['tags' => ['commonElement_' . $layout . '_' . $key]]
+        );
 
         // Done
         return [
