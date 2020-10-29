@@ -424,7 +424,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         }
 
         return $this->FrontendApiContext()->CacheService()->remember(function () use ($request) {
-            return $this->FrontendApiContext()->ResourceDataRepository()->findForInitialState($request);
+            return $this->FrontendApiContext()->ResourceDataRepository()->findForInitialState($request)->asArray();
         }, [__FUNCTION__, $request]);
     }
 
