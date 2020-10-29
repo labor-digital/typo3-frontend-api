@@ -23,6 +23,7 @@ namespace LaborDigital\Typo3FrontendApi\Site\Configuration;
 use LaborDigital\Typo3BetterApi\ExtConfig\ExtConfigContext;
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\PageMenu;
+use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer\LanguageMenuRenderer;
 use LaborDigital\Typo3FrontendApi\JsonApi\JsonApiException;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -147,30 +148,40 @@ class SiteConfigurator
      * Registers a custom class as a common element handler. The class will be instantiated and executed
      * when the element is requested via the api
      *
-     * @param   string  $key             A unique key that identifies this object. Note that
-     *                                   all common elements and menus share the same namespace
-     *                                   when the objects are passed to the frontend.
-     * @param   string  $class           The class that should be used to generate the data for this element.
-     *                                   The class has to implement the CommonCustomElementInterface
-     * @param   array   $data            Optional data that will be passed to the element class.
-     *                                   WARNING: The data MUST BE serializable!
-     * @param   array   $loadForLayouts  Can be used to define the keys of layouts which should load this element.
-     *                                   If not given, this element will be auto-loaded on all pages. You may use "default"
-     *                                   to load this element in the default layout
+     * @param   string  $key                A unique key that identifies this object. Note that
+     *                                      all common elements and menus share the same namespace
+     *                                      when the objects are passed to the frontend.
+     * @param   string  $class              The class that should be used to generate the data for this element.
+     *                                      The class has to implement the CommonCustomElementInterface
+     * @param   array   $data               Optional data that will be passed to the element class.
+     *                                      WARNING: The data MUST BE serializable!
+     * @param   array   $loadForLayouts     Can be used to define the keys of layouts which should load this element.
+     *                                      If not given, this element will be auto-loaded on all pages. You may use "default"
+     *                                      to load this element in the default layout
+     * @param   bool    $cacheBasedOnQuery  By default the result is cached after it was created. This means it does not
+     *                                      react to changes of the request and is therefore not reactive to the page id or other query parameters.
+     *                                      (It is aware of the language and the user group, tho!). If you want your element to be reactive to the
+     *                                      query parameters set this to true
      *
      * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigurator
      * @throws \LaborDigital\Typo3FrontendApi\FrontendApiException
      * @see \LaborDigital\Typo3FrontendApi\Site\Configuration\CommonCustomElementInterface
      */
-    public function registerCommonCustomElement(string $key, string $class, array $data = [], array $loadForLayouts = []): SiteConfigurator
-    {
+    public function registerCommonCustomElement(
+        string $key,
+        string $class,
+        array $data = [],
+        array $loadForLayouts = [],
+        bool $cacheBasedOnQuery = false
+    ): SiteConfigurator {
         if (! in_array(CommonCustomElementInterface::class, class_implements($class))) {
             throw new FrontendApiException("The given class: \"$class\" has to implement the required interface: " . CommonCustomElementInterface::class);
         }
 
         return $this->addToCommonElements('custom', $key, $loadForLayouts, [
-            'class' => $class,
-            'data'  => $data,
+            'class'             => $class,
+            'data'              => $data,
+            'cacheBasedOnQuery' => $cacheBasedOnQuery,
         ]);
     }
 
@@ -265,6 +276,10 @@ class SiteConfigurator
      *                            - postProcessor string: A class that can be used to filter/alter the menu array
      *                            before it is passed to the frontend api. Has to implement the
      *                            PageMenuPostProcessorInterface
+     *                            - cacheBasedOnQuery bool (FALSE): By default the result is cached after it was created. This means it does not
+     *                            react to changes of the request and is therefore not reactive to the page id or other query parameters.
+     *                            (It is aware of the language and the user group, tho!). If you want your element to be reactive to the
+     *                            query parameters set this to true
      *
      *                            TEMPORARY:
      *                            - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
@@ -284,8 +299,9 @@ class SiteConfigurator
         return $this->addToCommonElements('menu', $key,
             is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
             [
-                'type'    => PageMenu::TYPE_MENU_PAGE,
-                'options' => $options,
+                'type'              => PageMenu::TYPE_MENU_PAGE,
+                'options'           => $options,
+                'cacheBasedOnQuery' => $options['cacheBasedOnQuery'] || in_array('cacheBasedOnQuery', $options, true),
             ]);
     }
 
@@ -309,6 +325,10 @@ class SiteConfigurator
      *                            - postProcessor string: A class that can be used to filter/alter the menu array
      *                            before it is passed to the frontend api. Has to implement the
      *                            PageMenuPostProcessorInterface
+     *                            - cacheBasedOnQuery bool (FALSE): By default the result is cached after it was created. This means it does not
+     *                            react to changes of the request and is therefore not reactive to the page id or other query parameters.
+     *                            (It is aware of the language and the user group, tho!). If you want your element to be reactive to the
+     *                            query parameters set this to true
      *
      *                            TEMPORARY:
      *                            - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
@@ -328,8 +348,34 @@ class SiteConfigurator
         return $this->addToCommonElements('menu', $key,
             is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
             [
-                'type'    => PageMenu::TYPE_MENU_ROOT_LINE,
-                'options' => $options,
+                'type'              => PageMenu::TYPE_MENU_ROOT_LINE,
+                'options'           => $options,
+                'cacheBasedOnQuery' => $options['cacheBasedOnQuery'] || in_array('cacheBasedOnQuery', $options, true),
+            ]);
+    }
+
+    /**
+     * Registers a language switcher menu for this site
+     *
+     * @param   string  $key      A unique key to identify this menu with
+     * @param   array   $options  The options to build this menu with
+     *                            - cacheBasedOnQuery bool (TRUE): By default the result is cached in context to the given query parameters.
+     *                            This means it DOES react to changes of the request and IS therefore reactive to the page id or other query parameters.
+     *                            You can disable this feature by setting this option to false
+     *                            - postProcessor string: A class that can be used to filter/alter the menu array
+     *                            before it is passed to the frontend api. Has to implement the
+     *                            PageMenuPostProcessorInterface
+     *
+     * @return $this
+     */
+    public function registerLanguageMenu(string $key, array $options = []): self
+    {
+        return $this->addToCommonElements('menu', $key,
+            is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
+            [
+                'type'              => LanguageMenuRenderer::class,
+                'options'           => $options,
+                'cacheBasedOnQuery' => $options['cacheBasedOnQuery'] !== false,
             ]);
     }
 
@@ -355,6 +401,10 @@ class SiteConfigurator
      *                                - postProcessor string: A class that can be used to filter/alter the menu array
      *                                before it is passed to the frontend api. Has to implement the
      *                                PageMenuPostProcessorInterface
+     *                                - cacheBasedOnQuery bool (FALSE): By default the result is cached after it was created. This means it does not
+     *                                react to changes of the request and is therefore not reactive to the page id or other query parameters.
+     *                                (It is aware of the language and the user group, tho!). If you want your element to be reactive to the
+     *                                query parameters set this to true
      *
      *                                TEMPORARY:
      *                                - useV10Renderer bool (FALSE): If set to true, the menu is rendered using the new v10 menu renderer
@@ -376,8 +426,9 @@ class SiteConfigurator
         return $this->addToCommonElements('menu', $key,
             is_array($options['loadForLayouts']) ? $options['loadForLayouts'] : [],
             [
-                'type'    => PageMenu::TYPE_MENU_DIRECTORY,
-                'options' => $options,
+                'type'              => PageMenu::TYPE_MENU_DIRECTORY,
+                'options'           => $options,
+                'cacheBasedOnQuery' => $options['cacheBasedOnQuery'] || in_array('cacheBasedOnQuery', $options, true),
             ]);
     }
 

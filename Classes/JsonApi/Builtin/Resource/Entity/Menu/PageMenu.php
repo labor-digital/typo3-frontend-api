@@ -128,32 +128,36 @@ class PageMenu implements SelfTransformingInterface
      */
     public function asArray(): array
     {
-        // Handle legacy definitions
-        // @todo remove this in v10
-        if ($this->options['useV10Renderer'] !== true && ! in_array('useV10Renderer', $this->options, true)) {
-            // Build the legacy options using the v10 options
-            $this->options = $this->FrontendApiContext()->getInstanceWithoutDi(
-                LegacyOptionRenderer::class, [$this->type]
-            )->getOptions($this->options);
-
-            switch ($this->type) {
-                case static::TYPE_MENU_PAGE:
-                    return $this->renderLegacyPageMenu();
-                case static::TYPE_MENU_DIRECTORY:
-                    return $this->renderLegacyDirectoryMenu();
-                case static::TYPE_MENU_ROOT_LINE:
-                    return $this->renderLegacyRootLineMenu();
-                default:
-                    throw new JsonApiException('The menu is not configured correctly! There is no menu type: ' . $this->type);
-            }
-        }
-
         // Translate type to renderer class
-        $class = ([
-            static::TYPE_MENU_PAGE      => PageMenuRenderer::class,
-            static::TYPE_MENU_DIRECTORY => DirectoryMenuRenderer::class,
-            static::TYPE_MENU_ROOT_LINE => RootLineMenuRenderer::class,
-        ])[$this->type];
+        if (! class_exists($this->type)) {
+            // Handle legacy definitions
+            // @todo remove this in v10
+            if ($this->options['useV10Renderer'] !== true && ! in_array('useV10Renderer', $this->options, true)) {
+                // Build the legacy options using the v10 options
+                $this->options = $this->FrontendApiContext()->getInstanceWithoutDi(
+                    LegacyOptionRenderer::class, [$this->type]
+                )->getOptions($this->options);
+
+                switch ($this->type) {
+                    case static::TYPE_MENU_PAGE:
+                        return $this->renderLegacyPageMenu();
+                    case static::TYPE_MENU_DIRECTORY:
+                        return $this->renderLegacyDirectoryMenu();
+                    case static::TYPE_MENU_ROOT_LINE:
+                        return $this->renderLegacyRootLineMenu();
+                    default:
+                        throw new JsonApiException('The menu is not configured correctly! There is no menu type: ' . $this->type);
+                }
+            }
+
+            $class = ([
+                static::TYPE_MENU_PAGE      => PageMenuRenderer::class,
+                static::TYPE_MENU_DIRECTORY => DirectoryMenuRenderer::class,
+                static::TYPE_MENU_ROOT_LINE => RootLineMenuRenderer::class,
+            ])[$this->type];
+        } else {
+            $class = $this->type;
+        }
 
         // Render the menu
         /** @var AbstractMenuRenderer $renderer */

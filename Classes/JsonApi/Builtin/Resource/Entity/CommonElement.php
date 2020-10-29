@@ -82,7 +82,16 @@ class CommonElement implements SelfTransformingInterface
         $key    = $this->key;
         $config = $siteConfig->commonElements[$layout][$key];
         $type   = $config['type'];
-        $data   = $context->CacheService()->remember(static function () use ($config, $key, $context, $type) {
+
+        // Prepare additional caching arguments
+        $cacheKeyArgs = [__CLASS__, $siteConfig->siteIdentifier, $key, $layout, $type, $config];
+        if ($type === static::TYPE_CONTENT_ELEMENT || $type === static::TYPE_TYPO_SCRIPT ||
+            (is_array($config['value']) && $config['value']['cacheBasedOnQuery'])) {
+            $cacheKeyArgs[] = $context->getCacheRelevantQueryParams();
+        }
+
+        // Generate the data
+        $data = $context->CacheService()->remember(static function () use ($config, $key, $context, $type) {
             if ($type === static::TYPE_CONTENT_ELEMENT || $type === static::TYPE_TYPO_SCRIPT) {
                 return $context->getInstanceWithoutDi(ContentElement::class, [
                     $type === static::TYPE_CONTENT_ELEMENT ? ContentElement::TYPE_TT_CONTENT : ContentElement::TYPE_TYPO_SCRIPT,
@@ -110,7 +119,7 @@ class CommonElement implements SelfTransformingInterface
             throw new JsonApiException('Could not render a common element with type: ' . $type);
 
         },
-            [__CLASS__, $siteConfig->siteIdentifier, $key, $layout, $type, $config],
+            $cacheKeyArgs,
             ['tags' => ['commonElement_' . $layout . '_' . $key]]
         );
 

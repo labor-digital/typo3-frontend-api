@@ -53,6 +53,14 @@ abstract class AbstractMenuRenderer
     protected $options;
 
     /**
+     * The menu processor to generate the menu array with.
+     * This can be overwritten by implementations
+     *
+     * @var string
+     */
+    protected $processorClass = ExtendedMenuProcessor::class;
+
+    /**
      * Should return a list of menu specific option definitions to apply to the given options
      *
      * @return array
@@ -90,7 +98,7 @@ abstract class AbstractMenuRenderer
         )->getDefinition();
 
         $context   = $this->FrontendApiContext();
-        $processor = $context->getInstanceOf(ExtendedMenuProcessor::class);
+        $processor = $context->getInstanceOf($this->processorClass);
         $result    = $processor->process($context->Tsfe()->getContentObjectRenderer(), [], $tsConfig, []);
         $result    = $result['menu'];
 
@@ -197,10 +205,8 @@ abstract class AbstractMenuRenderer
     protected function getDefaultMenuOptionDefinition(): array
     {
         return [
-            'loadForLayouts'    => [
-                'type'    => 'array',
-                'default' => [],
-            ],
+            'loadForLayouts'    => null,
+            'cacheBasedOnQuery' => null,
             'entryLevel'        => [
                 'type'    => 'int',
                 'default' => 0,
