@@ -104,6 +104,10 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
                     ->registerRouteController(UpController::class)
                     ->registerRouteController(SchedulerController::class);
 
+        $configurator->typoScript()->registerStaticTsDirectory(
+            'Configuration/TypoScript/ContentElements/', 'FrontendApi - Content Elements'
+        );
+
         // Register typo middleware
         $configurator->http()->registerMiddleware(ApiMiddlewareFork::class, "frontend", [
             "after"  => [

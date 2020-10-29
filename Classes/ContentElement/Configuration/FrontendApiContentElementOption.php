@@ -327,7 +327,8 @@ class FrontendApiContentElementOption extends AbstractChildExtConfigOption
 
         // Register the required typoScript
         $this->context->TypoScript->addSetup($elementConfig->typoScript, [
-            "title" => "FrontendApi - Content Elements",
+            'dynKey' => 't3fa.contentElements',
+            'dynMemory',
         ]);
 
         // Update the tt_content TCA
