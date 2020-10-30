@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Menu\Renderer;
 
 
+use Neunerlei\PathUtil\Path;
 use TYPO3\CMS\Frontend\DataProcessing\LanguageMenuProcessor;
 
 class LanguageMenuRenderer extends AbstractMenuRenderer
@@ -84,9 +85,16 @@ class LanguageMenuRenderer extends AbstractMenuRenderer
         foreach ($entries as &$entry) {
             $entry['id']           = $entry['twoLetterIsoCode'];
             $entry['isTranslated'] = (bool)$entry['available'];
-
             if ($entry['available']) {
-                $entry['link'] = $linkService->getLink()->withLanguage($entry['languageId'])->build();
+                $link        = $linkService->getLink();
+                $queryParams = $this->FrontendApiContext()->getCacheRelevantQueryParams();
+                unset($queryParams['id']);
+                if (! empty($queryParams)) {
+                    $link = $link->withArgs($queryParams);
+                }
+
+                $link          = $link->withLanguage($entry['languageId'])->build();
+                $entry['link'] = (string)Path::makeUri($link)->withQuery('');
             } else {
                 $entry['link'] = (string)$site->getLanguageById($entry['languageId'])->getBase();
             }
