@@ -130,4 +130,16 @@ abstract class AbstractContentElementModel extends AbstractEntity
 
         return null;
     }
+
+    /**
+     * Allow magic state lookup for raw properties
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return $this->__get($name) !== null;
+    }
 }
