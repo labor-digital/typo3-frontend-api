@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.32.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.31.0...v9.32.0) (2020-10-29)
+
+
+### Features
+
+* implement language menu renderer ([5ac7a59](https://github.com/labor-digital/typo3-frontend-api/commit/5ac7a59bbd5f6f3a3a17f07d1372755a8e6e307e))
+
 ## [9.31.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.30.2...v9.31.0) (2020-10-29)
 
 
