@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.32.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.0...v9.32.1) (2020-11-02)
+
+
+### Bug Fixes
+
+* **AbstractContentElementModel:** add __isset() support for raw properties ([e3ffc06](https://github.com/labor-digital/typo3-frontend-api/commit/e3ffc063bd00e8dd2e09db181e4da716ddab68b9))
+* **ContentElementForm:** handle array display conditions correctly ([aded9f4](https://github.com/labor-digital/typo3-frontend-api/commit/aded9f4c5b962cdfef80a30b9fd283cb7e87998c))
+* **LanguageMenuRenderer:** handle parameter based urls correctly ([9f4e585](https://github.com/labor-digital/typo3-frontend-api/commit/9f4e5852db41dd4dfa153adb56cae3b765db8455))
+
 ## [9.32.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.31.0...v9.32.0) (2020-10-29)
 
 
