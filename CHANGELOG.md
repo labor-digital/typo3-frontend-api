@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.32.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.1...v9.32.2) (2020-11-09)
+
+
+### Bug Fixes
+
+* **VirtualColumn:** make sure extbase can map the vCols correctly when used in multiple content elements ([eb35332](https://github.com/labor-digital/typo3-frontend-api/commit/eb353323e4ae040d77c1bd1884313db302ffbe14))
+
 ### [9.32.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.0...v9.32.1) (2020-11-02)
 
 
