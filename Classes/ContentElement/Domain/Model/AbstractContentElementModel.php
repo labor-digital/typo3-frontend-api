@@ -26,14 +26,6 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 abstract class AbstractContentElementModel extends AbstractEntity
 {
-
-    /**
-     * The map of column names and their virtual column name to map
-     *
-     * @var array
-     */
-    protected $__virtualColumnMap;
-
     /**
      * The raw database array that was used to create this model
      *
@@ -44,9 +36,10 @@ abstract class AbstractContentElementModel extends AbstractEntity
     /**
      * The raw database array where the vCols have been remapped to their shorter name
      *
+     * @deprecated will be removed in v10
      * @var array
      */
-    protected $__rawRemapped;
+    protected $__legacyRawUnmapped;
 
     /**
      * Contains
@@ -58,28 +51,13 @@ abstract class AbstractContentElementModel extends AbstractEntity
     /**
      * Returns the raw database array that was used to create this model
      *
+     * @param   bool  $remapVCols  @deprecated will be removed in v10 this is always true in the future
+     *
      * @return array
      */
     public function getRaw(bool $remapVCols = false): array
     {
-        if ($remapVCols) {
-            if (is_array($this->__rawRemapped)) {
-                return $this->__rawRemapped;
-            }
-
-            $this->__rawRemapped = $this->__raw;
-            $map                 = array_flip($this->__virtualColumnMap);
-            foreach ($this->__rawRemapped as $field => $value) {
-                if (isset($map[$field])) {
-                    $field = $map[$field];
-                }
-                $this->__rawRemapped[$field] = $value;
-            }
-
-            return $this->__rawRemapped;
-        }
-
-        return $this->__raw;
+        return $remapVCols ? $this->__raw : $this->__legacyRawUnmapped;
     }
 
     /**
@@ -105,6 +83,17 @@ abstract class AbstractContentElementModel extends AbstractEntity
     }
 
     /**
+     * Block all writing on magic properties
+     *
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        throw new \InvalidArgumentException('This model has only readable magic properties!');
+    }
+
+    /**
      * Allow magic access to all the raw properties of this model
      *
      * @param $name
@@ -114,16 +103,10 @@ abstract class AbstractContentElementModel extends AbstractEntity
     public function __get($name)
     {
         $raw = $this->getRaw();
-        if (isset($this->__virtualColumnMap[$name])) {
-            $name = $this->__virtualColumnMap[$name];
-        }
         if (isset($raw[$name])) {
             return $raw[$name];
         }
         $name = Inflector::toDatabase($name);
-        if (isset($this->__virtualColumnMap[$name])) {
-            $name = $this->__virtualColumnMap[$name];
-        }
         if (isset($raw[$name])) {
             return $raw[$name];
         }

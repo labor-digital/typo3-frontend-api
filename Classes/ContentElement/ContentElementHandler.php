@@ -29,6 +29,7 @@ use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementContro
 use LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementDataPostProcessorInterface;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Repository\ContentElementRepository;
 use LaborDigital\Typo3FrontendApi\ContentElement\Transformation\ContentElementDataTransformer;
+use LaborDigital\Typo3FrontendApi\ContentElement\VirtualColumn\VirtualColumnUtil;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementAfterControllerFilterEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementAfterWrapFilterEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementPostProcessorEvent;
@@ -197,7 +198,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $context->setCacheOptionsArray($this->makeCacheConfig($config, $row));
 
         // Execute the controller
-        $result = $this->handleVirtualColumnTcaRewrite($cType,
+        $result = VirtualColumnUtil::runWithResolvedVColTca($cType,
             static function () use ($isFrontend, $controller, $context) {
                 return $isFrontend ? $controller->handle($context) : $controller->handleBackend($context);
             }
@@ -426,38 +427,6 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         return $this->FrontendApiContext()->CacheService()->remember(function () use ($request) {
             return $this->FrontendApiContext()->ResourceDataRepository()->findForInitialState($request)->asArray();
         }, [__FUNCTION__, $request]);
-    }
-
-    /**
-     * For the most part the virtual columns work out of the box,
-     * however when resolving file references in the backend there are issues where typo3 expects
-     * the "virtual" column names to exist in the tca. To provide a polyfill in the content element
-     * controller we rewrite the vCol_ definitions the their internal column name so typo3 can resolve the
-     * virtual columns without problems.
-     *
-     * @param   string    $cType
-     * @param   callable  $wrapper
-     *
-     * @return mixed
-     * @throws \JsonException
-     */
-    protected function handleVirtualColumnTcaRewrite(string $cType, callable $wrapper)
-    {
-        // Store the original tca and prepare the reverting function
-        $originalTca = json_encode(Arrays::getPath($GLOBALS, ['TCA', 'tt_content', 'columns'], []), JSON_THROW_ON_ERROR);
-
-        try {
-            // Remap the existing tca using the content element map
-            $columnMap = $this->FrontendApiContext()->ConfigRepository()->contentElement()->getVirtualColumnsFor($cType);
-            foreach ($columnMap as $target => $real) {
-                $GLOBALS['TCA']['tt_content']['columns'][$target] = Arrays::getPath($GLOBALS, ['TCA', 'tt_content', 'columns', $real], []);
-            }
-
-            // Run the real code
-            return $wrapper();
-        } finally {
-            $GLOBALS['TCA']['tt_content']['columns'] = json_decode($originalTca, true, 512, JSON_THROW_ON_ERROR);
-        }
     }
 
     /**
