@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.32.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.2...v9.32.3) (2020-11-16)
+
+
+### Bug Fixes
+
+* **AbstractContentElementModel:** use the remapped vcols for get requests ([b12e13e](https://github.com/labor-digital/typo3-frontend-api/commit/b12e13ee3b5b0277ffd423c13fd1ca246edd9c73))
+
 ### [9.32.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.1...v9.32.2) (2020-11-09)
 
 
