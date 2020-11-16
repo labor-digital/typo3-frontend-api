@@ -102,7 +102,7 @@ abstract class AbstractContentElementModel extends AbstractEntity
      */
     public function __get($name)
     {
-        $raw = $this->getRaw();
+        $raw = $this->getRaw(true);
         if (isset($raw[$name])) {
             return $raw[$name];
         }
