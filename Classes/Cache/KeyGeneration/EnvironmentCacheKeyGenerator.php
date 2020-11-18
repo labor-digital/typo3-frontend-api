@@ -22,8 +22,9 @@ declare(strict_types=1);
 
 namespace LaborDigital\Typo3FrontendApi\Cache\KeyGeneration;
 
-use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
-use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
+use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
+use LaborDigital\Typo3FrontendApi\Event\EnvironmentCacheKeyFilterEvent;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 
 /**
  * Class EnvironmentCacheKeyGenerator
@@ -36,38 +37,39 @@ use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
  */
 class EnvironmentCacheKeyGenerator implements CacheKeyGeneratorInterface
 {
-    /**
-     * @var \LaborDigital\Typo3BetterApi\Tsfe\TsfeService
-     */
-    protected $tsfeService;
-
-    /**
-     * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
-     */
-    protected $context;
-
-    public function __construct(TsfeService $tsfeService, TypoContext $context)
-    {
-        $this->tsfeService = $tsfeService;
-        $this->context     = $context;
-    }
+    use CommonDependencyTrait;
+    use FrontendApiContextAwareTrait;
 
     /**
      * @inheritDoc
      */
     public function makeCacheKey(): string
     {
-        $tsfe = $this->tsfeService->getTsfe();
-        $args = [
-            $tsfe->type,
-            $tsfe->MP,
-            implode(',', $this->context->FeUser()->getGroupIds()),
-            $this->context->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode(),
-            $this->context->BeUser()->isLoggedIn(),
-            $this->context->Site()->getCurrent()->getRootPageId(),
+        $tsfe    = $this->Tsfe()->getTsfe();
+        $context = $this->TypoContext();
+        $args    = [
+            'pageType'     => $tsfe->type,
+            'mountPoint'   => $tsfe->MP,
+            'feGroups'     => implode(',', $context->FeUser()->getGroupIds()),
+            'languageCode' => $context->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode(),
+            'isBeUser'     => $context->BeUser()->isLoggedIn(),
+            'siteRootPid'  => $context->Site()->getCurrent()->getRootPageId(),
         ];
 
-        return implode('|', $args);
+        $cacheConfig = $this->FrontendApiContext()->ConfigRepository()->cache();
+        if ($cacheConfig->get('cacheKeyEnhancerClass')) {
+            $enhancer = $this->getSingletonOf($cacheConfig->get('cacheKeyEnhancerClass'));
+            if ($enhancer instanceof CacheKeyEnhancerInterface) {
+                $args = $enhancer->enhanceArgs($args, $context, $this->FrontendApiContext());
+            }
+        }
+
+        $this->EventBus()->dispatch(($e = new EnvironmentCacheKeyFilterEvent($args)));
+        $args = $e->getArgs();
+
+        ksort($args);
+
+        return implode('|', array_values($args));
     }
 
 }

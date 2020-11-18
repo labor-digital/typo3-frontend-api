@@ -23,10 +23,13 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Cache\Scope;
 
 
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CacheScopeRegistry
 {
+    use FrontendApiContextAwareTrait;
+
     /**
      * @var \LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScope[]
      */
@@ -108,6 +111,7 @@ class CacheScopeRegistry
     public function runInScope(callable $callable): CacheScope
     {
         $scope          = GeneralUtility::makeInstance(CacheScope::class);
+        $scope->ttl     = $this->FrontendApiContext()->ConfigRepository()->cache()->get('defaultTtl');
         $this->scopes[] = $scope;
 
         try {

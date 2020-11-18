@@ -35,93 +35,111 @@ use LaborDigital\Typo3FrontendApi\Site\Configuration\FrontendApiSiteOption;
  *
  * @package LaborDigital\Typo3FrontendApi\ExtConfig
  */
-class FrontendApiOption extends AbstractExtConfigOption {
-	
-	
-	/**
-	 * FrontendApiOption constructor.
-	 *
-	 * @param \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository $configRepository
-	 */
-	public function __construct(FrontendApiConfigRepository $configRepository) {
-		$configRepository->__setConfigResolver(function () {
-			return $this->getCachedValueOrRun("configuration", function () {
-				
-				// Build the config for all children
-				$config = [];
-				$this->middleware()->__buildConfig($config);
-				$this->resource()->__buildConfig($config);
-				$this->routing()->__buildConfig($config);
-				$this->hybrid()->__buildConfig($config);
-				$this->contentElement()->__buildConfig($config);
-				$this->site()->__buildConfig($config);
-				$this->tool()->__buildConfig($config);
-				return $config;
-				
-			});
-		});
-	}
-	
-	/**
-	 * Contains the routing specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\FrontendApiRoutingOption
-	 */
-	public function routing(): FrontendApiRoutingOption {
-		return $this->getChildOptionInstance(FrontendApiRoutingOption::class);
-	}
-	
-	/**
-	 * Contains the resource specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\FrontendApiResourceOption
-	 */
-	public function resource(): FrontendApiResourceOption {
-		return $this->getChildOptionInstance(FrontendApiResourceOption::class);
-	}
-	
-	/**
-	 * Contains the middleware specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\FrontendApiMiddlewareOption
-	 */
-	public function middleware(): FrontendApiMiddlewareOption {
-		return $this->getChildOptionInstance(FrontendApiMiddlewareOption::class);
-	}
-	
-	/**
-	 * Contains the content element specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\FrontendApiContentElementOption
-	 */
-	public function contentElement(): FrontendApiContentElementOption {
-		return $this->getChildOptionInstance(FrontendApiContentElementOption::class);
-	}
-	
-	/**
-	 * Contains the site specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\FrontendApiSiteOption
-	 */
-	public function site(): FrontendApiSiteOption {
-		return $this->getChildOptionInstance(FrontendApiSiteOption::class);
-	}
-	
-	/**
-	 * Contains the hybrid app specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\HybridApp\FrontendApiHybridAppOption
-	 */
-	public function hybrid(): FrontendApiHybridAppOption {
-		return $this->getChildOptionInstance(FrontendApiHybridAppOption::class);
-	}
-	
-	/**
-	 * Contains generic, tool specific configuration options.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiToolOption
-	 */
-	public function tool(): FrontendApiToolOption {
-		return $this->getChildOptionInstance(FrontendApiToolOption::class);
-	}
+class FrontendApiOption extends AbstractExtConfigOption
+{
+    /**
+     * FrontendApiOption constructor.
+     *
+     * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     */
+    public function __construct(FrontendApiConfigRepository $configRepository)
+    {
+        $configRepository->__setConfigResolver(function () {
+            return $this->getCachedValueOrRun("configuration", function () {
+                // Build the config for all children
+                $config = [];
+                $this->middleware()->__buildConfig($config);
+                $this->resource()->__buildConfig($config);
+                $this->routing()->__buildConfig($config);
+                $this->hybrid()->__buildConfig($config);
+                $this->contentElement()->__buildConfig($config);
+                $this->site()->__buildConfig($config);
+                $this->tool()->__buildConfig($config);
+                $this->cache()->__buildConfig($config);
+
+                return $config;
+
+            });
+        });
+    }
+
+    /**
+     * Contains the routing specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\FrontendApiRoutingOption
+     */
+    public function routing(): FrontendApiRoutingOption
+    {
+        return $this->getChildOptionInstance(FrontendApiRoutingOption::class);
+    }
+
+    /**
+     * Contains the resource specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\FrontendApiResourceOption
+     */
+    public function resource(): FrontendApiResourceOption
+    {
+        return $this->getChildOptionInstance(FrontendApiResourceOption::class);
+    }
+
+    /**
+     * Contains the middleware specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\FrontendApiMiddlewareOption
+     */
+    public function middleware(): FrontendApiMiddlewareOption
+    {
+        return $this->getChildOptionInstance(FrontendApiMiddlewareOption::class);
+    }
+
+    /**
+     * Contains the content element specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\FrontendApiContentElementOption
+     */
+    public function contentElement(): FrontendApiContentElementOption
+    {
+        return $this->getChildOptionInstance(FrontendApiContentElementOption::class);
+    }
+
+    /**
+     * Contains the site specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\FrontendApiSiteOption
+     */
+    public function site(): FrontendApiSiteOption
+    {
+        return $this->getChildOptionInstance(FrontendApiSiteOption::class);
+    }
+
+    /**
+     * Contains the hybrid app specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\HybridApp\FrontendApiHybridAppOption
+     */
+    public function hybrid(): FrontendApiHybridAppOption
+    {
+        return $this->getChildOptionInstance(FrontendApiHybridAppOption::class);
+    }
+
+    /**
+     * Contains generic, tool specific configuration options.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiToolOption
+     */
+    public function tool(): FrontendApiToolOption
+    {
+        return $this->getChildOptionInstance(FrontendApiToolOption::class);
+    }
+
+    /**
+     * Caching related configuration, like the default ttl or the cache identifier
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiCacheOption
+     */
+    public function cache(): FrontendApiCacheOption
+    {
+        return $this->getChildOptionInstance(FrontendApiCacheOption::class);
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 LABOR.digital
  *
@@ -20,32 +21,6 @@
 namespace LaborDigital\Typo3FrontendApi\ExtConfig;
 
 
-use Neunerlei\Arrays\Arrays;
-
-class ToolConfigChildRepository implements FrontendApiConfigChildRepositoryInterface {
-	
-	/**
-	 * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
-	 */
-	protected $parent;
-	
-	/**
-	 * Returns the configured value at the given path or returns the given default value when the path was not found
-	 *
-	 * @param string|array $path    Either the path separated by "." or an array of path segments
-	 * @param null|mixed   $default The default value to return if the path was not found
-	 *
-	 * @return array|mixed|null
-	 */
-	public function get($path, $default = NULL) {
-		return Arrays::getPath($this->parent->getConfiguration("tool"), $path, $default);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function __setParentRepository(FrontendApiConfigRepository $parent): void {
-		$this->parent = $parent;
-	}
-	
+class ToolConfigChildRepository extends GetterConfigChildRepository
+{
 }

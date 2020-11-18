@@ -31,6 +31,7 @@ use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\EnvironmentCacheKeyGenerat
 use LaborDigital\Typo3FrontendApi\Cache\Metrics\MetricsTracker;
 use LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry;
 use LaborDigital\Typo3FrontendApi\Cache\Scope\CacheTagAwareInterface;
+use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContext;
 use Neunerlei\Options\Options;
 use Neunerlei\PathUtil\Path;
 use Throwable;
@@ -84,11 +85,18 @@ class CacheService implements SingletonInterface
      * @param   \LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry                    $scopeRegistry
      * @param   \TYPO3\CMS\Core\Cache\CacheManager                                               $cacheManager
      * @param   \LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\EnvironmentCacheKeyGenerator  $envCacheKeyGenerator
+     * @param   \LaborDigital\Typo3FrontendApi\Shared\FrontendApiContext                         $context
      */
-    public function __construct(CacheScopeRegistry $scopeRegistry, CacheManager $cacheManager, EnvironmentCacheKeyGenerator $envCacheKeyGenerator)
-    {
+    public function __construct(
+        CacheScopeRegistry $scopeRegistry,
+        CacheManager $cacheManager,
+        EnvironmentCacheKeyGenerator $envCacheKeyGenerator,
+        FrontendApiContext $context
+    ) {
         $this->scopeRegistry        = $scopeRegistry;
-        $this->cache                = $cacheManager->getCache('t3fa');
+        $this->cache                = $cacheManager->getCache(
+            $context->ConfigRepository()->cache()->get('cacheIdentifier')
+        );
         $this->envCacheKeyGenerator = $envCacheKeyGenerator;
     }
 

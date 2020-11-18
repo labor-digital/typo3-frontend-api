@@ -28,128 +28,164 @@ use LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigChildRepos
 use LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigChildRepository;
 use TYPO3\CMS\Core\SingletonInterface;
 
-class FrontendApiConfigRepository implements SingletonInterface {
-	
-	/**
-	 * @var \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface
-	 */
-	protected $container;
-	
-	/**
-	 * The configuration list
-	 * @var array|null
-	 */
-	protected $config;
-	
-	/**
-	 * The closure which is injected by the frontend api option that returns the cached configuration object
-	 * @var \Closure
-	 */
-	protected $configResolver;
-	
-	/**
-	 * The list of repositories that are already instantiated
-	 * @var array
-	 */
-	protected $repositories = [];
-	
-	/**
-	 * FrontendApiConfigRepository constructor.
-	 *
-	 * @param \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface $container
-	 */
-	public function __construct(TypoContainerInterface $container) {
-		$this->container = $container;
-	}
-	
-	/**
-	 * Contains the routing specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RoutingConfigChildRepository
-	 */
-	public function routing(): RoutingConfigChildRepository {
-		return $this->getOrMakeInstance(RoutingConfigChildRepository::class);
-	}
-	
-	/**
-	 * Contains the resource specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigChildRepository
-	 */
-	public function resource(): ResourceConfigChildRepository {
-		return $this->getOrMakeInstance(ResourceConfigChildRepository::class);
-	}
-	
-	/**
-	 * Contains the site specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigChildRepository
-	 */
-	public function site(): SiteConfigChildRepository {
-		return $this->getOrMakeInstance(SiteConfigChildRepository::class);
-	}
-	
-	/**
-	 * Contains the content element specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigChildRepository
-	 */
-	public function contentElement(): ContentElementConfigChildRepository {
-		return $this->getOrMakeInstance(ContentElementConfigChildRepository::class);
-	}
-	
-	/**
-	 * Contains the hybrid app specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\HybridApp\HybridAppConfigChildRepository
-	 */
-	public function hybridApp(): HybridAppConfigChildRepository {
-		return $this->getOrMakeInstance(HybridAppConfigChildRepository::class);
-	}
-	
-	/**
-	 * Contains generic, tool specific configuration.
-	 *
-	 * @return \LaborDigital\Typo3FrontendApi\ExtConfig\ToolConfigChildRepository
-	 */
-	public function tool(): ToolConfigChildRepository {
-		return $this->getOrMakeInstance(ToolConfigChildRepository::class);
-	}
-	
-	/**
-	 * Returns a single "namespace" in the configuration object.
-	 *
-	 * @param string $key
-	 *
-	 * @return mixed|null
-	 */
-	public function getConfiguration(string $key) {
-		if (!is_array($this->config)) $this->config = call_user_func($this->configResolver);
-		if (!isset($this->config[$key])) return NULL;
-		if (is_string($this->config[$key])) $this->config[$key] = unserialize($key);
-		return $this->config[$key];
-	}
-	
-	/**
-	 * Internal helper to inject the configuration resolver in the frontend api option
-	 *
-	 * @param \Closure $resolver
-	 */
-	public function __setConfigResolver(Closure $resolver): void {
-		$this->configResolver = $resolver;
-	}
-	
-	/**
-	 * Internal helper to create a new child repository class
-	 *
-	 * @param string $repositoryClass
-	 *
-	 * @return mixed
-	 */
-	protected function getOrMakeInstance(string $repositoryClass) {
-		if (isset($this->repositories[$repositoryClass])) return $this->repositories[$repositoryClass];
-		$i = $this->repositories[$repositoryClass] = $this->container->get($repositoryClass);
-		if ($i instanceof FrontendApiConfigChildRepositoryInterface) $i->__setParentRepository($this);
-		return $i;
-	}
+class FrontendApiConfigRepository implements SingletonInterface
+{
+
+    /**
+     * @var \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface
+     */
+    protected $container;
+
+    /**
+     * The configuration list
+     *
+     * @var array|null
+     */
+    protected $config;
+
+    /**
+     * The closure which is injected by the frontend api option that returns the cached configuration object
+     *
+     * @var \Closure
+     */
+    protected $configResolver;
+
+    /**
+     * The list of repositories that are already instantiated
+     *
+     * @var array
+     */
+    protected $repositories = [];
+
+    /**
+     * FrontendApiConfigRepository constructor.
+     *
+     * @param   \LaborDigital\Typo3BetterApi\Container\TypoContainerInterface  $container
+     */
+    public function __construct(TypoContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    /**
+     * Contains the routing specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ApiRouter\Configuration\RoutingConfigChildRepository
+     */
+    public function routing(): RoutingConfigChildRepository
+    {
+        return $this->getOrMakeInstance(RoutingConfigChildRepository::class);
+    }
+
+    /**
+     * Contains the resource specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\JsonApi\Configuration\ResourceConfigChildRepository
+     */
+    public function resource(): ResourceConfigChildRepository
+    {
+        return $this->getOrMakeInstance(ResourceConfigChildRepository::class);
+    }
+
+    /**
+     * Contains the site specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\Site\Configuration\SiteConfigChildRepository
+     */
+    public function site(): SiteConfigChildRepository
+    {
+        return $this->getOrMakeInstance(SiteConfigChildRepository::class);
+    }
+
+    /**
+     * Contains the content element specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ContentElement\Configuration\ContentElementConfigChildRepository
+     */
+    public function contentElement(): ContentElementConfigChildRepository
+    {
+        return $this->getOrMakeInstance(ContentElementConfigChildRepository::class);
+    }
+
+    /**
+     * Contains the hybrid app specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\HybridApp\HybridAppConfigChildRepository
+     */
+    public function hybridApp(): HybridAppConfigChildRepository
+    {
+        return $this->getOrMakeInstance(HybridAppConfigChildRepository::class);
+    }
+
+    /**
+     * Contains generic, tool specific configuration.
+     *
+     * @return \LaborDigital\Typo3FrontendApi\ExtConfig\ToolConfigChildRepository
+     */
+    public function tool(): ToolConfigChildRepository
+    {
+        return $this->getOrMakeInstance(ToolConfigChildRepository::class)->__setConfigKey('tool');
+    }
+
+    /**
+     * Contains caching related configuration, like the default ttl or the cache identifier
+     *
+     * @return GetterConfigChildRepository
+     */
+    public function cache(): GetterConfigChildRepository
+    {
+        return $this->getOrMakeInstance(GetterConfigChildRepository::class)->__setConfigKey('cache');
+    }
+
+    /**
+     * Returns a single "namespace" in the configuration object.
+     *
+     * @param   string  $key
+     *
+     * @return mixed|null
+     */
+    public function getConfiguration(string $key)
+    {
+        if (! is_array($this->config)) {
+            $this->config = call_user_func($this->configResolver);
+        }
+        if (! isset($this->config[$key])) {
+            return null;
+        }
+        if (is_string($this->config[$key])) {
+            $this->config[$key] = unserialize($key);
+        }
+
+        return $this->config[$key];
+    }
+
+    /**
+     * Internal helper to inject the configuration resolver in the frontend api option
+     *
+     * @param   \Closure  $resolver
+     */
+    public function __setConfigResolver(Closure $resolver): void
+    {
+        $this->configResolver = $resolver;
+    }
+
+    /**
+     * Internal helper to create a new child repository class
+     *
+     * @param   string  $repositoryClass
+     *
+     * @return mixed
+     */
+    protected function getOrMakeInstance(string $repositoryClass)
+    {
+        if (isset($this->repositories[$repositoryClass])) {
+            return $this->repositories[$repositoryClass];
+        }
+        $i = $this->repositories[$repositoryClass] = $this->container->get($repositoryClass);
+        if ($i instanceof FrontendApiConfigChildRepositoryInterface) {
+            $i->__setParentRepository($this);
+        }
+
+        return $i;
+    }
 }
