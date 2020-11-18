@@ -29,133 +29,170 @@ use Neunerlei\FileSystem\Fs;
 use Neunerlei\Options\Options;
 use Neunerlei\PathUtil\Path;
 
-class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface {
-	use ResizedImageOptionsTrait;
-	
-	/**
-	 * @var ExtConfigContext
-	 */
-	protected $context;
-	
-	protected const DEFAULT_CONFIG = [
-		"up"        => [
-			"enabled" => FALSE,
-		],
-		"scheduler" => [
-			"enabled" => FALSE,
-		],
-		"imaging"   => NULL,
-	];
-	
-	/**
-	 * @inheritDoc
-	 */
-	public function generate(array $data, ExtConfigContext $context, array $additionalData, $option) {
-		$this->context = $context;
-		$config = static::DEFAULT_CONFIG;
-		foreach ($data as $k => $options) {
-			if ($k === "scheduler") $config[$k] = $this->generateSchedulerConfig($options["value"]);
-			else if ($k === "imaging") $config[$k] = $this->generateImagingConfig(...$options["value"]);
-			else if ($k === "up") $config[$k]["enabled"] = $options["value"];
-		}
-		return $config;
-	}
-	
-	/**
-	 * Generates the configuration for the scheduler api endpoint
-	 *
-	 * @param array $options
-	 *
-	 * @return array
-	 */
-	public function generateSchedulerConfig(array $options): array {
-		return Options::make($options, [
-			"enabled"           => [
-				"type"    => "bool",
-				"default" => TRUE,
-			],
-			"maxExecutionType"  => [
-				"type"    => "int",
-				"default" => 60 * 10,
-			],
-			"token"             => [
-				"type"   => ["string", "array"],
-				"filter" => function ($v) {
-					if (is_string($v)) return [$v];
-					return array_values($v);
-				},
-			],
-			"allowTokenInQuery" => [
-				"type"    => "bool",
-				"default" => $this->context->TypoContext->getEnvAspect()->isDev(),
-			],
-		]);
-	}
-	
-	/**
-	 * Generates the configuration for the imaging endpoint
-	 *
-	 * @param array $definitions
-	 * @param array $options
-	 *
-	 * @return array
-	 */
-	protected function generateImagingConfig(array $definitions, array $options): array {
-		// Validate the definitions
-		if (!isset($definitions["default"])) $definitions["default"] = [];
-		foreach ($definitions as $k => $def)
-			$definitions[$k] = $this->applyResizedImageOptions($def);
-		
-		// Validate the options
-		$options = Options::make($options, [
-			"redirectDirectoryPath" => [
-				"type"      => "string",
-				"validator" => function ($v) {
-					if (!is_dir($v)) return "The given redirectDirectoryPath does not exist!";
-					if (!is_readable($v) || !is_writable($v)) return "The given redirectDirectoryPath is either not readable or not writable!";
-					return TRUE;
-				},
-				"default"   => function () {
-					$dir = Path::join($this->context->TypoContext->getPathAspect()->getVarPath(), "/imaging");
-					Fs::mkdir($dir);
-					return $dir;
-				},
-				"filter"    => function ($v) {
-					return Path::unifyPath($v);
-				},
-			],
-			"endpointDirectoryPath" => [
-				"type"      => "string",
-				"validator" => function ($v) {
-					if (!is_dir($v)) return "The given endpointDirectoryPath does not exist!";
-					if (!is_readable($v) || !is_writable($v)) return "The given endpointDirectoryPath is either not readable or not writable!";
-					return TRUE;
-				},
-				"default"   => function () {
-					$fileadminDir = Arrays::getPath($GLOBALS, "TYPO3_CONF_VARS.BE.fileadminDir", "/fileadmin");
-					$path = Path::join($this->context->TypoContext->getPathAspect()->getPublicPath(), $fileadminDir);
-					return $path;
-				},
-				"filter"    => function ($v) {
-					return Path::unifyPath($v);
-				},
-			],
-			"imagingProvider"       => [
-				"type"      => "string",
-				"validator" => function ($v) {
-					if (!class_exists($v)) return "The imaging provider class $v does not exist!";
-					if (!in_array(ImagingProviderInterface::class, class_implements($v))) return "The imaging provider class $v has to implement the required interface: " . ImagingProviderInterface::class;
-					return TRUE;
-				},
-				"default"   => CoreImagingProvider::class,
-			],
-			"webPConverterOptions"  => [
-				"type"    => "array",
-				"default" => [],
-			],
-		]);
-		
-		return ["definitions" => $definitions, "options" => $options];
-	}
-	
+class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface
+{
+    use ResizedImageOptionsTrait;
+
+    /**
+     * @var ExtConfigContext
+     */
+    protected $context;
+
+    protected const DEFAULT_CONFIG
+        = [
+            "up"        => [
+                "enabled" => false,
+            ],
+            "scheduler" => [
+                "enabled" => false,
+            ],
+            "imaging"   => null,
+        ];
+
+    /**
+     * @inheritDoc
+     */
+    public function generate(array $data, ExtConfigContext $context, array $additionalData, $option)
+    {
+        $this->context = $context;
+        $config        = static::DEFAULT_CONFIG;
+        foreach ($data as $k => $options) {
+            if ($k === "scheduler") {
+                $config[$k] = $this->generateSchedulerConfig($options["value"]);
+            } elseif ($k === "imaging") {
+                $config[$k] = $this->generateImagingConfig(...$options["value"]);
+            } elseif ($k === "up") {
+                $config[$k]["enabled"] = $options["value"];
+            }
+        }
+
+        return $config;
+    }
+
+    /**
+     * Generates the configuration for the scheduler api endpoint
+     *
+     * @param   array  $options
+     *
+     * @return array
+     */
+    public function generateSchedulerConfig(array $options): array
+    {
+        return Options::make($options, [
+            "enabled"           => [
+                "type"    => "bool",
+                "default" => true,
+            ],
+            "maxExecutionType"  => [
+                "type"    => "int",
+                "default" => 60 * 10,
+            ],
+            "token"             => [
+                "type"   => ["string", "array"],
+                "filter" => function ($v) {
+                    if (is_string($v)) {
+                        return [$v];
+                    }
+
+                    return array_values($v);
+                },
+            ],
+            "allowTokenInQuery" => [
+                "type"    => "bool",
+                "default" => $this->context->TypoContext->getEnvAspect()->isDev(),
+            ],
+        ]);
+    }
+
+    /**
+     * Generates the configuration for the imaging endpoint
+     *
+     * @param   array  $definitions
+     * @param   array  $options
+     *
+     * @return array
+     */
+    protected function generateImagingConfig(array $definitions, array $options): array
+    {
+        // Validate the definitions
+        if (! isset($definitions["default"])) {
+            $definitions["default"] = [];
+        }
+        foreach ($definitions as $k => $def) {
+            $definitions[$k] = $this->applyResizedImageOptions($def);
+        }
+
+        // Validate the options
+        $options = Options::make($options, [
+            "redirectDirectoryPath" => [
+                "type"      => "string",
+                "validator" => function ($v) {
+                    if (! is_dir($v)) {
+                        return "The given redirectDirectoryPath does not exist!";
+                    }
+                    if (! is_readable($v) || ! is_writable($v)) {
+                        return "The given redirectDirectoryPath is either not readable or not writable!";
+                    }
+
+                    return true;
+                },
+                "default"   => function () {
+                    $dir = Path::join($this->context->TypoContext->getPathAspect()->getVarPath(), "/imaging");
+                    Fs::mkdir($dir);
+
+                    return $dir;
+                },
+                "filter"    => function ($v) {
+                    return Path::unifyPath($v);
+                },
+            ],
+            "endpointDirectoryPath" => [
+                "type"      => "string",
+                "validator" => function ($v) {
+                    if (! is_dir($v)) {
+                        return "The given endpointDirectoryPath does not exist!";
+                    }
+                    if (! is_readable($v) || ! is_writable($v)) {
+                        return "The given endpointDirectoryPath is either not readable or not writable!";
+                    }
+
+                    return true;
+                },
+                "default"   => function () {
+                    $fileadminDir = Arrays::getPath($GLOBALS, "TYPO3_CONF_VARS.BE.fileadminDir", "/fileadmin");
+                    $path         = Path::join($this->context->TypoContext->Path()->getPublicPath(), $fileadminDir);
+                    if (! file_exists($path)) {
+                        // Make sure we don't crash the system
+                        $path = sys_get_temp_dir();
+                    }
+
+                    return $path;
+                },
+                "filter"    => function ($v) {
+                    return Path::unifyPath($v);
+                },
+            ],
+            "imagingProvider"       => [
+                "type"      => "string",
+                "validator" => function ($v) {
+                    if (! class_exists($v)) {
+                        return "The imaging provider class $v does not exist!";
+                    }
+                    if (! in_array(ImagingProviderInterface::class, class_implements($v))) {
+                        return "The imaging provider class $v has to implement the required interface: " . ImagingProviderInterface::class;
+                    }
+
+                    return true;
+                },
+                "default"   => CoreImagingProvider::class,
+            ],
+            "webPConverterOptions"  => [
+                "type"    => "array",
+                "default" => [],
+            ],
+        ]);
+
+        return ["definitions" => $definitions, "options" => $options];
+    }
+
 }
