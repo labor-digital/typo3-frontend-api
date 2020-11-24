@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.33.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.3...v9.33.0) (2020-11-24)
+
+
+### Features
+
+* implement cache configuration options ([a7af1d6](https://github.com/labor-digital/typo3-frontend-api/commit/a7af1d6fe5101d6f4d27d97b7f642ff551c56b51))
+
+
+### Bug Fixes
+
+* **FrontendApiToolConfigGenerator:** don't crash if fileadmin is no directory ([0a313f2](https://github.com/labor-digital/typo3-frontend-api/commit/0a313f27952f23fe830df8e2ebd3e8583f565d31))
+
 ### [9.32.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.2...v9.32.3) (2020-11-16)
 
 
