@@ -94,6 +94,7 @@ abstract class AbstractResourceTransformer extends TransformerAbstract
     {
         // Enable additional processing
         $context = $this->FrontendApiContext();
+        $value   = $this->resolveRealValue($value);
         $context->EventBus()->dispatch(($e = new ResourceTransformerPreProcessorEvent($value, $this->config)));
         $this->config = $e->getConfig();
         $value        = $e->getValue();

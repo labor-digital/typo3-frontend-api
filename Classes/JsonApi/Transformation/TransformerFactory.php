@@ -22,18 +22,18 @@ namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 use Closure;
 use LaborDigital\Typo3BetterApi\Container\TypoContainerInterface;
-use LaborDigital\Typo3BetterApi\LazyLoading\LazyLoadingTrait;
 use LaborDigital\Typo3FrontendApi\Event\TransformerConfigFilterEvent;
 use LaborDigital\Typo3FrontendApi\Event\TransformerInstanceFilterEvent;
 use LaborDigital\Typo3FrontendApi\Event\TransformerProxyFilterEvent;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
+use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\Utils\ValueProxyTrait;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\EventBus\EventBusInterface;
 use TYPO3\CMS\Core\SingletonInterface;
 
 class TransformerFactory implements SingletonInterface
 {
-    use LazyLoadingTrait;
+    use ValueProxyTrait;
 
     /**
      * @var \LaborDigital\Typo3FrontendApi\JsonApi\Transformation\TransformerConfigGenerator
@@ -112,7 +112,7 @@ class TransformerFactory implements SingletonInterface
     public function getConfigFor($value, ?string $suggestedResourceType = null): TransformerConfig
     {
         // Find the relevant object
-        $value = $this->lazyLoading->getRealValue($value);
+        $value = $this->resolveRealValue($value);
         if (is_iterable($value)) {
             // Make sure to convert associative arrays not as lists
             if (! is_array($value) || Arrays::isSequential($value)) {
@@ -126,6 +126,7 @@ class TransformerFactory implements SingletonInterface
                 }
             }
         }
+        $value = $this->resolveRealValue($value);
 
         // Resolve resource type and resource config
         $resourceType = $this->configRepository->resource()->getResourceTypeByValue($value, false);

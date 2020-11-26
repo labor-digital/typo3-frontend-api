@@ -20,11 +20,20 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Transformation;
 
 
-class AutoTransformContext {
-	/**
-	 * Holds the auto transformer value path to determine if we are running inside a
-	 * circular loop that will never end
-	 * @var array
-	 */
-	public static $path = [];
+class AutoTransformContext
+{
+    /**
+     * Holds the auto transformer value path to determine if we are running inside a
+     * circular loop that will never end
+     *
+     * @var array
+     */
+    public static $path = [];
+
+    /**
+     * A list of circular references that have to be converted when the data was processed
+     *
+     * @var array
+     */
+    public static $references = [];
 }

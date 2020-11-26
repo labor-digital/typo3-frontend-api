@@ -25,6 +25,8 @@ use Iterator;
 use LaborDigital\Typo3BetterApi\Container\CommonDependencyTrait;
 use LaborDigital\Typo3BetterApi\Container\CommonServiceLocatorTrait;
 use LaborDigital\Typo3FrontendApi\Cache\CacheServiceAwareTrait;
+use LaborDigital\Typo3FrontendApi\Event\TransformerCircularDependencyFilterEvent;
+use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\Utils\ValueProxyTrait;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -34,6 +36,7 @@ trait TransformerTrait
     use FrontendApiContextAwareTrait;
     use CacheServiceAwareTrait;
     use CommonServiceLocatorTrait;
+    use ValueProxyTrait;
 
     /**
      * @deprecated This trait will be removed from the transformer trait in v10
@@ -155,6 +158,9 @@ trait TransformerTrait
             ]);
         }
 
+        // Resolve all forms of proxies
+        $value = $this->resolveRealValue($value);
+
         // Track values to avoid circular transformation that would lead to a never ending loop
         $isTrackedValue = false;
         $isArrayValue   = is_array($value);
@@ -197,17 +203,25 @@ trait TransformerTrait
                         }
                     }
 
-                    // No, nothing we can do here...
-                    throw TransformationException::makeNew(
-                        'Found a circular transformation: ' .
-                        implode(' -> ', AutoTransformContext::$path), $value);
+                    // Allow the outside world to filter the value
+                    $this->EventBus()->dispatch($e = new TransformerCircularDependencyFilterEvent(
+                        AutoTransformContext::$path, $value
+                    ));
+                    if ($e->getResolvedValue() !== null) {
+                        return $e->getResolvedValue();
+                    }
+
+                    // Set a backreference
+                    AutoTransformContext::$references[] = $key;
+
+                    return '{{RESOURCE_TRANSFORMER_RECURSIVE_REF_' . $key . '}}';
                 }
             }
             AutoTransformContext::$path[] = $value;
         }
 
         try {
-            return (function ($value) use ($options) {
+            $result = (function ($value) use ($options) {
                 // Handle links in strings
                 if (! empty($value) && is_string($value) && ! is_numeric($value)) {
                     $value = $this->transformTypoLinkStringReferences($value);
@@ -268,6 +282,22 @@ trait TransformerTrait
 
                 return $value;
             })($value);
+
+            // Resolve back references for circular transformation
+            if ($isTrackedValue) {
+                $resolvedKey = count(AutoTransformContext::$path) - 1;
+                if (in_array($resolvedKey, AutoTransformContext::$references, true)) {
+                    $placeholder       = '"{{RESOURCE_TRANSFORMER_RECURSIVE_REF_' . $resolvedKey . '}}"';
+                    $resultString      = \GuzzleHttp\json_encode($result);
+                    $resultStringClean = str_replace($placeholder, '"RECURSION"', $resultString);
+                    $result            = \GuzzleHttp\json_decode(
+                        str_replace($placeholder, $resultStringClean, $resultString)
+                        , true);
+                    unset(AutoTransformContext::$references[$resolvedKey]);
+                }
+            }
+
+            return $result;
         } finally {
             if ($isTrackedValue) {
                 array_pop(AutoTransformContext::$path);
