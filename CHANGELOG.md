@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.34.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.33.0...v9.34.0) (2020-11-26)
+
+
+### Features
+
+* **Transformation:** add automatic circular dependency resolving ([a5e54d9](https://github.com/labor-digital/typo3-frontend-api/commit/a5e54d9f9d4ea9421742736186091af48d985f19))
+
 ## [9.33.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.32.3...v9.33.0) (2020-11-24)
 
 
