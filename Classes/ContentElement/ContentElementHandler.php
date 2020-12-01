@@ -32,6 +32,7 @@ use LaborDigital\Typo3FrontendApi\ContentElement\Transformation\ContentElementDa
 use LaborDigital\Typo3FrontendApi\ContentElement\VirtualColumn\VirtualColumnUtil;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementAfterControllerFilterEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementAfterWrapFilterEvent;
+use LaborDigital\Typo3FrontendApi\Event\ContentElementErrorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementPreProcessorEvent;
 use LaborDigital\Typo3FrontendApi\Event\ContentElementSpaEvent;
@@ -41,6 +42,7 @@ use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\Inflection\Inflector;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 use TYPO3\CMS\Core\SingletonInterface;
 
 /**
@@ -199,8 +201,12 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 
         // Execute the controller
         $result = VirtualColumnUtil::runWithResolvedVColTca($cType,
-            static function () use ($isFrontend, $controller, $context) {
-                return $isFrontend ? $controller->handle($context) : $controller->handleBackend($context);
+            function () use ($isFrontend, $controller, $context) {
+                try {
+                    return $isFrontend ? $controller->handle($context) : $controller->handleBackend($context);
+                } catch (Throwable $e) {
+                    return $this->handleError($e, $isFrontend, $controller, $context);
+                }
             }
         );
         $result = $t3faContext->EventBus()->dispatch(new ContentElementAfterControllerFilterEvent(
@@ -469,5 +475,42 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         }
 
         return $result;
+    }
+
+    protected function handleError(
+        Throwable $throwable,
+        bool $isFrontend,
+        ContentElementControllerInterface $controller,
+        ContentElementControllerContext $context
+    ) {
+        $t3faContext = $this->FrontendApiContext();
+        $isDev       = $t3faContext->TypoContext()->Env()->isDev();
+
+        // Allow others to handle the error
+        $t3faContext->EventBus()->dispatch($e = new ContentElementErrorEvent(
+            $throwable, $isFrontend, $controller, $context
+        ));
+        if ($e->isHandled()) {
+            return $e->getResult();
+        }
+
+        $error = 'Error while rendering the element';
+
+        // Handle a backend request
+        if (! $isFrontend) {
+            if ($isDev) {
+                $error .= '<br>' . $throwable;
+            }
+
+            return '<div style="background-color:red; padding: 10px; font-family: sans-serif; color: #fff">'
+                   . htmlentities($error) . '</div>';
+        }
+
+        // Handle a frontend request
+        $context->setType('html');
+
+        return '<script type="text/javascript">if(console && console.error){
+    console.error("' . $error . ($isDev ? '\\n' . $throwable : '') . '");
+}</script>';
     }
 }
