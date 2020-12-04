@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.34.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.1...v9.34.2) (2020-12-04)
+
+
+### Bug Fixes
+
+* **Menu:** fix an issue when a link references a hidden/deleted page ([e6df277](https://github.com/labor-digital/typo3-frontend-api/commit/e6df2777296e90c00cf854af8a3aadc609394aa1))
+
 ### [9.34.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.0...v9.34.1) (2020-12-02)
 
 
