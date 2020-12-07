@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.34.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.2...v9.34.3) (2020-12-07)
+
+
+### Bug Fixes
+
+* **Menu:** allow links with an empty target, while still blocking NULL values ([6527056](https://github.com/labor-digital/typo3-frontend-api/commit/6527056c5521cffbdcdfc9511beca9795d8e3784))
+
 ### [9.34.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.1...v9.34.2) (2020-12-04)
 
 
