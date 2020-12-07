@@ -66,7 +66,7 @@ class PageMenuItemDataProcessor implements DataProcessorInterface
         }
 
         // Handle links that reference a hidden/deleted page
-        if (empty($processedData['link'])) {
+        if (! is_string($processedData['link'])) {
             return static::INVALID_TARGET_MARKER;
         }
 
@@ -126,6 +126,13 @@ class PageMenuItemDataProcessor implements DataProcessorInterface
         return PageMenu::TYPE_LINK_PAGE;
     }
 
+    /**
+     * Helper to remove all invalid link targets from the given list of entries.
+     *
+     * @param   array|null  $list
+     *
+     * @return array|null
+     */
     public static function removeInvalidMarkers(?array $list): ?array
     {
         return is_array($list) ? array_values(array_filter($list, function ($v) {
