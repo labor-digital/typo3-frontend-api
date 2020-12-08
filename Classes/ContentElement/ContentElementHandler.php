@@ -509,8 +509,14 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         // Handle a frontend request
         $context->setType('html');
 
+        $errorString = str_replace(
+            ['"', PHP_EOL],
+            ['\"', '\n'],
+            $error . ($isDev ? '\\n' . $throwable : '')
+        );
+
         return '<script type="text/javascript">if(console && console.error){
-    console.error("' . $error . ($isDev ? '\\n' . $throwable : '') . '");
+    console.error("' . $errorString . '");
 }</script>';
     }
 }
