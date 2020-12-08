@@ -36,6 +36,8 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  */
 class PageMenuItemDataProcessor implements DataProcessorInterface
 {
+    protected const INVALID_TARGET_MARKER = '{{INVALID_LINK_TARGET}}';
+
     /**
      * @inheritDoc
      */
@@ -63,8 +65,13 @@ class PageMenuItemDataProcessor implements DataProcessorInterface
             }
         }
 
+        // Handle links that reference a hidden/deleted page
+        if (! is_string($processedData['link'])) {
+            return static::INVALID_TARGET_MARKER;
+        }
+
         // Generate additional information
-        $processedData['children'] = $processedData['children'] ?? null;
+        $processedData['children'] = static::removeInvalidMarkers($processedData['children']) ?? null;
         $processedData['id']       = $data['uid'];
         $processedData['type']     = $this->findLinkType($data, $processedData['link']);
         $processedData['inMenu']   = $data['nav_hide'] !== 1;
@@ -117,6 +124,20 @@ class PageMenuItemDataProcessor implements DataProcessorInterface
         }
 
         return PageMenu::TYPE_LINK_PAGE;
+    }
+
+    /**
+     * Helper to remove all invalid link targets from the given list of entries.
+     *
+     * @param   array|null  $list
+     *
+     * @return array|null
+     */
+    public static function removeInvalidMarkers(?array $list): ?array
+    {
+        return is_array($list) ? array_values(array_filter($list, function ($v) {
+            return $v !== static::INVALID_TARGET_MARKER;
+        })) : $list;
     }
 
 }

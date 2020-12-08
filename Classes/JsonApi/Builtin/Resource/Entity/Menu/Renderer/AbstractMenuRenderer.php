@@ -100,7 +100,7 @@ abstract class AbstractMenuRenderer
         $context   = $this->FrontendApiContext();
         $processor = $context->getInstanceOf($this->processorClass);
         $result    = $processor->process($context->Tsfe()->getContentObjectRenderer(), [], $tsConfig, []);
-        $result    = $result['menu'];
+        $result    = PageMenuItemDataProcessor::removeInvalidMarkers($result['menu']);
 
         return $this->runPostProcessing($result);
     }
