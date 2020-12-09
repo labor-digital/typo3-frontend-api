@@ -39,10 +39,12 @@ use LaborDigital\Typo3FrontendApi\Event\ContentElementSpaEvent;
 use LaborDigital\Typo3FrontendApi\FrontendApiException;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\ContentElement;
 use LaborDigital\Typo3FrontendApi\Shared\FrontendApiContextAwareTrait;
+use League\Route\Http\Exception\HttpExceptionInterface;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\Inflection\Inflector;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\SingletonInterface;
 
 /**
@@ -61,6 +63,14 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
      * @var array
      */
     protected static $pageCacheConfigCache = [];
+
+    /**
+     * A list of exceptions that should not be handled by the content element error handler.
+     *
+     * @todo add config option for this
+     * @var string[]
+     */
+    public static $globallyHandledExceptions = [HttpExceptionInterface::class, ImmediateResponseException::class];
 
     /**
      * This is set by the page layout transformer to tell the handler if the contents should
@@ -477,6 +487,16 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         return $result;
     }
 
+    /**
+     * Handles errors that occurs while a content element is rendered
+     *
+     * @param   \Throwable                                                                                  $throwable
+     * @param   bool                                                                                        $isFrontend
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerInterface  $controller
+     * @param   \LaborDigital\Typo3FrontendApi\ContentElement\Controller\ContentElementControllerContext    $context
+     *
+     * @return mixed|string
+     */
     protected function handleError(
         Throwable $throwable,
         bool $isFrontend,
@@ -492,6 +512,13 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         ));
         if ($e->isHandled()) {
             return $e->getResult();
+        }
+
+        // Rethrow exceptions that should not be handled on a content element level
+        foreach (static::$globallyHandledExceptions as $exceptionClass) {
+            if ($throwable instanceof $exceptionClass) {
+                throw $throwable;
+            }
         }
 
         $error = 'Error while rendering the element';
