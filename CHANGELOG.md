@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.34.5](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.4...v9.34.5) (2020-12-11)
+
+
+### Bug Fixes
+
+* **ContentElementHandler:** allow some exceptions to be rethrown by the content element handler ([b1a3496](https://github.com/labor-digital/typo3-frontend-api/commit/b1a3496f1d61ff6b33213a97e9ded03900fed0b1))
+
 ### [9.34.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.3...v9.34.4) (2020-12-08)
 
 
