@@ -235,9 +235,14 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         }
 
         // Create the element
-        $element = $t3faContext->EventBus()->dispatch(new ContentElementPostProcessorEvent(
-            $this->makeElementInstance($context, $result), $controller, $context, $isFrontend
-        ))->getElement();
+        try {
+            $element = $t3faContext->EventBus()->dispatch(new ContentElementPostProcessorEvent(
+                $this->makeElementInstance($context, $result), $controller, $context, $isFrontend
+            ))->getElement();
+        } catch (Throwable $e) {
+            return $this->handleError($e, $isFrontend, $controller, $context);
+        }
+
 
         // Break if we are running in an spa app
         if (static::$spaMode === true) {
@@ -506,6 +511,12 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $t3faContext = $this->FrontendApiContext();
         $isDev       = $t3faContext->TypoContext()->Env()->isDev();
 
+        // Let the controller handle the error if possible
+        $result = $controller->handleError($throwable, $context, $isFrontend);
+        if (is_string($result)) {
+            return $result;
+        }
+
         // Allow others to handle the error
         $t3faContext->EventBus()->dispatch($e = new ContentElementErrorEvent(
             $throwable, $isFrontend, $controller, $context
@@ -539,7 +550,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         $errorString = str_replace(
             ['"', PHP_EOL],
             ['\"', '\n'],
-            $error . ($isDev ? '\\n' . $throwable : '')
+            $error . ($isDev ? '\\n' . get_class($throwable) . '\\n' . $throwable : '')
         );
 
         return '<script type="text/javascript">if(console && console.error){

@@ -212,7 +212,6 @@ class ResourceDataRepository implements SingletonInterface
             // Read base url
             $resourceInfo = $this->configRepository->resource()->getResourceConfig($resourceType);
             $baseUri      = $resourceInfo !== null ? "/resources" : '';
-//            $baseUri      = $resourceInfo !== null && ! empty($resourceInfo->baseUri) ? $resourceInfo->baseUri : "/resources";
             if (stripos($uri, $baseUri . "/") === false) {
                 $uri = $baseUri . $uri;
             }
@@ -250,16 +249,20 @@ class ResourceDataRepository implements SingletonInterface
         try {
             $response = $this->router->handleLink($link, "internal");
         } catch (NotFoundException $exception) {
-            throw new JsonApiException("Failed to retrieve the data for ($link): " . $exception->getMessage());
+            throw new ResourceNotFoundException("Failed to retrieve the data for (" . $link . "): " . $exception->getMessage(), 404, $exception);
         }
 
         if ($response->getStatusCode() !== 200) {
+            if ($response->getStatusCode() === 404) {
+                throw new ResourceNotFoundException("Failed to retrieve the data for (" . $link . ")!", 404);
+            }
+
             // Show the error when in dev mode
             if ($this->context->Env()->isDev()) {
                 echo (string)$response->getBody();
                 die;
             }
-            throw new JsonApiException("Failed to retrieve the data for ($link): " . $response->getReasonPhrase());
+            throw new JsonApiException("Failed to retrieve the data for (" . $link . "): " . $response->getReasonPhrase());
         }
 
         // Convert into an array if possible

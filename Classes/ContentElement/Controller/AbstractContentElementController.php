@@ -36,4 +36,12 @@ abstract class AbstractContentElementController implements ContentElementControl
     }
     use FrontendApiContextAwareTrait;
     use CacheServiceAwareTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public function handleError(\Throwable $error, ContentElementControllerContext $context, bool $frontend): ?string
+    {
+        return null;
+    }
 }
