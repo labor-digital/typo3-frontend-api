@@ -110,7 +110,7 @@ trait SwitchableContentElementActionTrait
         $method = $this->getSelectedAction($context);
 
         return $this->callControllerAction(
-            Inflector::toCamelBack($method . '-Error'), $context, func_get_args());
+            Inflector::toCamelBack($method . '-Error'), $context, func_get_args(), true);
     }
 
     /**
