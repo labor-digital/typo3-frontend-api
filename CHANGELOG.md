@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.35.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.35.0...v9.35.1) (2021-01-11)
+
+
+### Bug Fixes
+
+* **SwitchableContentElementActionTrait:** don't obfuscate error messages ([bb58ba0](https://github.com/labor-digital/typo3-frontend-api/commit/bb58ba06b292d9bd04dec3fbd95bd9af09dc2873))
+
 ## [9.35.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.34.5...v9.35.0) (2020-12-12)
 
 
