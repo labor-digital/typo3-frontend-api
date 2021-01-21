@@ -243,7 +243,6 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
             return $this->handleError($e, $isFrontend, $controller, $context);
         }
 
-
         // Break if we are running in an spa app
         if (static::$spaMode === true) {
             // @todo remove this in v10
@@ -509,7 +508,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         ContentElementControllerContext $context
     ) {
         $t3faContext = $this->FrontendApiContext();
-        $isDev       = $t3faContext->TypoContext()->Env()->isDev();
+        $isDebug     = $t3faContext->TypoContext()->Env()->isFeDebug();
 
         // Let the controller handle the error if possible
         $result = $controller->handleError($throwable, $context, $isFrontend);
@@ -536,7 +535,7 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
 
         // Handle a backend request
         if (! $isFrontend) {
-            if ($isDev) {
+            if ($isDebug) {
                 $error .= '<br>' . $throwable;
             }
 
@@ -547,14 +546,22 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         // Handle a frontend request
         $context->setType('html');
 
-        $errorString = str_replace(
-            ['"', PHP_EOL],
-            ['\"', '\n'],
-            $error . ($isDev ? '\\n' . get_class($throwable) . '\\n' . $throwable : '')
-        );
+        $errorString = '<!-- ' . htmlentities($error) . '-->';
 
-        return '<script type="text/javascript">if(console && console.error){
-    console.error("' . $errorString . '");
-}</script>';
+        if ($isDebug) {
+            $errorString
+                .= '<!--SERVER_ERROR::' .
+                   \GuzzleHttp\json_encode([
+                       'message' => $errorString,
+                       'code'    => $throwable->getCode(),
+                       'context' => [
+                           'class'     => get_class($throwable),
+                           'throwable' => (string)$throwable,
+                       ],
+                   ]) .
+                   '::SERVER_ERROR-->';
+        }
+
+        return $errorString;
     }
 }
