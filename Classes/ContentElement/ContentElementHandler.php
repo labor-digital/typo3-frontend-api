@@ -551,14 +551,15 @@ class ContentElementHandler implements SingletonInterface, BackendPreviewRendere
         if ($isDebug) {
             $errorString
                 .= '<!--SERVER_ERROR::' .
-                   \GuzzleHttp\json_encode([
-                       'message' => $errorString,
+                   htmlentities(\GuzzleHttp\json_encode([
+                       'message' => 'TYPO3 ERROR: ' . $throwable->getMessage() . PHP_EOL .
+                                    $throwable->getFile() . ' (' . $throwable->getLine() . ')',
                        'code'    => $throwable->getCode(),
                        'context' => [
                            'class'     => get_class($throwable),
                            'throwable' => (string)$throwable,
                        ],
-                   ]) .
+                   ])) .
                    '::SERVER_ERROR-->';
         }
 
