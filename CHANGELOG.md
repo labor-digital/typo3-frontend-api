@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.36.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.0...v9.36.1) (2021-01-22)
+
+
+### Bug Fixes
+
+* **ContentElementHandler:** adjust the server error output ([536268e](https://github.com/labor-digital/typo3-frontend-api/commit/536268ec51b67da4b7eeec2d59e39107ea217edf))
+
 ## [9.36.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.35.1...v9.36.0) (2021-01-21)
 
 
