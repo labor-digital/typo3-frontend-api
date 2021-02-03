@@ -26,10 +26,10 @@ use LaborDigital\Typo3BetterApi\Simulation\EnvironmentSimulator;
 use LaborDigital\Typo3BetterApi\Tsfe\TsfeService;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
-use Neunerlei\Arrays\Arrays;
 use Neunerlei\FileSystem\Fs;
 use Throwable;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 class RteContentParser implements SingletonInterface
 {
@@ -59,7 +59,7 @@ class RteContentParser implements SingletonInterface
      *
      * @var array|null
      */
-    protected $preparedParserConfig;
+    protected $fallbackParserConfig;
 
     /**
      * RteContentParser constructor.
@@ -92,15 +92,34 @@ class RteContentParser implements SingletonInterface
      */
     public function parseContent(string $content): string
     {
-        // Check if we have the config already loaded
-        if ($this->preparedParserConfig === null) {
-            $this->preparedParserConfig = $this->loadParserConfig();
-        }
-
         // Parse the string using the simulator
         return (string)$this->simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($content) {
-            return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, $this->preparedParserConfig);
+            $this->ensureTsParserConfig($this->tsfeService->getTsfe());
+            $result = $this->tsfeService->getContentObjectRenderer()->parseFunc($content, null, '< lib.parseFunc_RTE');
+
+            return $result;
         });
+    }
+
+    /**
+     * Makes sure that both lib.parseFunc and lib.parseFunc_RTE are set up correctly
+     * to parse our contents with
+     *
+     * @param   \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController  $tsfe
+     */
+    protected function ensureTsParserConfig(TypoScriptFrontendController $tsfe): void
+    {
+        // Inject parseFunc if required
+        if (! isset($tsfe->tmpl->setup['lib.']['parseFunc.'])) {
+            $config                                  = $this->getFallbackParserConfig();
+            $tsfe->tmpl->setup['lib.']['parseFunc.'] = $config['lib.']['parseFunc.'] ?? [];
+        }
+
+        // Inject parseFunc_RTE if required
+        if (! isset($tsfe->tmpl->setup['lib.']['parseFunc_RTE.'])) {
+            $config                                      = $this->getFallbackParserConfig();
+            $tsfe->tmpl->setup['lib.']['parseFunc_RTE.'] = $config['lib.']['parseFunc_RTE.'] ?? [];
+        }
     }
 
     /**
@@ -109,12 +128,10 @@ class RteContentParser implements SingletonInterface
      *
      * @return array
      */
-    protected function loadParserConfig(): array
+    protected function getFallbackParserConfig(): array
     {
-        // Try to load the configuration from typo script
-        $config = $this->typoScriptService->get('lib.parseFunc_RTE');
-        if (is_array($config)) {
-            return $config;
+        if (isset($this->fallbackParserConfig)) {
+            return $this->fallbackParserConfig;
         }
 
         // Load the required constants
@@ -137,11 +154,8 @@ class RteContentParser implements SingletonInterface
             if (Fs::exists($path)) {
                 $content = Fs::readFile($path);
                 $content = str_replace(array_keys($constants), array_values($constants), $content);
-                $ts      = $this->typoScriptService->parse($content);
-                $config  = Arrays::getPath($ts, ['lib.', 'parseFunc_RTE.']);
-                if (is_array($config)) {
-                    return $config;
-                }
+
+                return $this->fallbackParserConfig = $this->typoScriptService->parse($content);
             }
         } catch (Throwable $e) {
         }
@@ -149,8 +163,7 @@ class RteContentParser implements SingletonInterface
         // Load the fallback file
         $content = Fs::readFile(__DIR__ . DIRECTORY_SEPARATOR . 'RteContentParserFallbackParseFunc.typoscript');
         $content = str_replace(array_keys($constants), array_values($constants), $content);
-        $ts      = $this->typoScriptService->parse($content);
 
-        return Arrays::getPath($ts, ['lib.', 'parseFunc_RTE.'], []);
+        return $this->fallbackParserConfig = $this->typoScriptService->parse($content);
     }
 }
