@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.36.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.1...v9.36.2) (2021-02-03)
+
+
+### Bug Fixes
+
+* **RteContentParser:** make sure ts config for parseFunc is loaded ([1298fe3](https://github.com/labor-digital/typo3-frontend-api/commit/1298fe364c8b798267aaea99ca8cbbfa8cb6117d))
+
 ### [9.36.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.0...v9.36.1) (2021-01-22)
 
 
