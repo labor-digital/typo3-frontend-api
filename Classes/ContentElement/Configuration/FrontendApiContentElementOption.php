@@ -35,6 +35,7 @@ use Neunerlei\EventBus\Subscription\EventSubscriptionInterface;
 use Neunerlei\Inflection\Inflector;
 use Neunerlei\PathUtil\Path;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 class FrontendApiContentElementOption extends AbstractChildExtConfigOption
 {
@@ -388,7 +389,7 @@ class FrontendApiContentElementOption extends AbstractChildExtConfigOption
             }
 
             // Register plugin wizard icons
-            $this->context->TypoScript->addPageTsConfig($elementConfig->tsConfig);
+            ExtensionManagementUtility::addPageTSConfig($elementConfig->tsConfig);
             $iconRegistry = $this->context->getInstanceOf(IconRegistry::class);
             foreach ($elementConfig->iconDefinitionArgs as $args) {
                 $iconRegistry->registerIcon(...$args);
