@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.36.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.2...v9.36.3) (2021-02-05)
+
+
+### Bug Fixes
+
+* **FrontendApiContentElementOption:** don't rely on the the TypoScript service for pageTs registration ([888b20b](https://github.com/labor-digital/typo3-frontend-api/commit/888b20b959b21274bd3e89b3334d6ceb6b34f976))
+
 ### [9.36.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.1...v9.36.2) (2021-02-03)
 
 
