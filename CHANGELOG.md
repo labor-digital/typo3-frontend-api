@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.36.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.3...v9.36.4) (2021-02-18)
+
+
+### Bug Fixes
+
+* **AdditionalRouteStrategy:** announce caching configuration ([8c1d24a](https://github.com/labor-digital/typo3-frontend-api/commit/8c1d24aa3ac0bac0c9adfea8eb6d5aa39b45e830))
+
 ### [9.36.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.2...v9.36.3) (2021-02-05)
 
 
