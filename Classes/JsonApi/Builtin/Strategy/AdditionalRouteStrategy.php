@@ -40,6 +40,7 @@ class AdditionalRouteStrategy extends AbstractResourceStrategy
     public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
     {
         // Get the resource configuration
+        $this->announceRouteCacheOptions($route);
         $routeConfig = $this->getRouteConfig($route);
 
         // Check if we have to handle a collection
