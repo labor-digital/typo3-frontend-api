@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\Cache;
 
 
+use GuzzleHttp\Psr7\Utils;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3FrontendApi\Cache\CacheService;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\RequestCacheKeyGenerator;
@@ -33,11 +34,14 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function GuzzleHttp\Psr7\stream_for;
 
-class CacheMiddleware implements MiddlewareInterface
+class CacheMiddleware implements MiddlewareInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     public const CACHE_STATUS_HEADER    = 'X-T3FA-Server-Cache-Status';
     public const CACHE_GENERATED_HEADER = 'X-T3FA-Generated';
 
@@ -98,14 +102,14 @@ class CacheMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $collectMetrics = isset($request->getQueryParams()[static::REQUEST_QUERY_METRICS_ARG])
-                          && $this->typoContext->Env()->isDev();
+                          && ($this->typoContext->Env()->isFeDebug() ||
+                              $this->typoContext->Env()->isDev());
         $isCacheable    = in_array(strtoupper($request->getMethod()), ['GET', 'HEAD']);
-        $this->cacheService->setUpdate(
-            $this->typoContext->BeUser()->isLoggedIn() && (
+        $forceUpdate    = $this->typoContext->BeUser()->isLoggedIn() && (
                 stripos($request->getHeaderLine('cache-control'), 'no-cache') !== false
                 || stripos($request->getHeaderLine('pragma'), 'no-cache') !== false
-            )
-        );
+            );
+        $this->cacheService->setUpdate($forceUpdate);
 
         if ($collectMetrics) {
             $metricsTracker = GeneralUtility::makeInstance(MetricsTracker::class);
@@ -153,7 +157,7 @@ class CacheMiddleware implements MiddlewareInterface
             },
             'onWarmup'     => static function (array $data): ResponseInterface {
                 $response = $data['response'];
-                $response = $response->withBody(stream_for($data['body']));
+                $response = $response->withBody(Utils::streamFor($data['body']));
                 $response = $response->withHeader(static::CACHE_STATUS_HEADER, 'hit');
 
                 return $response;
@@ -162,7 +166,7 @@ class CacheMiddleware implements MiddlewareInterface
 
         if (isset($metricsTracker)) {
             $metricsRenderer = GeneralUtility::makeInstance(MetricsRenderer::class);
-            $response        = $response->withBody(stream_for($metricsRenderer->render($metricsTracker)));
+            $response        = $response->withBody(Utils::streamFor($metricsRenderer->render($metricsTracker)));
             $response        = $response->withHeader('Content-Type', 'text/plain');
         }
 
@@ -182,6 +186,11 @@ class CacheMiddleware implements MiddlewareInterface
         $response = $response->withoutHeader(static::RESPONSE_CACHE_TTL_HEADER);
         $response = $response->withoutHeader(static::RESPONSE_IGNORE_BROWSER_CACHE_HEADER);
         $response = $response->withoutHeader(static::RESPONSE_NO_CACHE_HEADER);
+
+        $this->logger->debug(
+            'Response caching: ' . $request->getUri() . ' | T3FA: ' .
+            $response->getHeaderLine(static::CACHE_STATUS_HEADER) . ', ' . $response->getHeaderLine(static::CACHE_GENERATED_HEADER) .
+            ' | Browser: ' . $response->getHeaderLine('Cache-Control') . ', ' . $response->getHeaderLine('Pragma'));
 
         return $response;
     }
