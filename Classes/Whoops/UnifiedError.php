@@ -77,6 +77,13 @@ class UnifiedError
     protected $error;
 
     /**
+     * The compiled message containing all nested messages
+     *
+     * @var string
+     */
+    protected $message;
+
+    /**
      * Contains the call stack of the given error and all of its parents
      *
      * @var array
@@ -101,6 +108,7 @@ class UnifiedError
     {
         $this->rawError = $error;
         $this->error    = $this->translateError($error);
+        $this->message  = $this->generateExtendedErrorMessage($this->error, $request);
         $this->generateMeta($request);
         $this->convertThrowableToStack($error);
         $this->statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : 500;
@@ -133,7 +141,7 @@ class UnifiedError
      */
     public function getMessage(): string
     {
-        return empty($this->error->getMessage()) ? $this->rawError->getMessage() : $this->error->getMessage();
+        return $this->message;
     }
 
     /**
@@ -184,6 +192,38 @@ class UnifiedError
                 }, $this->getStack()),
             ]
         );
+    }
+
+    /**
+     * Helper to generate more speaking error messages
+     *
+     * @param   \Throwable                                     $error
+     * @param   \Psr\Http\Message\ServerRequestInterface|null  $request
+     *
+     * @return string
+     */
+    protected function generateExtendedErrorMessage(Throwable $error, ?ServerRequestInterface $request): string
+    {
+        // Combine the error messages of all nested errors
+        $e = $error;
+        while ($e !== null) {
+            $message[] = $e->getMessage();
+            $e         = $e->getPrevious();
+        }
+        $count = count($message);
+        if ($count > 1) {
+            foreach ($message as $k => $msg) {
+                $message[$k] = '(' . ($k + 1) . '/' . $count . ') ' . $msg;
+            }
+        }
+        $message = implode(' || ', $message);
+
+        // Enhance the message by routing information
+        if ($error instanceof Exception\HttpExceptionInterface) {
+            $message .= ' (' . $request->getUri() . ')';
+        }
+
+        return $message;
     }
 
     /**

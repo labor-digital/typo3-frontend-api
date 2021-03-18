@@ -154,17 +154,20 @@ abstract class AbstractHandler implements LoggerAwareInterface
      */
     protected function logError(UnifiedError $error): void
     {
+        $context = $error->getLogContext();
+        $message = $error->getMessage();
+
         $statusCode = $error->getStatusCode();
         if ($statusCode >= 400) {
             if ($statusCode >= 500) {
-                $this->logger->critical($error->getMessage(), $error->getLogContext());
+                $this->logger->critical($message, $context);
             } elseif ($statusCode === 404) {
-                $this->logger->warning($error->getMessage(), $error->getLogContext());
+                $this->logger->warning($message, $context);
             } else {
-                $this->logger->error($error->getMessage(), $error->getLogContext());
+                $this->logger->error($message, $context);
             }
         } else {
-            $this->logger->info($error->getMessage(), $error->getLogContext());
+            $this->logger->info($message, $context);
         }
     }
 
