@@ -25,11 +25,15 @@ use LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
 use Neunerlei\Inflection\Inflector;
 use Neunerlei\PathUtil\Path;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Throwable;
 use TYPO3\CMS\Core\Resource\File;
 
-class FileResourceTransformer extends AbstractResourceTransformer
+class FileResourceTransformer extends AbstractResourceTransformer implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * Defines how file types are mapped to their string representation
      */
@@ -141,12 +145,18 @@ class FileResourceTransformer extends AbstractResourceTransformer
                         ];
                     }
                     $info['image']['variants'] = $variants;
+
+                    if (empty($variants)) {
+                        $this->logger->error('The calculated "variants" array of an image is empty', $info);
+                    }
                 }
             }
 
             // Done
             return $info;
         } catch (Throwable $e) {
+            $this->logger->error('Failed to transform file', ['exception' => $e]);
+
             // Make sure that a missing file reference does not crash the entire page
             return ['id' => null, 'error' => 'Failed to gather the file information!'];
         }
