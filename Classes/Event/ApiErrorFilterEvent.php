@@ -61,6 +61,8 @@ class ApiErrorFilterEvent
      *
      * @param   \Throwable                           $error
      * @param   \Psr\Http\Message\ResponseInterface  $response
+     *
+     * @todo Throwable should be the instance of UnifiedError instead!
      */
     public function __construct(Throwable $error, ResponseInterface $response)
     {

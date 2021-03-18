@@ -19,17 +19,23 @@
 
 namespace Symfony\Component\VarDumper\Dumper {
 
-    use LaborDigital\Typo3FrontendApi\Whoops\ErrorHandler;
     use ReflectionObject;
     use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
     use Whoops\Util\HtmlDumperOutput;
 
     class HtmlDumper
     {
+        protected static $dumpValues = true;
+
+        public static function setDumpValues(bool $state): void
+        {
+            static::$dumpValues = $state;
+        }
+
         public function dump($var, HtmlDumperOutput $output)
         {
             // Disable value rendering
-            if (ErrorHandler::renderValues()) {
+            if (static::$dumpValues) {
                 $result = DebuggerUtility::var_dump($var);
             } else {
                 if (is_scalar($var)) {
