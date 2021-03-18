@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.37.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.4...v9.37.0) (2021-03-18)
+
+
+### Features
+
+* log api errors in the backend log ([dc54f17](https://github.com/labor-digital/typo3-frontend-api/commit/dc54f17a9244fe66fb4b588b73e2e2007426e8ab))
+* **CacheMiddleware:** implement error logging ([b2dbc9f](https://github.com/labor-digital/typo3-frontend-api/commit/b2dbc9fda60a305d92069e10b1b50d55938a7b24))
+* **FileResourceTransformer:** implement error logging ([502ab80](https://github.com/labor-digital/typo3-frontend-api/commit/502ab801a8889e7fbf480b5afd07c89f39b34ed9))
+* **Whoops:** enhance error logging ([ca486d6](https://github.com/labor-digital/typo3-frontend-api/commit/ca486d6fb90a408ef9321fedfbb6af3b6242072b))
+* **Whoops:** rewrite the error handler + implement logging ([2ce5a8c](https://github.com/labor-digital/typo3-frontend-api/commit/2ce5a8cb1b114e8db52fefc03f707d2f380a464a))
+
 ### [9.36.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.36.3...v9.36.4) (2021-02-18)
 
 
