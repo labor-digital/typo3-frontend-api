@@ -155,7 +155,13 @@ class FileResourceTransformer extends AbstractResourceTransformer implements Log
             // Done
             return $info;
         } catch (Throwable $e) {
-            $this->logger->error('Failed to transform file', ['exception' => $e]);
+            $message = 'Failed to transform file';
+
+            if ($fileInfo) {
+                $message .= ' uid: ' . $fileInfo->getUid() . ' reference: ' . $fileInfo->isFileReference() .
+                            ' name: ' . $fileInfo->getFileName();
+            }
+            $this->logger->error($message, ['exception' => $e]);
 
             // Make sure that a missing file reference does not crash the entire page
             return ['id' => null, 'error' => 'Failed to gather the file information!'];
