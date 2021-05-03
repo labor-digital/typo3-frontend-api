@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright 2019 LABOR.digital
+/*
+ * Copyright 2021 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2019.03.19 at 16:09
+ * Last modified: 2021.05.03 at 14:00
  */
 
 $EM_CONF[$_EXTKEY] = [
-	"title"            => "LABOR - Typo3 - Frontend API",
-	"description"      => "Provides a frontend API handler with support for Single Page Apps",
-	"author"           => "Martin Neundorfer",
-	"author_email"     => "m.neundorfer@labor.digital",
-	"category"         => "fe",
-	"author_company"   => "Labor.digital",
-	"shy"              => "",
-	"conflicts"        => "",
-	"priority"         => "",
-	"module"           => "",
-	"state"            => "stable",
-	"internal"         => "",
-	"uploadfolder"     => 0,
-	"createDirs"       => "",
-	"modify_tables"    => "",
-	"clearCacheOnLoad" => 1,
-	"lockType"         => "",
-	"version"          => "9.37.2",
-	"constraints"      => [
-		"depends"   => [
-			"typo3"            => "9.0.0-9.99.99",
-			"typo3_better_api" => "9.0.0-9.99.99",
-		],
-		"conflicts" => [
-		],
-		"suggests"  => [
-		],
-	],
-	"suggests"         => [
-	],
+    'title' => 'T3FA',
+    'description' => 'Provides a frontend API handler with support for Single Page Apps',
+    'author' => 'Martin Neundorfer',
+    'author_email' => 'm.neundorfer@labor.digital',
+    'category' => 'fe',
+    'author_company' => 'Labor.digital',
+    'shy' => '',
+    'conflicts' => '',
+    'priority' => '',
+    'module' => '',
+    'state' => 'alpha',
+    'internal' => '',
+    'uploadfolder' => 0,
+    'createDirs' => '',
+    'modify_tables' => '',
+    'clearCacheOnLoad' => 1,
+    'lockType' => '',
+    'version' => '9.37.2',
+    'constraints' => [
+        'depends' => [
+            'typo3' => '10.0.0-10.99.99',
+            't3ba' => '10.0.0-10.99.99',
+        ],
+        'conflicts' => [
+        ],
+        'suggests' => [
+        ],
+    ],
+    'suggests' => [
+    ],
 ];
