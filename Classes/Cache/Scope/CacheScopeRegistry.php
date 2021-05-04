@@ -45,7 +45,7 @@ class CacheScopeRegistry
      */
     public function announceTtl(?int $ttl): self
     {
-        if ($ttl === null) {
+        if ($ttl === null || empty($this->scopes)) {
             return $this;
         }
 
