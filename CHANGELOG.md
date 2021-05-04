@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.37.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.2...v9.37.3) (2021-05-04)
+
+
+### Bug Fixes
+
+* **Cache\CacheScopeRegistry:** don't crash if announceTtl() is executed without scopes ([f431361](https://github.com/labor-digital/typo3-frontend-api/commit/f43136159ba3015feed70906879e1864fd33e8f0))
+
 ### [9.37.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.1...v9.37.2) (2021-04-13)
 
 
