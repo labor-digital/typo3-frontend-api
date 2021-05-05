@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.37.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.3...v9.37.4) (2021-05-05)
+
+
+### Bug Fixes
+
+* fix multiple issues when the same domain model was mapped on multiple types ([213b1f6](https://github.com/labor-digital/typo3-frontend-api/commit/213b1f6c531bd9af72d8eb42bdcb43fe8a000f47))
+
 ### [9.37.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.2...v9.37.3) (2021-05-04)
 
 
