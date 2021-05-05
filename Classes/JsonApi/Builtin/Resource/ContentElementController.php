@@ -47,7 +47,7 @@ class ContentElementController extends AbstractResourceController
             [
                 ContentElement::TYPE_TT_CONTENT,
                 $id,
-                $this->TypoContext()->Language()->getCurrentFrontendLanguage()->toArray(),
+                $this->TypoContext()->Language()->getCurrentFrontendLanguage()->getTwoLetterIsoCode(),
             ]
         );
     }
