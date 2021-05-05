@@ -104,7 +104,7 @@ class Hydrator
     public function getContext(string $tableName, array $row): ?string
     {
         $typeField = $GLOBALS['TCA'][$tableName]['ctrl']['type'] ?? null;
-        dbg($typeField);
+
         $typeName = empty($typeField) ? null : TcaUtil::getRowValue($row, $typeField);
         if (empty($typeName)) {
             return null;
@@ -219,8 +219,6 @@ class Hydrator
         if (! in_array(AbstractEntity::class, class_parents($modelClass), true)) {
             throw new HydratorException('The given model class $modelClass does not extend the AbstractEntity class!');
         }
-
-        dbg($modelClass, $tableName, $this->getContext($tableName, $row), $row);
 
         return $this->runWithPreparedDataMapper(
             $modelClass, $tableName,
