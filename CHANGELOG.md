@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.37.6](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.5...v9.37.6) (2021-05-05)
+
+
+### Bug Fixes
+
+* **ContentElementController:** pass correct language code to content element instance ([afaadd2](https://github.com/labor-digital/typo3-frontend-api/commit/afaadd2c7ae0efe394b54e6392c0ef06d2d64349))
+
 ### [9.37.5](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.4...v9.37.5) (2021-05-05)
 
 
