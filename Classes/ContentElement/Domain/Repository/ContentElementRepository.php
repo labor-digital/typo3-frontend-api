@@ -20,45 +20,26 @@
 namespace LaborDigital\Typo3FrontendApi\ContentElement\Domain\Repository;
 
 
-use LaborDigital\Typo3FrontendApi\ContentElement\ContentElementException;
 use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel;
-use LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\DefaultContentElementModel;
-use LaborDigital\Typo3FrontendApi\ContentElement\VirtualColumn\VirtualColumnUtil;
-use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
-use Neunerlei\Arrays\Arrays;
-use TYPO3\CMS\Core\Service\FlexFormService;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
+use LaborDigital\Typo3FrontendApi\Shared\Hydrator\Hydrator;
 
 class ContentElementRepository
 {
-
     /**
-     * @var \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository
+     * @var \LaborDigital\Typo3FrontendApi\Shared\Hydrator\Hydrator
      */
-    protected $configRepository;
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper
-     */
-    protected $dataMapper;
-
-    /**
-     * @var \TYPO3\CMS\Core\Service\FlexFormService
-     */
-    protected $flexFormService;
+    protected $hydrator;
 
     /**
      * ContentElementRepository constructor.
      *
      * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
-     * @param   \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper              $dataMapper
+     * @param   \LaborDigital\Typo3FrontendApi\Shared\Hydrator\Hydrator               $hydrator
      * @param   \TYPO3\CMS\Core\Service\FlexFormService                               $flexFormService
      */
-    public function __construct(FrontendApiConfigRepository $configRepository, DataMapper $dataMapper, FlexFormService $flexFormService)
+    public function __construct(Hydrator $hydrator)
     {
-        $this->configRepository = $configRepository;
-        $this->dataMapper       = $dataMapper;
-        $this->flexFormService  = $flexFormService;
+        $this->hydrator = $hydrator;
     }
 
     /**
@@ -72,66 +53,6 @@ class ContentElementRepository
      */
     public function hydrateRow(array $row): AbstractContentElementModel
     {
-        $cType = Arrays::getPath($row, ['CType']);
-        if (empty($cType)) {
-            throw new ContentElementException('The given row could not be hydrated, as it does not specify a CType field!');
-        }
-
-        // Resolve the model class
-        $modelClass = $this->configRepository->contentElement()->getContentElementConfig($cType, 'modelClass');
-        if (empty($modelClass)) {
-            $modelClass = DefaultContentElementModel::class;
-        }
-
-        // Unpack the virtual columns
-        $resolvedRow = VirtualColumnUtil::resolveVColsInRow($cType, $row, true);
-        // @todo remove this in v10
-        $legacyRow = VirtualColumnUtil::resolveVColsInRow($cType, $row);
-
-        // Map the row to the model
-        return VirtualColumnUtil::runWithResolvedVColTca($cType,
-            function () use ($modelClass, $resolvedRow, $legacyRow) {
-                $mapped = $this->dataMapper->map($modelClass, [$resolvedRow]);
-                /** @var \LaborDigital\Typo3FrontendApi\ContentElement\Domain\Model\AbstractContentElementModel $model */
-                $model = reset($mapped);
-
-                $model->_setProperty('__raw', $resolvedRow);
-                $model->_setProperty('__flex', $this->resolveFlexFormColumns($resolvedRow));
-                $model->_setProperty('__legacyRawUnmapped', $legacyRow);
-
-                return $model;
-            });
-    }
-
-    /**
-     * Internal helper to resolve the flex form columns into the __flex magic storage key
-     *
-     * @param   array  $row
-     *
-     * @return array
-     */
-    protected function resolveFlexFormColumns(array $row): array
-    {
-        $colConfig = $GLOBALS['TCA']['tt_content']['columns'];
-        $flexCols  = [];
-        foreach ($colConfig as $col => $conf) {
-            // Check if this is a flex form column
-            if (empty($row[$col])) {
-                continue;
-            }
-            $type = Arrays::getPath($colConfig, [$col, 'config', 'type']);
-            if ($type !== 'flex') {
-                continue;
-            }
-
-            // Parse the content
-            $value = $row[$col];
-            $value = $this->flexFormService->convertFlexFormContentToArray($value);
-
-            // Store the column
-            $flexCols[$col] = $value;
-        }
-
-        return $flexCols;
+        return $this->hydrator->hydrateObject('', 'tt_content', $row);
     }
 }
