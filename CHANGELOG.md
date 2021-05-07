@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.37.7](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.6...v9.37.7) (2021-05-07)
+
+
+### Bug Fixes
+
+* make sure data maps for unmapped models are generated correctly ([5474443](https://github.com/labor-digital/typo3-frontend-api/commit/5474443e364a83098e38401794ea3e72b15f938a))
+
 ### [9.37.6](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.5...v9.37.6) (2021-05-05)
 
 
