@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Shared\Hydrator;
 
 
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 
 class CacheContextAwareDataMapFactory extends DataMapFactory
@@ -62,14 +63,18 @@ class CacheContextAwareDataMapFactory extends DataMapFactory
      */
     public function buildDataMap($className)
     {
-        $storageKey = ltrim(str_replace('\\', '%', $className), '\\') . '_' . $this->cacheContext;
+        $storageKey = str_replace('\\', '%', $className) . '_' . $this->cacheContext;
         $that       = $this->concreteFactory;
         if (isset($that->dataMaps[$storageKey])) {
             return $that->dataMaps[$storageKey];
         }
 
-        $dataMap = $that->dataMapCache->get(str_replace('\\', '%', $storageKey));
+        $dataMap = $that->dataMapCache->get($storageKey);
         if ($dataMap === false) {
+            if ($that->configurationManager instanceof ConfigurationManager) {
+                ConfigManagerAdapter::flushCache($that->configurationManager);
+            }
+
             $dataMap = $that->buildDataMapInternal($className);
             $that->dataMapCache->set($storageKey, $dataMap);
         }
