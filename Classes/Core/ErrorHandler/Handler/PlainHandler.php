@@ -1,0 +1,52 @@
+<?php
+/*
+ * Copyright 2021 LABOR.digital
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Last modified: 2021.05.12 at 16:07
+ */
+
+declare(strict_types=1);
+
+
+namespace LaborDigital\T3fa\Core\ErrorHandler\Handler;
+
+
+use GuzzleHttp\Psr7\Utils;
+use LaborDigital\T3fa\Core\ErrorHandler\UnifiedError;
+use Psr\Http\Message\ResponseInterface;
+
+class PlainHandler extends AbstractHandler
+{
+    /**
+     * @inheritDoc
+     */
+    protected function makeResponse(UnifiedError $error): ResponseInterface
+    {
+        $response = $this->getErrorResponse($error, true);
+        
+        return $response->withBody(
+            Utils::streamFor(
+                json_encode([
+                    'errors' => [
+                        [
+                            'status' => $error->getStatusCode(),
+                            'title' => $response->getReasonPhrase(),
+                        ],
+                    ],
+                ], JSON_THROW_ON_ERROR | ($this->isDev ? JSON_PRETTY_PRINT : 0))
+            )
+        );
+    }
+}

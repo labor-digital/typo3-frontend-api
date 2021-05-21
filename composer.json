@@ -25,12 +25,9 @@
 	"require": {
 		"labor-digital/typo3-better-api": "10.0.0-beta.4",
 		"league/route": "^5.0.1",
-		"laminas/laminas-httphandlerrunner": "^1.1",
-		"filp/whoops": "^2.5",
+		"laminas/laminas-httphandlerrunner": "^1.4.0",
 		"league/fractal": "^0.18",
-		"rosell-dk/webp-convert": "^2.3",
-		"woohoolabs/yin": "^4.3.0",
-		"woohoolabs/yang": "^2.3"
+		"rosell-dk/webp-convert": "^2.3"
 	},
 	"require-dev": {
 		"roave/security-advisories": "dev-latest"
