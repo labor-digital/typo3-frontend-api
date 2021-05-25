@@ -78,6 +78,7 @@ class MetricsTracker
                     'key'       => $key,
                     'children'  => $children,
                     'tags'      => $scope->tags,
+                    'ttl'       => $scope->ttl,
                     'time'      => microtime(true) - $time,
                     'generator' => $this->getCallableId($callable),
                 ];

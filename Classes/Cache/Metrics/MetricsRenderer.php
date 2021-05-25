@@ -65,7 +65,8 @@ class MetricsRenderer
         $output   = [];
         $prefix   = str_repeat('|   ', $level + 1);
         $output[] = $prefix . '[' . $node['type'] . ']: ' . $node['key'] .
-                    (isset($node['time']) ? ' | TIME: ' . $node['time'] : '');
+                    (isset($node['time']) ? ' | TIME: ' . $node['time'] : '') .
+                    (isset($node['ttl']) ? ' | TTL ' . $node['ttl'] / 60 / 60 : '');
         $output[] = $prefix . str_repeat('-', 150);
         $output[] = $prefix;
 
