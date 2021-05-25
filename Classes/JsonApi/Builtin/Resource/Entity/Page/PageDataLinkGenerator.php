@@ -46,17 +46,25 @@ class PageDataLinkGenerator implements SingletonInterface
     {
         $context = $this->FrontendApiContext();
 
-        if (! class_exists(CanonicalGenerator::class)) {
-            return $context->Links()->getLink()->build();
+        $getBackup = $_GET;
+        $_GET      = $context->getRequest()->getQueryParams();
+        unset($_GET['slug'], $_GET['include']);
+
+        try {
+            if (! class_exists(CanonicalGenerator::class)) {
+                return $context->Links()->getLink()->withKeepQuery(true)->build();
+            }
+
+            $canonicalTag = $context->Simulator()->runWithEnvironment(['pid' => $pageData->getId()], static function () use ($context) {
+                return $context->getInstanceOf(CanonicalGenerator::class)->generate();
+            });
+
+            preg_match('~href="(.*?)"~', $canonicalTag, $m);
+
+            return (string)Path::makeUri($m[1])->withQuery(null);
+        } finally {
+            $_GET = $getBackup;
         }
-
-        $canonicalTag = $context->Simulator()->runWithEnvironment(['pid' => $pageData->getId()], static function () use ($context) {
-            return $context->getInstanceOf(CanonicalGenerator::class)->generate();
-        });
-
-        preg_match('~href="(.*?)"~', $canonicalTag, $m);
-
-        return (string)Path::makeUri($m[1])->withQuery(null);
     }
 
     /**
