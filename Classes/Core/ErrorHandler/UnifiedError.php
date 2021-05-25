@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 16:27
+ * Last modified: 2021.05.25 at 13:50
  */
 
 declare(strict_types=1);
@@ -111,7 +111,7 @@ class UnifiedError
         $this->message = $this->generateExtendedErrorMessage($this->error, $request);
         $this->generateMeta($request);
         $this->convertThrowableToStack($error);
-        $this->statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : 500;
+        $this->statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : $this->statusCode;
     }
     
     /**
@@ -237,8 +237,10 @@ class UnifiedError
     {
         // Translate immediate response exceptions
         if ($error instanceof ImmediateResponseException) {
+            $this->statusCode = $error->getResponse()->getStatusCode();
+            
             /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
-            $error = new \League\Route\Http\Exception(
+            return new \League\Route\Http\Exception(
                 $error->getResponse()->getStatusCode(),
                 $error->getResponse()->getReasonPhrase(),
                 $error,
@@ -296,7 +298,7 @@ class UnifiedError
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         while ($error !== null) {
             $this->stack[] = [
-                'title' => $error->getMessage(),
+                'title' => empty($error->getMessage()) ? $this->error->getMessage() : $error->getMessage(),
                 'code' => $error->getCode(),
                 'trace' => array_map(static function ($v) {
                     unset($v['args'], $v['type']);
