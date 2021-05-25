@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 16:28
+ * Last modified: 2021.05.25 at 13:59
  */
 
 declare(strict_types=1);
@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\Core\ErrorHandler\Renderer;
 
 use LaborDigital\T3ba\Core\ErrorHandler\DebugExceptionHandler;
 use LaborDigital\T3fa\Core\ErrorHandler\UnifiedError;
+use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -65,7 +66,12 @@ class VerboseHtmlRenderer extends DebugExceptionHandler implements VerboseRender
     {
         ob_start();
         
-        $this->defaultExceptionHandlerInstance->echoExceptionWeb($error->getRawError());
+        $rawError = $error->getRawError();
+        if ($rawError instanceof ImmediateResponseException) {
+            return (string)$rawError->getResponse()->getBody();
+        }
+        
+        $this->defaultExceptionHandlerInstance->echoExceptionWeb($rawError);
         
         return ob_get_clean();
     }
