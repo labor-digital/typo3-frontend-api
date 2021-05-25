@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.22 at 00:29
+ * Last modified: 2021.05.25 at 10:11
  */
 
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\Core\Resource\Repository;
 
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
+use LaborDigital\T3fa\Core\Resource\Transformer\Special\SelfTransformingInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerScope;
 use League\Fractal\Manager;
@@ -33,7 +34,7 @@ use League\Fractal\Serializer\JsonApiSerializer;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-abstract class AbstractResourceElement implements NoDiInterface
+abstract class AbstractResourceElement implements NoDiInterface, SelfTransformingInterface
 {
     /**
      * The unique resource type this item contains

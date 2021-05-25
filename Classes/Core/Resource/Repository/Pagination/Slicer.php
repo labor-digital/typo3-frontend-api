@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 19:54
+ * Last modified: 2021.05.25 at 10:56
  */
 
 declare(strict_types=1);
@@ -32,12 +32,12 @@ class Slicer
     /**
      * Extracts the required slice of data from the $raw set based on the instructions in $pagination
      *
-     * @param   iterable    $raw         The raw data to extract the slice from
-     * @param   Pagination  $pagination  The prepared pagination object that describes how the slice should be retrieved
+     * @param   iterable|SelfPaginatingInterface  $raw         The raw data to extract the slice from
+     * @param   Pagination                        $pagination  The prepared pagination object that describes how the slice should be retrieved
      *
      * @return iterable
      */
-    public function slice(iterable $raw, Pagination $pagination): iterable
+    public function slice($raw, Pagination $pagination): iterable
     {
         $offset = (int)max(0, $pagination->pageSize * ($pagination->page - 1));
         
@@ -100,8 +100,8 @@ class Slicer
          */
         $countGenerator = static function (SelfPaginatingInterface $raw, Pagination $pagination): void {
             $pagination->itemCount = $raw->getItemCount();
-            $pagination->pages = max(ceil($pagination->itemCount / $pagination->pageSize), 1);
-            $pagination->page = max(min($pagination->pages, $pagination->page), 1);
+            $pagination->pages = (int)max(ceil($pagination->itemCount / $pagination->pageSize), 1);
+            $pagination->page = (int)max(min($pagination->pages, $pagination->page), 1);
         };
         
         if (! $isLateCounting) {

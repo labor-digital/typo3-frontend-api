@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.22 at 00:37
+ * Last modified: 2021.05.25 at 10:57
  */
 
 declare(strict_types=1);
@@ -48,8 +48,9 @@ class TestEventHandler implements LazyEventSubscriberInterface
     public function run()
     {
         $repo = $this->getService(ResourceRepository::class);
-        
-        dbg($repo->getResource('news', 2)->asArray(['includes' => true]));
+
+//        dbge($repo->getCollection('proxy', ['filter' => ['title' => 'hello'], 'page' => ['number' => 2]])->asArray());
+        dbg($repo->getResource('proxy', 2)->asArray(['includes' => true]));
         dbge($repo->getCollection('news', [
             'filter' => [
                 'dateRange' => [

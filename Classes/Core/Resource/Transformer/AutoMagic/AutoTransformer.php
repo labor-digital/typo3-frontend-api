@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 00:06
+ * Last modified: 2021.05.25 at 10:11
  */
 
 declare(strict_types=1);
@@ -24,6 +24,8 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
+use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\Link\RteContentParser;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\SchemaRegistry;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
@@ -84,6 +86,10 @@ class AutoTransformer
             }
             
             if (is_object($value)) {
+                if ($value instanceof ResourceItem || $value instanceof ResourceCollection) {
+                    return $value->asArray();
+                }
+                
                 if (! $this->factory->hasNonDefaultTransformer($value) && is_iterable($value)) {
                     $result = [];
                     foreach ($value as $k => $v) {

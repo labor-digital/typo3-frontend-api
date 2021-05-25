@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 23:41
+ * Last modified: 2021.05.25 at 10:56
  */
 
 declare(strict_types=1);
@@ -46,20 +46,20 @@ class Paginator
     /**
      * Collects pagination information about the given $raw data and automatically slices the data to match the requirements
      *
-     * @param   iterable       $raw         The raw data to be paginated
-     * @param   int            $queryPage   The page that was selected via the resource query
-     * @param   int            $pageSize    The maximal items per page
-     * @param   callable|null  $pageFinder  Optional page finder callback to resolve the correct page id if a specific element in the list was required
+     * @param   iterable|SelfPaginatingInterface  $raw         The raw data to be paginated
+     * @param   int                               $queryPage   The page that was selected via the resource query
+     * @param   int                               $pageSize    The maximal items per page
+     * @param   callable|null                     $pageFinder  Optional page finder callback to resolve the correct page id if a specific element in the list was required
      *
      * @return array
      */
-    public function paginate(iterable $raw, int $queryPage, int $pageSize, ?callable $pageFinder): array
+    public function paginate($raw, int $queryPage, int $pageSize, ?callable $pageFinder): array
     {
         $pagination = $this->makeInstance(Pagination::class);
         $pagination->pageSize = $pageSize;
         $pagination->itemCount = $this->getItemCount($raw);
-        $pagination->pages = max(ceil($pagination->itemCount / $pagination->pageSize), 1);
-        $pagination->page = max(min($pagination->pages, $this->findPage($raw, $queryPage, $pageSize, $pageFinder)), 1);
+        $pagination->pages = (int)max(ceil($pagination->itemCount / $pagination->pageSize), 1);
+        $pagination->page = (int)max(min($pagination->pages, $this->findPage($raw, $queryPage, $pageSize, $pageFinder)), 1);
         
         if ($pagination->itemCount <= $pageSize) {
             // Shortcut -> no slicing required if the count is less or equal to a page size
@@ -76,7 +76,7 @@ class Paginator
     /**
      * Tries multiple different options to retrieve the item count of the given value.
      *
-     * @param   mixed  $raw  The value to retrieve the item count of
+     * @param   iterable|SelfPaginatingInterface  $raw  The value to retrieve the item count of
      *
      * @return int
      * @throws \LaborDigital\T3fa\Core\Resource\Exception\PaginationException
@@ -113,12 +113,15 @@ class Paginator
     /**
      * Is used internally to resolve the current page number
      *
-     * @param   int  $queryPage
+     * @param   iterable|SelfPaginatingInterface  $raw
+     * @param   int                               $queryPage
+     * @param   int                               $pageSize
+     * @param   callable|null                     $pageFinder
      *
      * @return int
      * @throws \LaborDigital\T3fa\Core\Resource\Exception\PaginationException
      */
-    protected function findPage(iterable $raw, int $queryPage, int $pageSize, ?callable $pageFinder): int
+    protected function findPage($raw, int $queryPage, int $pageSize, ?callable $pageFinder): int
     {
         $queryPage = $queryPage ?? 1;
         
