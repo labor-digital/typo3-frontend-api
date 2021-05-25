@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.38.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.7...v9.38.0) (2021-05-25)
+
+
+### Features
+
+* add ttl to cache metrics tracker ([cbe90c3](https://github.com/labor-digital/typo3-frontend-api/commit/cbe90c307d108f797f5a0b1b7d86584b26c3aefb))
+
+
+### Bug Fixes
+
+* **PageDataLinkGenerator:** make sure canonical url gets generated correctly ([483794b](https://github.com/labor-digital/typo3-frontend-api/commit/483794bd892061f3d795dcb33b7a7793ccaedbf2))
+
 ### [9.37.7](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.6...v9.37.7) (2021-05-07)
 
 
