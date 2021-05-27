@@ -47,6 +47,7 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Core\Log\LogLevel;
+use TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler;
 
 class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface
 {
@@ -94,10 +95,13 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
             ->middleware()
             ->registerGlobalMiddleware(ErrorHandlerMiddleware::class, ["middlewareStack" => "external"])
             ->registerGlobalMiddleware(BodyParserMiddleware::class, ['middlewareStack' => 'external'])
-            ->registerGlobalMiddleware(ApiRedirectMiddleware::class,
-                ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class])
             ->registerGlobalMiddleware(FrontendSimulationMiddleware::class)
             ->registerGlobalMiddleware(CacheMiddleware::class, ['middlewareStack' => 'external', 'after' => FrontendSimulationMiddleware::class]);
+
+        if (class_exists(RedirectHandler::class)) {
+            $frontendApi->middleware()->registerGlobalMiddleware(ApiRedirectMiddleware::class,
+                ["middlewareStack" => "external", "before" => FrontendSimulationMiddleware::class]);
+        }
 
         // Register the default resources
         $frontendApi->resource()->registerResourcesDirectory("EXT:{{extkey}}/Classes/JsonApi/Builtin/Resource");
