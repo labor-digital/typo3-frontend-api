@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.38.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.38.0...v9.38.1) (2021-05-27)
+
+
+### Bug Fixes
+
+* make ApiRedirectMiddleware more resilient ([b974eac](https://github.com/labor-digital/typo3-frontend-api/commit/b974eac437cbcc08179eff3234ed437598f937df))
+
 ## [9.38.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.7...v9.38.0) (2021-05-25)
 
 
