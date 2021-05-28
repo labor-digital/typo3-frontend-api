@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 16:07
+ * Last modified: 2021.05.28 at 19:38
  */
 
 declare(strict_types=1);
@@ -24,6 +24,8 @@ namespace LaborDigital\T3fa\Core\ErrorHandler\Handler;
 
 
 use GuzzleHttp\Psr7\Utils;
+use LaborDigital\T3ba\Core\EventBus\TypoEventBus;
+use LaborDigital\T3ba\Event\Core\ErrorFilterEvent;
 use LaborDigital\T3fa\Core\ErrorHandler\UnifiedError;
 use Psr\Http\Message\ResponseInterface;
 
@@ -38,14 +40,20 @@ class PlainHandler extends AbstractHandler
         
         return $response->withBody(
             Utils::streamFor(
-                json_encode([
-                    'errors' => [
-                        [
-                            'status' => $error->getStatusCode(),
-                            'title' => $response->getReasonPhrase(),
-                        ],
-                    ],
-                ], JSON_THROW_ON_ERROR | ($this->isDev ? JSON_PRETTY_PRINT : 0))
+                TypoEventBus::getInstance()->dispatch(
+                    new ErrorFilterEvent(
+                        $error->getRawError(),
+                        json_encode([
+                            'errors' => [
+                                [
+                                    'status' => $error->getStatusCode(),
+                                    'title' => $response->getReasonPhrase(),
+                                ],
+                            ],
+                        ], JSON_THROW_ON_ERROR | ($this->isDev ? JSON_PRETTY_PRINT : 0))
+                    )
+                )->getResult()
+            
             )
         );
     }

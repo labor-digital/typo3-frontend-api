@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 16:32
+ * Last modified: 2021.05.28 at 19:37
  */
 
 declare(strict_types=1);
@@ -24,6 +24,8 @@ namespace LaborDigital\T3fa\Core\ErrorHandler\Handler;
 
 
 use GuzzleHttp\Psr7\Utils;
+use LaborDigital\T3ba\Core\EventBus\TypoEventBus;
+use LaborDigital\T3ba\Event\Core\ErrorFilterEvent;
 use LaborDigital\T3fa\Core\ErrorHandler\Renderer\VerboseHtmlRenderer;
 use LaborDigital\T3fa\Core\ErrorHandler\Renderer\VerboseJsonRenderer;
 use LaborDigital\T3fa\Core\ErrorHandler\Renderer\VerboseRendererInterface;
@@ -55,7 +57,9 @@ class VerboseHandler extends AbstractHandler
         try {
             return $this->getErrorResponse($error)->withBody(
                 Utils::streamFor(
-                    $this->makeRenderer()->render($error)
+                    TypoEventBus::getInstance()->dispatch(
+                        new ErrorFilterEvent($error->getRawError(), $this->makeRenderer()->render($error))
+                    )->getResult()
                 )
             );
         } catch (Throwable $e) {
