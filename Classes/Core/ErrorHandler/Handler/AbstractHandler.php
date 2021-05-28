@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 16:42
+ * Last modified: 2021.05.28 at 21:16
  */
 
 declare(strict_types=1);
@@ -34,6 +34,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Throwable;
+use TYPO3\CMS\Core\Log\LogManager;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
 {
@@ -96,8 +98,13 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
             );
         };
         
-        set_error_handler(function ($errorLevel, $errorMessage, $errorFile, $errorLine) use ($errorProcessor) {
-            if ($errorLevel & error_reporting()) {
+        // Inherit the TYPO3 error configuration
+        $errorHandlerErrors = $GLOBALS['TYPO3_CONF_VARS']['SYS']['errorHandlerErrors'] | E_USER_DEPRECATED;
+        $excludedErrors = E_COMPILE_WARNING | E_COMPILE_ERROR | E_CORE_WARNING | E_CORE_ERROR | E_PARSE | E_ERROR;
+        $exceptionalErrors = ((int)$GLOBALS['TYPO3_CONF_VARS']['SYS']['exceptionalErrors']) & ~E_USER_DEPRECATED;
+        
+        set_error_handler(function ($errorLevel, $errorMessage, $errorFile, $errorLine) use ($errorProcessor, $exceptionalErrors) {
+            if ($errorLevel & $exceptionalErrors) {
                 $this->makeInstance(SapiEmitter::class)->emit(
                     $errorProcessor(
                         new ErrorException($errorMessage, 0, $errorLevel, $errorFile, $errorLine)
@@ -106,7 +113,29 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
                 
                 exit();
             }
-        });
+            
+            if ($errorLevel === E_USER_DEPRECATED) {
+                $logger = GeneralUtility::makeInstance(LogManager::class)->getLogger('TYPO3.CMS.deprecations');
+                $logger->notice($errorMessage);
+                
+                return true;
+            }
+            
+            switch ($errorLevel) {
+                case E_USER_ERROR:
+                case E_RECOVERABLE_ERROR:
+                    $this->logger->error($errorMessage, ['file' => $errorFile, 'line' => $errorLine]);
+                    break;
+                case E_USER_WARNING:
+                case E_WARNING:
+                    $this->logger->warning($errorMessage, ['file' => $errorFile, 'line' => $errorLine]);
+                    break;
+                default:
+                    $this->logger->info($errorMessage, ['file' => $errorFile, 'line' => $errorLine]);
+            }
+            
+            return true;
+        }, (int)$errorHandlerErrors & ~$excludedErrors);
         
         try {
             return $callback();
