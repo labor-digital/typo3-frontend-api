@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:21
+ * Last modified: 2021.05.31 at 13:10
  */
 
 declare(strict_types=1);
@@ -23,9 +23,12 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
 
 
+use GuzzleHttp\Psr7\Uri;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
+use Neunerlei\Configuration\State\ConfigState;
 
 class ApiSiteConfigurator implements NoDiInterface
 {
@@ -39,13 +42,73 @@ class ApiSiteConfigurator implements NoDiInterface
      */
     protected $pageConfigurator;
     
+    /**
+     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator
+     */
+    protected $routingConfigurator;
+    
+    /**
+     * The host and schema the framework should always use when api links are generated
+     *
+     * @var string|null
+     */
+    protected $apiHost;
+    
     public function __construct(
         TransformerConfigurator $transformerCollector,
-        PageConfigurator $pageConfigurator
+        PageConfigurator $pageConfigurator,
+        RoutingConfigurator $routingConfigurator
     )
     {
         $this->transformerCollector = $transformerCollector;
         $this->pageConfigurator = $pageConfigurator;
+        $this->routingConfigurator = $routingConfigurator;
+    }
+    
+    /**
+     * Returns the host and schema the framework should always use when api links are generated
+     * If null is returned, the url will be generated context sensitive
+     *
+     * @return string|null
+     */
+    public function getApiHost(): ?string
+    {
+        return $this->apiHost;
+    }
+    
+    /**
+     * Allows you to set the host and schema the framework should always use when api links are generated
+     * If null is set, the url will be generated context sensitive.
+     * Note: it is possible to add a path segment after the host.
+     *
+     * @param   string|null  $apiHost
+     *
+     * @return $this
+     */
+    public function setApiHost(?string $apiHost): self
+    {
+        $uri = new Uri($apiHost);
+        
+        $scheme = $uri->getScheme();
+        $path = $uri->getPath();
+        $host = $uri->getHost();
+        
+        if ($scheme === '') {
+            $scheme = 'https';
+        }
+        
+        if ($host === '') {
+            if (str_contains($path, '.') && ! str_contains($path, '/')) {
+                $host = $path;
+                $path = '';
+            } else {
+                throw new \InvalidArgumentException('The given api host is invalid. You must define a host name');
+            }
+        }
+        
+        $this->apiHost = rtrim($scheme . '://' . $host . '/' . ltrim($path, '/'), '/');
+        
+        return $this;
     }
     
     /**
@@ -66,5 +129,25 @@ class ApiSiteConfigurator implements NoDiInterface
     public function page(): PageConfigurator
     {
         return $this->pageConfigurator;
+    }
+    
+    /**
+     * Access to the list of routing options and route configuration
+     *
+     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator
+     */
+    public function routing(): RoutingConfigurator
+    {
+        return $this->routingConfigurator;
+    }
+    
+    /**
+     * Persists the local site configuration into the given state object
+     *
+     * @param   \Neunerlei\Configuration\State\ConfigState  $state
+     */
+    public function finish(ConfigState $state): void
+    {
+        $state->set('apiHost', $this->apiHost);
     }
 }

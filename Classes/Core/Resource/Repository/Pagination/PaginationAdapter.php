@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.22 at 00:16
+ * Last modified: 2021.05.31 at 13:49
  */
 
 declare(strict_types=1);
@@ -99,14 +99,11 @@ class PaginationAdapter implements PaginatorInterface
      */
     public function getUrl($page)
     {
-        // Todo to implement this we should add implement the resource routing first
+        if (is_string($this->pagination->paginationLink)) {
+            return str_replace('___pageNumber___', (string)$page, $this->pagination->paginationLink);
+        }
+        
         return (string)$page;
-
-//        $q = parse_query($this->link->getQuery());
-//        $q["page[number]"] = $page;
-//        $q = build_query($q);
-//
-//        return (string)$this->link->withQuery($q);
     }
     
 }

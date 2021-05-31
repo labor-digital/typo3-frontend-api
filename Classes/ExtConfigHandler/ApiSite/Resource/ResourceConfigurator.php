@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 18:27
+ * Last modified: 2021.05.31 at 13:31
  */
 
 declare(strict_types=1);
@@ -24,7 +24,11 @@ namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource;
 
 
 use LaborDigital\T3fa\Core\Resource\Query\Parser;
+use LaborDigital\T3fa\Core\Resource\Route\DefaultResourceController;
+use LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface;
+use LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\TransformerRegistrationTrait;
 use Neunerlei\Options\Options;
@@ -32,6 +36,8 @@ use Neunerlei\Options\Options;
 class ResourceConfigurator
 {
     use TransformerRegistrationTrait;
+    
+    // @todo implement Cache options trait
     
     /**
      * The unique name of this resource type
@@ -46,6 +52,13 @@ class ResourceConfigurator
      * @var string
      */
     protected $resourceClass;
+    
+    /**
+     * The api controller class that is used to handle the route requests for this resource
+     *
+     * @var string
+     */
+    protected $controllerClass = DefaultResourceController::class;
     
     /**
      * Optional options that may have been provided when the resource was registered
@@ -386,13 +399,46 @@ class ResourceConfigurator
     }
     
     /**
+     * Returns the currently configured controller class to handle this resources api requests
+     *
+     * @return string
+     */
+    public function getControllerClass(): string
+    {
+        return $this->controllerClass;
+    }
+    
+    /**
+     * Allows you to override the api controller class that is used to resolve this resource
+     *
+     * @param   string  $controllerClass  The class must implement the ResourceControllerInterface
+     *
+     * @see \LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface
+     * @see DefaultResourceController
+     */
+    public function setControllerClass(string $controllerClass): self
+    {
+        if (! class_exists($controllerClass)) {
+            throw new \InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class does not exist');
+        }
+        
+        if (! in_array(ResourceControllerInterface::class, class_implements($controllerClass), true)) {
+            throw new \InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class has to implement the required interface: "' . ResourceControllerInterface::class . '"');
+        }
+        
+        $this->controllerClass = $controllerClass;
+        
+        return $this;
+    }
+    
+    /**
      * Provides the collected configuration to the provided storage lists
      *
      * @param   TransformerConfigurator  $transformerCollector
      * @param   array                    $types
      * @param   array                    $classMap
      */
-    public function finish(TransformerConfigurator $transformerCollector, array &$types, array &$classMap): void
+    public function finish(ApiSiteConfigurator $configurator, array &$types, array &$classMap): void
     {
         $query = Parser::parse($this->defaultQuery);
         if ($this->pageSize !== null) {
@@ -417,14 +463,60 @@ class ResourceConfigurator
             array_fill_keys($this->classes, $this->resourceType)
         );
         
+        $this->finishTransformerConfig($configurator->transformer());
+        $this->finishRoutes($configurator->routing());
+    }
+    
+    /**
+     * Injects the locally configured transformer data into the transformer configuration object
+     *
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator  $configurator
+     */
+    protected function finishTransformerConfig(TransformerConfigurator $configurator): void
+    {
         foreach ($this->transformers as $args) {
-            $transformerCollector->registerTransformer($args[0], $args[1] ?? $this->classes);
+            $configurator->registerTransformer($args[0], $args[1] ?? $this->classes);
         }
         foreach ($this->postProcessors as $args) {
-            $transformerCollector->registerPostProcessor($args[0], $args[1] ?? $this->classes);
+            $configurator->registerPostProcessor($args[0], $args[1] ?? $this->classes);
         }
         foreach ($this->properties as $target => $args) {
-            $transformerCollector->registerPropertyAccess($target, ...array_values($args));
+            $configurator->registerPropertyAccess($target, ...array_values($args));
         }
+    }
+    
+    /**
+     * Injects the required routes into the route configurator
+     *
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator  $configurator
+     */
+    protected function finishRoutes(RoutingConfigurator $configurator): void
+    {
+        $group = $configurator->routes('/resources/' . $this->getResourceType());
+        
+        // Single
+        $group->get('/{id}', [$this->controllerClass, 'singleAction'])
+            // @todo pass cache options along
+              ->setName('resource-' . $this->getResourceType() . '-single')
+              ->setAttribute('resourceType', $this->getResourceType());
+        
+        // Single related
+        $group->get('/{id}/{related}', [$this->controllerClass, 'relationAction'])
+            // @todo pass cache options along
+              ->setName('resource-' . $this->getResourceType() . '-relation')
+              ->setAttribute('resourceType', $this->getResourceType());
+        
+        // Relationships
+        $group->get('/{id}/relationships/{relationship}', [$this->controllerClass, 'relationshipAction'])
+            // @todo pass cache options along
+              ->setName('resource-' . $this->getResourceType() . '-relationships')
+              ->setAttribute('resourceType', $this->getResourceType());
+        
+        // Collection
+        $group->get('/', [$this->controllerClass, 'collectionAction'])
+            // @todo pass cache options along
+              ->setName('resource-' . $this->getResourceType() . '-collection')
+              ->setAttribute('resourceType', $this->getResourceType());
+        
     }
 }

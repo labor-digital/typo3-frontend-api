@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 19:10
+ * Last modified: 2021.05.31 at 11:57
  */
 
 declare(strict_types=1);
@@ -27,11 +27,13 @@ use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\AbstractResource;
 use LaborDigital\T3fa\Core\Resource\Exception\InvalidIdException;
+use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
 use LaborDigital\T3fa\Resource\Entity\PageEntity;
+use LaborDigital\T3fa\Resource\Factory\Page\PageResourceFactory;
 use LaborDigital\T3fa\Resource\PostProcessor\TestPostProcessor;
 use LaborDigital\T3fa\Resource\Transformer\PageTransformer;
 
@@ -42,9 +44,15 @@ class Page extends AbstractResource
      */
     protected $context;
     
-    public function __construct(TypoContext $context)
+    /**
+     * @var \LaborDigital\T3fa\Resource\Factory\Page\PageResourceFactory
+     */
+    protected $factory;
+    
+    public function __construct(TypoContext $context, PageResourceFactory $factory)
     {
         $this->context = $context;
+        $this->factory = $factory;
     }
     
     /**
@@ -70,10 +78,10 @@ class Page extends AbstractResource
             $id = $this->context->pid()->getCurrent();
         }
         
-        // @todo change this
-        $context->setMeta(['foo' => 'bar']);
-        
-        return new PageEntity($id);
+        return $this->factory->make(
+            (int)$id,
+            $this->context->language()->getCurrentFrontendLanguage(),
+            $this->context->site()->getCurrent());
     }
     
     /**
@@ -81,7 +89,7 @@ class Page extends AbstractResource
      */
     public function findCollection(ResourceQuery $resourceQuery, ResourceCollectionContext $context)
     {
-        // TODO: Implement findCollection() method.
+        throw new NoCollectionException($context->getResourceType());
     }
     
 }

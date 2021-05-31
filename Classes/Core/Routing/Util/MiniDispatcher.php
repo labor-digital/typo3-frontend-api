@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 12:54
+ * Last modified: 2021.05.31 at 10:15
  */
 
 declare(strict_types=1);
@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace LaborDigital\T3fa\Core\Routing\Util;
 
+use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -37,8 +38,12 @@ use RuntimeException;
  */
 class MiniDispatcher implements RequestHandlerInterface
 {
+    use ContainerAwareTrait;
+    
     /**
-     * @var MiddlewareInterface[]
+     * The list of registered middleware instances or middleware class names
+     *
+     * @var string[]|MiddlewareInterface[]
      */
     public $middlewares = [];
     
@@ -48,6 +53,12 @@ class MiniDispatcher implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $middleware = array_shift($this->middlewares);
+        if (is_string($middleware)) {
+            $middleware = $this->getContainer()->has($middleware)
+                ? $this->getService($middleware)
+                : $this->makeInstance($middleware);
+        }
+        
         if (! is_object($middleware)) {
             throw new RuntimeException('No more middlewares left');
         }

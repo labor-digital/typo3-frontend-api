@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 18:51
+ * Last modified: 2021.05.31 at 11:55
  */
 
 declare(strict_types=1);
@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page;
 
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
+use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\Link\PageLinkProviderInterface;
 
 class PageConfigurator extends AbstractExtConfigConfigurator
 {
@@ -41,6 +42,13 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      * @var array
      */
     protected $rootLineDataProviders = [];
+    
+    /**
+     * The list of link provider classes that generate additional links when the "page" resource is retrieved
+     *
+     * @var array
+     */
+    protected $linkProviders = [];
     
     /**
      * Adds the given fields to the list of additional "pages" table fields which will be added to root line resource entries
@@ -133,4 +141,51 @@ class PageConfigurator extends AbstractExtConfigConfigurator
         return $this->rootLineDataProviders;
     }
     
+    /**
+     * Allows you to register a static link provider. The provider is called once for every page
+     * It allows you to add additional links to the "link" node of the "page" resource. This can be used
+     * to provide static urls for your project. The given class has to implement the SiteLinkProviderInterface.
+     *
+     * @param   string  $linkProviderClass  The class to register as link provider
+     *
+     * @return $this
+     *
+     * @see PageLinkProviderInterface
+     */
+    public function registerLinkProvider(string $linkProviderClass): self
+    {
+        if (! class_exists($linkProviderClass) ||
+            ! in_array(PageLinkProviderInterface::class, class_implements($linkProviderClass), true)) {
+            throw new \InvalidArgumentException(
+                'Invalid link provider "' . $linkProviderClass . '" given! The class has to exist, and implement: "' .
+                PageLinkProviderInterface::class . '"');
+        }
+        $this->linkProviders[md5($linkProviderClass)] = $linkProviderClass;
+        
+        return $this;
+    }
+    
+    /**
+     * Removes a previously registered link provider class from the list
+     *
+     * @param   string  $linkProviderClass
+     *
+     * @return $this
+     */
+    public function removeLinkProvider(string $linkProviderClass): self
+    {
+        unset($this->linkProviders[md5($linkProviderClass)]);
+        
+        return $this;
+    }
+    
+    /**
+     * Returns the list of all registered link provider classes
+     *
+     * @return array
+     */
+    public function getLinkProviders(): array
+    {
+        return array_values($this->linkProviders);
+    }
 }

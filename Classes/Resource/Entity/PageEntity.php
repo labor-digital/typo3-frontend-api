@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.07 at 09:47
+ * Last modified: 2021.05.31 at 10:50
  */
 
 declare(strict_types=1);
@@ -23,12 +23,11 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Resource\Entity;
 
 
-use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use TYPO3\CMS\Core\Site\Entity\SiteInterface;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
 class PageEntity
 {
-    use ContainerAwareTrait;
-    
     /**
      * The page id we hold the representation for
      *
@@ -43,9 +42,33 @@ class PageEntity
      */
     protected $rootLine;
     
-    public function __construct(int $id)
+    /**
+     * The language object used to generate the site
+     *
+     * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage
+     */
+    protected $language;
+    
+    /**
+     * The site which contains this page
+     *
+     * @var \TYPO3\CMS\Core\Site\Entity\SiteInterface
+     */
+    protected $site;
+    
+    /**
+     * The list of links relevant to this page
+     *
+     * @var array
+     */
+    protected $links;
+    
+    public function __construct(int $id, SiteLanguage $language, SiteInterface $site, array $links)
     {
         $this->id = $id;
+        $this->language = $language;
+        $this->site = $site;
+        $this->links = $links;
     }
     
     /**
@@ -58,8 +81,35 @@ class PageEntity
         return $this->id;
     }
     
-    public function getRootLine(): array
+    /**
+     * Returns the language object used to generate the site
+     *
+     * @return \TYPO3\CMS\Core\Site\Entity\SiteLanguage
+     */
+    public function getLanguage(): SiteLanguage
     {
-        return [];
+        return $this->language;
     }
+    
+    /**
+     * Returns the site which contains this page
+     *
+     * @return \TYPO3\CMS\Core\Site\Entity\SiteInterface
+     */
+    public function getSite(): SiteInterface
+    {
+        return $this->site;
+    }
+    
+    /**
+     * Returns the list of links relevant to this page
+     *
+     * @return array
+     */
+    public function getLinks(): array
+    {
+        return $this->links;
+    }
+    
+    
 }

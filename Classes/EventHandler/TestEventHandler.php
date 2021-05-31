@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.25 at 10:57
+ * Last modified: 2021.05.28 at 20:27
  */
 
 declare(strict_types=1);
@@ -48,9 +48,10 @@ class TestEventHandler implements LazyEventSubscriberInterface
     public function run()
     {
         $repo = $this->getService(ResourceRepository::class);
-
+        
+        dbge($repo->getResource('page', '/job-finden/job/45/asdf'));
 //        dbge($repo->getCollection('proxy', ['filter' => ['title' => 'hello'], 'page' => ['number' => 2]])->asArray());
-        dbg($repo->getResource('proxy', 2)->asArray(['includes' => true]));
+        dbg($repo->getResource('proxy', 2)->asArray(['include' => true]));
         dbge($repo->getCollection('news', [
             'filter' => [
                 'dateRange' => [
@@ -62,7 +63,7 @@ class TestEventHandler implements LazyEventSubscriberInterface
                 'size' => 0,
                 'number' => 1,
             ],
-        ])->asArray(['includes' => true]));
+        ])->asArray(['include' => true]));
         
         $factory = $this->getService(TransformerFactory::class);
         dbge($factory->getTransformer(new PageEntity(1)));

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 23:21
+ * Last modified: 2021.05.31 at 14:08
  */
 
 declare(strict_types=1);
@@ -78,17 +78,14 @@ abstract class AbstractResourceTransformer implements ResourceTransformerInterfa
     protected function autoIncludeCollection($value): Collection
     {
         if ($value instanceof ResourceCollection) {
-            return $value->getCollection();
+            return $value->getFractalCollection();
         }
         
-        $resourceFacet = $this->getTypoContext()->resource();
+        if ($value instanceof Collection) {
+            return $value;
+        }
         
-        $resourceType = $resourceFacet->getResourceType($value);
-        $resourceFacet->$factory = $this->TransformerFactory();
-        
-        return $this->collection($value,
-            $factory->getTransformer()->getConcreteTransformer($value),
-            $factory->getConfigFor($value)->resourceType);
+        return $this->getResourceFactory()->makeResourceCollection($value)->getFractalCollection();
     }
     
     /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.25 at 10:11
+ * Last modified: 2021.05.31 at 13:23
  */
 
 declare(strict_types=1);
@@ -31,6 +31,7 @@ use League\Fractal\Manager;
 use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\Serializer\DataArraySerializer;
 use League\Fractal\Serializer\JsonApiSerializer;
+use League\Fractal\Serializer\SerializerAbstract;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -58,6 +59,13 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
     protected $meta;
     
     /**
+     * The api base url for this resource element
+     *
+     * @var string
+     */
+    protected $baseUrl;
+    
+    /**
      * The list of transformed variants by their unique options key
      *
      * @var array
@@ -71,12 +79,19 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
      */
     protected $transformerFactory;
     
-    public function __construct(string $resourceType, $raw, ?array $meta, TransformerFactory $transformerFactory)
+    public function __construct(
+        string $resourceType,
+        $raw,
+        ?array $meta,
+        string $baseUrl,
+        TransformerFactory $transformerFactory
+    )
     {
         $this->resourceType = $resourceType;
         $this->raw = $raw;
         $this->meta = $meta;
         $this->transformerFactory = $transformerFactory;
+        $this->baseUrl = $baseUrl;
     }
     
     /**
@@ -113,7 +128,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
      * Returns the transformed value as an array
      *
      * @param   array  $options  Options for the transformation process
-     *                           - includes array|string|true: Defines which sub-resources should be included.
+     *                           - include array|string|true: Defines which sub-resources should be included.
      *                           By default none are included,
      *                           if true is given ALL sub-resources will be included.
      *                           Can be an array of keys or sub.keys.as.paths that match the json:api schema
@@ -141,7 +156,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
         $accessCheck = TransformerScope::$accessCheck;
         
         $options = Options::make($options, [
-            'includes' => [
+            'include' => [
                 'type' => ['array', 'true', 'null', 'string'],
                 'default' => null,
             ],
@@ -168,20 +183,27 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
             
             TransformerScope::$accessCheck = ! $options['noAccessCheck'];
             
-            if ($options['includes'] === true) {
+            if ($options['include'] === true) {
                 TransformerScope::$allIncludes = true;
-            } elseif (! empty($options['includes'])) {
-                $fractal->parseIncludes($options['includes']);
+            } elseif (! empty($options['include'])) {
+                $fractal->parseIncludes($options['include']);
             }
             
             if (! empty($options['fields'])) {
                 $fractal->parseFieldsets($options['fields']);
             }
             
-            /** @noinspection PhpParamsInspection */
-            $fractal->setSerializer(GeneralUtility::makeInstance(
-                $options['jsonApi'] ? JsonApiSerializer::class : DataArraySerializer::class
-            ));
+            if ($options['jsonApi']) {
+                $serializer = GeneralUtility::makeInstance(
+                    JsonApiSerializer::class, $this->baseUrl
+                );
+            } else {
+                $serializer = GeneralUtility::makeInstance(DataArraySerializer::class);
+            }
+            
+            if ($serializer instanceof SerializerAbstract) {
+                $fractal->setSerializer($serializer);
+            }
             
             return $this->transformed[$storageKey]
                 = $fractal->createData($this->getFractalElement())->toArray();

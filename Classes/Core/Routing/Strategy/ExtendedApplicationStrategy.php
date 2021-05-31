@@ -14,26 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 20:09
+ * Last modified: 2021.05.28 at 20:08
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\Core\Resource\Route;
+namespace LaborDigital\T3fa\Core\Routing\Strategy;
 
 
-use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
+use League\Route\Route;
+use League\Route\Strategy\ApplicationStrategy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface ResourceControllerInterface extends PublicServiceInterface
+class ExtendedApplicationStrategy extends ApplicationStrategy
 {
-    public function singleAction(ServerRequestInterface $request, array $vars): ResponseInterface;
+    public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
+    {
+        $controller = $route->getCallable($this->getContainer());
+        
+        $vars = array_merge(
+            $request->getAttribute('staticRouteAttributes', []),
+            $route->getVars()
+        );
+        
+        $response = $controller($request, $vars);
+        
+        return $this->decorateResponse($response);
+    }
     
-    public function collectionAction(ServerRequestInterface $request, array $vars): ResponseInterface;
-    
-    public function relationshipAction(ServerRequestInterface $request, array $vars): ResponseInterface;
-    
-    public function relationAction(ServerRequestInterface $request, array $vars): ResponseInterface;
 }

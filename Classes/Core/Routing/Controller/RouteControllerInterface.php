@@ -14,26 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 20:09
+ * Last modified: 2021.05.28 at 16:25
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\Core\Resource\Route;
+namespace LaborDigital\T3fa\Core\Routing\Controller;
 
 
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
-interface ResourceControllerInterface extends PublicServiceInterface
+interface RouteControllerInterface extends PublicServiceInterface
 {
-    public function singleAction(ServerRequestInterface $request, array $vars): ResponseInterface;
-    
-    public function collectionAction(ServerRequestInterface $request, array $vars): ResponseInterface;
-    
-    public function relationshipAction(ServerRequestInterface $request, array $vars): ResponseInterface;
-    
-    public function relationAction(ServerRequestInterface $request, array $vars): ResponseInterface;
+
 }

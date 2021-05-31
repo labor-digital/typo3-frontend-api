@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.06 at 12:25
+ * Last modified: 2021.05.28 at 21:03
  */
 
 declare(strict_types=1);
@@ -23,9 +23,73 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Resource\Route;
 
 
+use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Core\Resource\Exception\InvalidConfigException;
+use LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository;
 use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
+use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AbstractResourceController implements ResourceControllerInterface
 {
     use ResponseFactoryTrait;
+    
+    /**
+     * @var \LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository
+     */
+    protected $resourceRepository;
+    
+    /**
+     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     */
+    protected $typoContext;
+    
+    public function __construct(ResourceRepository $resourceRepository, TypoContext $typoContext)
+    {
+        $this->resourceRepository = $resourceRepository;
+        $this->typoContext = $typoContext;
+    }
+    
+    /**
+     * Tries to extract the resource type from the given vars.
+     * Fails with an exception if no resource type was provided
+     *
+     * @param   array  $vars  The vars array provided to the controller action
+     *
+     * @return string
+     * @throws \LaborDigital\T3fa\Core\Resource\Exception\InvalidConfigException
+     */
+    protected function validateResourceType(array $vars): string
+    {
+        $resourceType = $this->typoContext->resource()->getResourceType($vars['resourceType'] ?? null);
+        
+        if ($resourceType === null) {
+            throw new InvalidConfigException('The route had no provided resource type');
+        }
+        
+        return $resourceType;
+    }
+    
+    /**
+     * Extracts possible "asArray" options from the request object and returns a prepared options array
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     *
+     * @return array
+     * @see \LaborDigital\T3fa\Core\Resource\Repository\AbstractResourceElement::asArray()
+     */
+    protected function convertRequestToAsArrayOptions(ServerRequestInterface $request): array
+    {
+        $params = $request->getQueryParams();
+        $options = ['jsonApi'];
+        
+        if (is_array($params['fields'] ?? null)) {
+            $options['fields'] = $params['fields'];
+        }
+        
+        if (is_string($params['include'] ?? null)) {
+            $options['include'] = $params['include'];
+        }
+        
+        return $options;
+    }
 }

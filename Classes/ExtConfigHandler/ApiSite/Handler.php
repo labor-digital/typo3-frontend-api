@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 17:53
+ * Last modified: 2021.05.31 at 13:10
  */
 
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
 
 
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigHandler;
+use LaborDigital\T3ba\ExtConfig\ExtConfigService;
 use LaborDigital\T3ba\ExtConfig\Interfaces\SiteBasedHandlerInterface;
 use LaborDigital\T3fa\ApiSite\Bundle\CategoryBundle;
 use LaborDigital\T3fa\ApiSite\Bundle\FileBundle;
@@ -32,6 +33,7 @@ use LaborDigital\T3fa\ApiSite\Bundle\ValueTransformerBundle;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
 use Neunerlei\Configuration\Handler\HandlerConfigurator;
 
@@ -49,6 +51,16 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
      * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator
      */
     protected $configurator;
+    
+    /**
+     * @var \LaborDigital\T3ba\ExtConfig\ExtConfigService
+     */
+    protected $extConfigService;
+    
+    public function __construct(ExtConfigService $extConfigService)
+    {
+        $this->extConfigService = $extConfigService;
+    }
     
     /**
      * @inheritDoc
@@ -70,6 +82,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
             [
                 $this->getInstanceWithoutDi(TransformerConfigurator::class),
                 $this->getInstanceWithoutDi(PageConfigurator::class),
+                $this->getInstanceWithoutDi(RoutingConfigurator::class),
             ]
         );
     }
@@ -84,21 +97,38 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         
         /** @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\BundleCollector $bundleCollector */
         $bundleCollector = $this->getInstanceWithoutDi(BundleCollector::class, [static::DEFAULT_BUNDLES]);
-        call_user_func([$class, 'registerBundles'], $bundleCollector);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $class::registerBundles($bundleCollector);
         
         // Register resources
         $resourceCollector = $this->getInstanceWithoutDi(ResourceCollector::class, [$context->getSiteKey()]);
         foreach ($bundleCollector->getAll() as $bundleClass) {
-            call_user_func([$bundleClass, 'registerResources'], $resourceCollector, $context, $bundleCollector->getOptions($bundleClass));
+            $this->runBundleInNamespace($bundleClass, function () use ($bundleClass, $resourceCollector, $context, $bundleCollector) {
+                $bundleClass::registerResources(
+                    $resourceCollector,
+                    $context,
+                    $bundleCollector->getOptions($bundleClass)
+                );
+            });
         }
-        call_user_func([$class, 'registerResources'], $resourceCollector, $context);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $class::registerResources($resourceCollector, $context);
         $this->handleResources($resourceCollector);
         
         // Execute configureSite methods
         foreach ($bundleCollector->getAll() as $bundleClass) {
-            call_user_func([$bundleClass, 'configureSite'], $this->configurator, $context, $bundleCollector->getOptions($bundleClass));
+            $this->runBundleInNamespace($bundleClass, function () use ($bundleClass, $context, $bundleCollector) {
+                $bundleClass::configureSite(
+                    $this->configurator,
+                    $context,
+                    $bundleCollector->getOptions($bundleClass)
+                );
+            });
+            
+            $bundleClass::configureSite($this->configurator, $context, $bundleCollector->getOptions($bundleClass));
         }
-        call_user_func([$class, 'configureSite'], $this->configurator, $context);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $class::configureSite($this->configurator, $context);
         
     }
     
@@ -125,9 +155,9 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
                 $options,
             ]);
             
-            call_user_func([$class, 'configure'], $configurator, $context);
+            $class::configure($configurator, $context);
             
-            $configurator->finish($this->configurator->transformer(), $types, $classMap);
+            $configurator->finish($this->configurator, $types, $classMap);
         }
         
         $context->getState()
@@ -146,6 +176,28 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         
         $state->useNamespace('t3fa.transformer', [$this->configurator->transformer(), 'finish']);
         $state->useNamespace('t3fa.page', [$this->configurator->page(), 'finish']);
+        $state->useNamespace('t3fa.routing', [$this->configurator->routing(), 'finish']);
+        
+        $state->useNamespace('t3fa.site', [$this->configurator, 'finish']);
+    }
+    
+    /**
+     * Internal helper to run the given callback in the namespace context for the bundle class
+     *
+     * @param   string    $bundleClass
+     * @param   callable  $callback
+     *
+     * @return \LaborDigital\T3ba\ExtConfig\ExtConfigContext|\Neunerlei\Configuration\Loader\ConfigContext
+     */
+    protected function runBundleInNamespace(string $bundleClass, callable $callback)
+    {
+        $namespace = $this->extConfigService->resolveNamespaceForClass($bundleClass);
+        
+        if ($namespace === null) {
+            return $callback();
+        }
+        
+        return $this->context->runWithNamespace($namespace, $callback);
     }
     
 }

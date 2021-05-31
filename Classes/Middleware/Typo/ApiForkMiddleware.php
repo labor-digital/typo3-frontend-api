@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 17:44
+ * Last modified: 2021.05.28 at 21:00
  */
 
 declare(strict_types=1);
@@ -67,7 +67,7 @@ class ApiForkMiddleware implements MiddlewareInterface, LoggerAwareInterface
     protected function forkRequest(ServerRequestInterface $request): ResponseInterface
     {
         return $this->getService(ErrorHandler::class)->handleErrorsIn(function () use ($request) {
-            $this->getService(ApiBootstrap::class)->boot($request);
+            return $this->getService(ApiBootstrap::class)->boot($request);
         }, $request);
     }
 }

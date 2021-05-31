@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 23:43
+ * Last modified: 2021.05.31 at 14:08
  */
 
 declare(strict_types=1);
@@ -32,6 +32,7 @@ use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
+use Psr\Http\Message\ServerRequestInterface;
 
 class ResourceFactory implements PublicServiceInterface
 {
@@ -54,6 +55,13 @@ class ResourceFactory implements PublicServiceInterface
      * @var \LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator
      */
     protected $paginator;
+    
+    /**
+     * The resolved base urls by their matching site identifiers
+     *
+     * @var array
+     */
+    protected $baseUrlCache = [];
     
     public function __construct(TransformerFactory $transformerFactory, TypoContext $context, Paginator $paginator)
     {
@@ -84,10 +92,21 @@ class ResourceFactory implements PublicServiceInterface
         
         return $this->makeInstance(
             static::$resourceItemClass,
-            [$resourceType, $raw, $meta, $this->transformerFactory]
+            [$resourceType, $raw, $meta, $this->makeBaseUrl(), $this->transformerFactory]
         );
     }
     
+    /**
+     * Creates a new resource collection instance
+     *
+     * @param   iterable         $raw           The raw data that should be passed into the collection
+     * @param   string|null      $resourceType  The unique resource type name for the item to create.
+     *                                          If this is NULL or not provided, the type is automatically resolved
+     * @param   array|null       $meta          Optional metadata that should be stored for this item
+     * @param   Pagination|null  $pagination    Optional pagination definition to be passed to the collection
+     *
+     * @return \LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection
+     */
     public function makeResourceCollection(iterable $raw, ?string $resourceType = null, ?array $meta = null, ?Pagination $pagination = null): ResourceCollection
     {
         if ($raw instanceof ResourceCollection) {
@@ -106,16 +125,18 @@ class ResourceFactory implements PublicServiceInterface
         
         // Create a fallback pagination object
         if ($pagination === null) {
-            [$_, $pagination] = $this->paginator->paginate(
+            [, $pagination] = $this->paginator->paginate(
                 $raw, 1, $this->paginator->getItemCount($raw), null
             );
-            
-            dbge('fallback pagination', $pagination);
+        }
+        
+        if (! is_string($pagination->paginationLink)) {
+            $pagination->paginationLink = $this->makeBaseUrl() . '/' . $resourceType . '?' . $this->makePaginationUrl();
         }
         
         return $this->makeInstance(
             static::$resourceCollectionClass,
-            [$resourceType, $raw, $meta, $pagination, $this, $this->transformerFactory]
+            [$resourceType, $raw, $meta, $this->makeBaseUrl(), $pagination, $this, $this->transformerFactory]
         );
     }
     
@@ -146,5 +167,67 @@ class ResourceFactory implements PublicServiceInterface
         $parts = array_map('ucfirst', array_filter(['auto', array_shift($parts), array_pop($parts)]));
         
         return lcfirst(implode($parts));
+    }
+    
+    /**
+     * Builds the base url for all api links
+     *
+     * @return string
+     */
+    protected function makeBaseUrl(): string
+    {
+        $siteIdentifier = $this->context->site()->getCurrent()->getIdentifier();
+        if (isset($this->baseUrlCache[$siteIdentifier])) {
+            return $this->baseUrlCache[$siteIdentifier];
+        }
+        
+        $host = $this->context->t3fa()->getConfigValue('site.apiHost');
+        
+        if (! is_string($host)) {
+            $request = $this->getApiRequest();
+            if (! $request) {
+                return $this->baseUrlCache[$siteIdentifier] = '';
+            }
+            
+            $uri = $request->getUri();
+            $host = $uri->getScheme() . '://' . $uri->getHost();
+        }
+        
+        $baseUri = $this->context->config()->getConfigValue('t3fa.routing.apiPath');
+        
+        return $this->baseUrlCache[$siteIdentifier] = $host . '/' . trim($baseUri, '/') . '/resources';
+    }
+    
+    /**
+     * Builds the pagination url of all current query parameters
+     *
+     * @return string
+     */
+    protected function makePaginationUrl(): string
+    {
+        $request = $this->getApiRequest();
+        if (! $request) {
+            return '';
+        }
+        
+        $params = $request->getQueryParams();
+        $params['page']['number'] = '___pageNumber___';
+        
+        return urldecode(http_build_query($params));
+    }
+    
+    /**
+     * Internal helper to retrieve the correct request instance
+     *
+     * @return \Psr\Http\Message\ServerRequestInterface|null
+     */
+    protected function getApiRequest(): ?ServerRequestInterface
+    {
+        $request = $this->context->request()->getRootRequest();
+        if ($request && $request->getAttribute('originalRequest') !== null) {
+            return $request->getAttribute('originalRequest');
+        }
+        
+        return $request;
     }
 }

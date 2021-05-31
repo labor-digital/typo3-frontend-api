@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 14:41
+ * Last modified: 2021.05.31 at 14:07
  */
 
 declare(strict_types=1);
@@ -92,11 +92,10 @@ class DefaultResourceTransformer extends AbstractResourceTransformer
         
         $value = $arguments[0];
         $property = lcfirst(substr($name, 7));
-        $schema = $this->getSchema($value);
         
-        $returnValue = $schema->getValue($value, $property);
+        $returnValue = $this->getSchema($value)->getValue($value, $property);
         
-        if ($schema->isIterable) {
+        if ($this->getSchema($returnValue)->isIterable) {
             return $this->autoIncludeCollection($returnValue);
         }
         

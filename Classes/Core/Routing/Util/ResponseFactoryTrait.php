@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.06 at 12:22
+ * Last modified: 2021.05.31 at 13:53
  */
 
 declare(strict_types=1);
@@ -123,7 +123,12 @@ trait ResponseFactoryTrait
         $response = $this->getResponse($code);
         $response = $response->withAddedHeader('Content-Type', 'application/vnd.api+json');
         
-        return $response->withBody(Utils::streamFor(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
+        /** @noinspection JsonEncodingApiUsageInspection */
+        return $response->withBody(Utils::streamFor(json_encode($data,
+            TypoContext::getInstance()->env()->isFeDebug()
+                ? JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
+                : JSON_THROW_ON_ERROR
+        )));
     }
     
     /**

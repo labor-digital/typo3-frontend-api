@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 20:08
+ * Last modified: 2021.05.31 at 12:25
  */
 
 declare(strict_types=1);
@@ -28,6 +28,7 @@ use LaborDigital\T3fa\Core\Resource\Transformer\AbstractResourceTransformer;
 use LaborDigital\T3fa\Resource\Entity\PageEntity;
 use LaborDigital\T3fa\Resource\PageRootLine;
 use League\Fractal\Resource\ResourceAbstract;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
 class PageTransformer extends AbstractResourceTransformer
 {
@@ -50,10 +51,19 @@ class PageTransformer extends AbstractResourceTransformer
      */
     public function transform($value): array
     {
+        if (! $value instanceof PageEntity) {
+            return ['id' => null];
+        }
+        
         // @todo finish this
         return [
             'id' => $value->getId(),
-            'page' => ':)',
+            'site' => $value->getSite()->getIdentifier(),
+            'languages' => array_map(static function (SiteLanguage $language): string {
+                return $language->getTwoLetterIsoCode();
+            }, $value->getSite()->getAllLanguages()),
+            'language' => $value->getLanguage()->getTwoLetterIsoCode(),
+            'links' => $value->getLinks(),
         ];
     }
     

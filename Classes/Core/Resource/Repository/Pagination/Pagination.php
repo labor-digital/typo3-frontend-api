@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 19:23
+ * Last modified: 2021.05.31 at 13:49
  */
 
 declare(strict_types=1);
@@ -61,4 +61,12 @@ class Pagination implements NoDiInterface
      * @var int
      */
     public $itemCount;
+    
+    /**
+     * Internal property to store the pagination request query string for the fractal paginatior
+     *
+     * @internal
+     * @var string|null
+     */
+    public $paginationLink;
 }
