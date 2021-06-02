@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:40
+ * Last modified: 2021.06.02 at 21:30
  */
 
 declare(strict_types=1);
@@ -23,7 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Api\Route;
 
 
-use LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException;
+use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
