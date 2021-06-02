@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 17:58
+ * Last modified: 2021.06.02 at 21:34
  */
 
 declare(strict_types=1);
@@ -118,6 +118,10 @@ class ErrorHandler implements SingletonInterface, LoggerAwareInterface, PublicSe
             while (ob_get_level() >= $level) {
                 ob_end_clean();
             }
+            
+            // We have to reset the response code because otherwise
+            // our response code in the respoonse object will not be emitted correctly
+            http_response_code(200);
             
             // Allow cors requests in development environments
             if ($isDev) {
