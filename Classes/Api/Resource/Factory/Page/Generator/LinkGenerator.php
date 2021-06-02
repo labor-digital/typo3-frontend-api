@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:23
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -29,7 +29,7 @@ use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\Tsfe\TsfeService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\Link\PageLinkCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link\PageLinkCollector;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Seo\Canonical\CanonicalGenerator;
 

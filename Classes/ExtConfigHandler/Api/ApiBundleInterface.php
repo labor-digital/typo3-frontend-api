@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 
 /**
  * Interface ApiBundleInterface
@@ -48,12 +48,12 @@ interface ApiBundleInterface extends NoDiInterface
     /**
      * MUST apply the bundle configuration to the site configurator
      *
-     * @param   ApiSiteConfigurator  $configurator  The configurator to add the setup to
-     * @param   SiteConfigContext    $context       Additional context information about the site to configure
-     * @param   array                $options       Optional options that can be provided in the registerBundles() method
+     * @param   ApiConfigurator    $configurator  The configurator to add the setup to
+     * @param   SiteConfigContext  $context       Additional context information about the site to configure
+     * @param   array              $options       Optional options that can be provided in the registerBundles() method
      *
-     * @see ConfigureApiSiteInterface::registerBundles() on how to register a bundle
+     * @see ConfigureApiInterface::registerBundles() on how to register a bundle
      */
-    public static function configureSite(ApiSiteConfigurator $configurator, SiteConfigContext $context, array $options): void;
+    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context, array $options): void;
     
 }

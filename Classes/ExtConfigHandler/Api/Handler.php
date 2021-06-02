@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:29
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigHandler;
@@ -31,11 +31,11 @@ use LaborDigital\T3fa\Api\Bundle\ContentBundle;
 use LaborDigital\T3fa\Api\Bundle\FileBundle;
 use LaborDigital\T3fa\Api\Bundle\PageBundle;
 use LaborDigital\T3fa\Api\Bundle\ValueTransformerBundle;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
 use Neunerlei\Configuration\Handler\HandlerConfigurator;
 
 class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterface
@@ -50,7 +50,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         ];
     
     /**
-     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator
      */
     protected $configurator;
     
@@ -69,8 +69,8 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
      */
     public function configure(HandlerConfigurator $configurator): void
     {
-        $configurator->registerInterface(ConfigureApiSiteInterface::class);
-        $configurator->registerDefaultConfigClass(DefaultApiSiteConfig::class);
+        $configurator->registerInterface(ConfigureApiInterface::class);
+        $configurator->registerDefaultConfigClass(DefaultApiConfig::class);
         $this->registerDefaultLocation($configurator);
     }
     
@@ -80,7 +80,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
     public function prepare(): void
     {
         $this->configurator = $this->getInstanceWithoutDi(
-            ApiSiteConfigurator::class,
+            ApiConfigurator::class,
             [
                 $this->getInstanceWithoutDi(TransformerConfigurator::class),
                 $this->getInstanceWithoutDi(PageConfigurator::class),
@@ -97,7 +97,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         /** @var \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext $context */
         $context = $this->context;
         
-        /** @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\BundleCollector $bundleCollector */
+        /** @var \LaborDigital\T3fa\ExtConfigHandler\Api\BundleCollector $bundleCollector */
         $bundleCollector = $this->getInstanceWithoutDi(BundleCollector::class, [static::DEFAULT_BUNDLES]);
         /** @noinspection PhpUndefinedMethodInspection */
         $class::registerBundles($bundleCollector);
@@ -137,7 +137,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
     /**
      * Handles the configuration of all registered resource classes
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector  $collector
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector  $collector
      */
     protected function handleResources(ResourceCollector $collector): void
     {

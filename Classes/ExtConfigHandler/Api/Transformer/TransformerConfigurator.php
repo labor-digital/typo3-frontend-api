@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:21
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Transformer;
 
 
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerInterface;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\TransformerRegistrationTrait;
+use LaborDigital\T3fa\ExtConfigHandler\Api\TransformerRegistrationTrait;
 use Neunerlei\Configuration\State\ConfigState;
 
 class TransformerConfigurator extends AbstractExtConfigConfigurator

@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 20:06
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page;
 
 
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;

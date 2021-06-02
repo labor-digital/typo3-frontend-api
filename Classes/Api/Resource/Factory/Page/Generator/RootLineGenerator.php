@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:24
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -28,7 +28,7 @@ use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 use LaborDigital\T3fa\Event\Resource\Page\PageRootLineFilterEvent;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\RootLineDataProviderInterface;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Page\RootLineDataProviderInterface;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
 

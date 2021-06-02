@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:26
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -28,7 +28,7 @@ use LaborDigital\T3fa\Core\Resource\AbstractResource;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
 
 class PageContentResource extends AbstractResource
 {

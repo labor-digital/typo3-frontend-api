@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 19:10
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -28,15 +28,15 @@ use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
 
 interface ResourceInterface extends PublicServiceInterface
 {
     /**
      * Allows this resource to tell the system how it should be handled correctly.
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator  $configurator
-     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext                   $context
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator  $configurator
+     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext               $context
      */
     public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void;
     

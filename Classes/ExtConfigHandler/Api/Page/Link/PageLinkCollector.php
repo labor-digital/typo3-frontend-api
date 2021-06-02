@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 18:01
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\Link;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link;
 
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;

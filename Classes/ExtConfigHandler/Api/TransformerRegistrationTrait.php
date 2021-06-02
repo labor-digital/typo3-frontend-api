@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.16 at 21:50
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use InvalidArgumentException;

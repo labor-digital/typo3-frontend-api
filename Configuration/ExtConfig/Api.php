@@ -14,34 +14,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:37
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\Configuration\ExtConfig;
 
-
-use LaborDigital\T3ba\Core\Di\NoDiInterface;
+// @todo remove this when done
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\BundleCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\ConfigureApiInterface;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 
-class DefaultApiSiteConfig implements ConfigureApiSiteInterface, NoDiInterface
+class Api implements ConfigureApiInterface
 {
     /**
      * @inheritDoc
      */
-    public static function registerBundles(BundleCollector $collector): void { }
+    public static function registerBundles(BundleCollector $collector): void
+    {
+    }
     
     /**
      * @inheritDoc
      */
-    public static function registerResources(ResourceCollector $collector, SiteConfigContext $context): void { }
+    public static function registerResources(ResourceCollector $collector, SiteConfigContext $context): void
+    {
+    }
     
     /**
      * @inheritDoc
      */
-    public static function configureSite(ApiSiteConfigurator $configurator, SiteConfigContext $context): void { }
+    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context): void
+    {
+        // TODO: Implement configureSite() method.
+    }
     
 }

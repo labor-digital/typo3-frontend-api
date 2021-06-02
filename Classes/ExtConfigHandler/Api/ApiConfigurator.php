@@ -13,37 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 14:37
+ * Last modified: 2021.06.02 at 20:35
  */
 /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use GuzzleHttp\Psr7\Uri;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiCacheOption;
 use Neunerlei\Configuration\State\ConfigState;
 
-class ApiSiteConfigurator implements NoDiInterface
+class ApiConfigurator implements NoDiInterface
 {
     /**
-     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator
      */
     protected $transformerCollector;
     
     /**
-     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator
      */
     protected $pageConfigurator;
     
     /**
-     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator
      */
     protected $routingConfigurator;
     
@@ -146,7 +146,7 @@ class ApiSiteConfigurator implements NoDiInterface
     /**
      * Access to the list of globally registered transformers for this site
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator
      */
     public function transformer(): TransformerConfigurator
     {
@@ -156,7 +156,7 @@ class ApiSiteConfigurator implements NoDiInterface
     /**
      * Access to the list of page related resource options
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator
      */
     public function page(): PageConfigurator
     {
@@ -166,7 +166,7 @@ class ApiSiteConfigurator implements NoDiInterface
     /**
      * Access to the list of routing options and route configuration
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator
      */
     public function routing(): RoutingConfigurator
     {

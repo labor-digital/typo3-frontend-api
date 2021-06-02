@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use InvalidArgumentException;
@@ -48,7 +48,7 @@ class BundleCollector implements NoDiInterface
      * @param   array|null  $options      Please check the documentation of the bundle to see if config options are supported.
      *
      * @return $this
-     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiBundleInterface
+     * @see \LaborDigital\T3fa\ExtConfigHandler\Api\ApiBundleInterface
      */
     public function register(string $bundleClass, ?array $options = null): self
     {

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 11:56
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -36,7 +36,7 @@ declare(strict_types=1);
  * Last modified: 2019.08.26 at 13:51
  */
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Routing;
 
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;

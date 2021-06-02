@@ -20,30 +20,28 @@
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\Api\Bundle;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3fa\Api\Resource\FileReferenceResource;
-use LaborDigital\T3fa\Api\Resource\FileResource;
-use LaborDigital\T3fa\ExtConfigHandler\Api\ApiBundleInterface;
-use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 
-class FileBundle implements ApiBundleInterface
+class DefaultApiConfig implements ConfigureApiInterface, NoDiInterface
 {
     /**
      * @inheritDoc
      */
-    public static function registerResources(ResourceCollector $collector, SiteConfigContext $context, array $options): void
-    {
-        $collector->register(FileResource::class);
-        $collector->register(FileReferenceResource::class);
-    }
+    public static function registerBundles(BundleCollector $collector): void { }
     
     /**
      * @inheritDoc
      */
-    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context, array $options): void { }
+    public static function registerResources(ResourceCollector $collector, SiteConfigContext $context): void { }
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context): void { }
     
 }

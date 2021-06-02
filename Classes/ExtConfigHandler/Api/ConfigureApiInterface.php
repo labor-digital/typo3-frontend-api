@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 
-interface ConfigureApiSiteInterface
+interface ConfigureApiInterface
 {
     /**
      * Bundles can be provided by extensions to configure the frontend API site to match their needs.
@@ -36,7 +36,7 @@ interface ConfigureApiSiteInterface
      *
      * If your site does not need any bundles, simply ignore this method.
      *
-     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiBundleInterface
+     * @see \LaborDigital\T3fa\ExtConfigHandler\Api\ApiBundleInterface
      */
     public static function registerBundles(BundleCollector $collector): void;
     
@@ -51,16 +51,16 @@ interface ConfigureApiSiteInterface
      * This method is executed after the registerResources() of all registered bundles, which allows you to override resources before they are applied
      * into the site configuration.
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector  $collector
-     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext                $context
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector  $collector
+     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext            $context
      */
     public static function registerResources(ResourceCollector $collector, SiteConfigContext $context): void;
     
     /**
      * Configures a single site for the frontend api. The options range from routing to resource handling.
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator  $configurator
-     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext         $context
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator   $configurator
+     * @param   \LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext  $context
      */
-    public static function configureSite(ApiSiteConfigurator $configurator, SiteConfigContext $context): void;
+    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context): void;
 }

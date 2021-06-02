@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 11:56
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Resource;
 
 
 use LaborDigital\T3fa\Core\Cache\CacheOptionsTrait;
@@ -28,10 +28,10 @@ use LaborDigital\T3fa\Core\Resource\Query\Parser;
 use LaborDigital\T3fa\Core\Resource\Route\DefaultResourceController;
 use LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\TransformerRegistrationTrait;
+use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\TransformerRegistrationTrait;
 use Neunerlei\Options\Options;
 
 class ResourceConfigurator
@@ -438,7 +438,7 @@ class ResourceConfigurator
      * @param   array                    $types
      * @param   array                    $classMap
      */
-    public function finish(ApiSiteConfigurator $configurator, array &$types, array &$classMap): void
+    public function finish(ApiConfigurator $configurator, array &$types, array &$classMap): void
     {
         $query = Parser::parse($this->defaultQuery);
         if ($this->pageSize !== null) {
@@ -470,7 +470,7 @@ class ResourceConfigurator
     /**
      * Injects the locally configured transformer data into the transformer configuration object
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator  $configurator
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator  $configurator
      */
     protected function finishTransformerConfig(TransformerConfigurator $configurator): void
     {
@@ -488,7 +488,7 @@ class ResourceConfigurator
     /**
      * Injects the required routes into the route configurator
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator  $configurator
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator  $configurator
      */
     protected function finishRoutes(RoutingConfigurator $configurator): void
     {

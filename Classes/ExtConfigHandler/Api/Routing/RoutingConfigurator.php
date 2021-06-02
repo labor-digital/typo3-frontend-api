@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:31
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Routing;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
@@ -38,7 +38,7 @@ class RoutingConfigurator extends AbstractExtConfigConfigurator
     /**
      * The list of all existing route groups by their prefix
      *
-     * @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteGroup[]
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteGroup[]
      */
     protected $groups = [];
     
@@ -114,7 +114,7 @@ class RoutingConfigurator extends AbstractExtConfigConfigurator
      *
      * @param   string|null  $prefix  The uri prefix to retrieve a specific route group, or null to retrieve the default group
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteGroup
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteGroup
      */
     public function routes(?string $prefix = null): RouteGroup
     {
@@ -140,7 +140,7 @@ class RoutingConfigurator extends AbstractExtConfigConfigurator
      *
      * @param   string  $prefix  The uri prefix for the group to retrieve
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteGroup|null
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteGroup|null
      */
     public function getRouteGroup(string $prefix): ?RouteGroup
     {

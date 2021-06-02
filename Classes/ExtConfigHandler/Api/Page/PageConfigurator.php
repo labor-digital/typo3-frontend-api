@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 19:03
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page;
 
 
 use InvalidArgumentException;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\Link\PageLinkProviderInterface;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link\PageLinkProviderInterface;
 use LaborDigital\T3fa\Resource\Factory\Page\Data\PageDataModel;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -117,7 +117,7 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      *
      * @return $this
      * @throws \LaborDigital\T3ba\ExtConfig\ExtConfigException
-     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\RootLineDataProviderInterface
+     * @see \LaborDigital\T3fa\ExtConfigHandler\Api\Page\RootLineDataProviderInterface
      */
     public function registerRootLineDataProvider(string $class): self
     {

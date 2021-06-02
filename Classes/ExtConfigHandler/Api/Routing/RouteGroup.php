@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 18:07
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing;
+namespace LaborDigital\T3fa\ExtConfigHandler\Api\Routing;
 
 
 use InvalidArgumentException;
@@ -155,7 +155,7 @@ class RouteGroup implements NoDiInterface
      * @param   string          $path     The route to listen to
      * @param   callable|array  $handler  The action handler, as an array of [$controllerClass, $actionMethod]
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteConfig
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteConfig
      */
     public function registerRoute(string $method, string $path, array $handler): RouteConfig
     {
@@ -170,7 +170,7 @@ class RouteGroup implements NoDiInterface
         $id = md5($method . '.' . $path);
         
         // Make a new route
-        /** @var \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteConfig $route */
+        /** @var \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteConfig $route */
         $route = $this->makeInstance(RouteConfig::class, [
             $method,
             $path,
@@ -189,7 +189,7 @@ class RouteGroup implements NoDiInterface
      * @param   string  $method  The HTTP method to retrieve the route for
      * @param   string  $path    The uri path of the route to resolve
      *
-     * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteConfig|null
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteConfig|null
      */
     public function getRoute(string $method, string $path): ?RouteConfig
     {
@@ -201,7 +201,7 @@ class RouteGroup implements NoDiInterface
     /**
      * Adds a route to this group, useful if you want to move routes between groups
      *
-     * @param   \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RouteConfig  $route
+     * @param   \LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RouteConfig  $route
      *
      * @return $this
      */

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:32
+ * Last modified: 2021.06.02 at 20:35
  */
 
 declare(strict_types=1);
@@ -26,9 +26,9 @@ namespace LaborDigital\T3fa\Api\Bundle;
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
 use LaborDigital\T3fa\Api\Resource\PageContentResource;
 use LaborDigital\T3fa\Api\Resource\PageResource;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiBundleInterface;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteConfigurator;
-use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
+use LaborDigital\T3fa\ExtConfigHandler\Api\ApiBundleInterface;
+use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 
 class PageBundle implements ApiBundleInterface
 {
@@ -45,6 +45,6 @@ class PageBundle implements ApiBundleInterface
     /**
      * @inheritDoc
      */
-    public static function configureSite(ApiSiteConfigurator $configurator, SiteConfigContext $context, array $options): void { }
+    public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context, array $options): void { }
     
 }
