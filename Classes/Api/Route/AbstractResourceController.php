@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 21:03
+ * Last modified: 2021.06.02 at 20:40
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\Core\Resource\Route;
+namespace LaborDigital\T3fa\Api\Route;
 
 
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;

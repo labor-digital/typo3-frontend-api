@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 14:47
+ * Last modified: 2021.06.02 at 20:40
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\Core\Resource\Route;
+namespace LaborDigital\T3fa\Api\Route;
 
 
 use LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException;
@@ -31,13 +31,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class DefaultResourceController extends AbstractResourceController
 {
     /**
-     * Handles the request for a single resource
-     *
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
-     * @param   array                                     $vars
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws \LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException
+     * @inheritDoc
      */
     public function singleAction(ServerRequestInterface $request, array $vars): ResponseInterface
     {
@@ -56,12 +50,7 @@ class DefaultResourceController extends AbstractResourceController
     }
     
     /**
-     * Handles the request for a resource collection
-     *
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
-     * @param   array                                     $vars
-     *
-     * @return \Psr\Http\Message\ResponseInterface
+     * @inheritDoc
      */
     public function collectionAction(ServerRequestInterface $request, array $vars): ResponseInterface
     {
@@ -77,13 +66,7 @@ class DefaultResourceController extends AbstractResourceController
     }
     
     /**
-     * Handles the relationship action for a single relation field
-     *
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
-     * @param   array                                     $vars
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws \LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException
+     * @inheritDoc
      */
     public function relationshipAction(ServerRequestInterface $request, array $vars): ResponseInterface
     {
@@ -95,12 +78,7 @@ class DefaultResourceController extends AbstractResourceController
     }
     
     /**
-     * Handles the relation resolution on a single related field
-     *
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
-     * @param   array                                     $vars
-     *
-     * @return \Psr\Http\Message\ResponseInterface
+     * @inheritDoc
      */
     public function relationAction(ServerRequestInterface $request, array $vars): ResponseInterface
     {

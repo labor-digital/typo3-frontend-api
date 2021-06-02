@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.02 at 20:40
  */
 
 declare(strict_types=1);
@@ -23,10 +23,10 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\Api\Resource;
 
 
+use LaborDigital\T3fa\Api\Route\DefaultResourceController;
+use LaborDigital\T3fa\Api\Route\ResourceControllerInterface;
 use LaborDigital\T3fa\Core\Cache\CacheOptionsTrait;
 use LaborDigital\T3fa\Core\Resource\Query\Parser;
-use LaborDigital\T3fa\Core\Resource\Route\DefaultResourceController;
-use LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface;
 use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
@@ -413,7 +413,7 @@ class ResourceConfigurator
      *
      * @param   string  $controllerClass  The class must implement the ResourceControllerInterface
      *
-     * @see \LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface
+     * @see \LaborDigital\T3fa\Api\Route\ResourceControllerInterface
      * @see DefaultResourceController
      */
     public function setControllerClass(string $controllerClass): self
