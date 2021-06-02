@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:03
+ * Last modified: 2021.06.02 at 20:22
  */
 
 declare(strict_types=1);
@@ -36,7 +36,7 @@ interface ConfigureApiSiteInterface
      *
      * If your site does not need any bundles, simply ignore this method.
      *
-     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteBundleInterface
+     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiBundleInterface
      */
     public static function registerBundles(BundleCollector $collector): void;
     

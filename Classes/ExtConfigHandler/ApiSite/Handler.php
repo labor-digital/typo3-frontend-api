@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:10
+ * Last modified: 2021.06.02 at 20:29
  */
 
 declare(strict_types=1);
@@ -26,10 +26,11 @@ namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigHandler;
 use LaborDigital\T3ba\ExtConfig\ExtConfigService;
 use LaborDigital\T3ba\ExtConfig\Interfaces\SiteBasedHandlerInterface;
-use LaborDigital\T3fa\ApiSite\Bundle\CategoryBundle;
-use LaborDigital\T3fa\ApiSite\Bundle\FileBundle;
-use LaborDigital\T3fa\ApiSite\Bundle\PageBundle;
-use LaborDigital\T3fa\ApiSite\Bundle\ValueTransformerBundle;
+use LaborDigital\T3fa\Api\Bundle\CategoryBundle;
+use LaborDigital\T3fa\Api\Bundle\ContentBundle;
+use LaborDigital\T3fa\Api\Bundle\FileBundle;
+use LaborDigital\T3fa\Api\Bundle\PageBundle;
+use LaborDigital\T3fa\Api\Bundle\ValueTransformerBundle;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceCollector;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource\ResourceConfigurator;
@@ -45,6 +46,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
             PageBundle::class => [],
             CategoryBundle::class => [],
             FileBundle::class => [],
+            ContentBundle::class => [],
         ];
     
     /**

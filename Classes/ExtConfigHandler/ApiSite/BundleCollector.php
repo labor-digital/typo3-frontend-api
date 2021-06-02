@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:38
+ * Last modified: 2021.06.02 at 20:22
  */
 
 declare(strict_types=1);
@@ -48,7 +48,7 @@ class BundleCollector implements NoDiInterface
      * @param   array|null  $options      Please check the documentation of the bundle to see if config options are supported.
      *
      * @return $this
-     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiSiteBundleInterface
+     * @see \LaborDigital\T3fa\ExtConfigHandler\ApiSite\ApiBundleInterface
      */
     public function register(string $bundleClass, ?array $options = null): self
     {
@@ -56,9 +56,9 @@ class BundleCollector implements NoDiInterface
             throw new InvalidArgumentException('The given bundle class: "' . $bundleClass . '" does not exist');
         }
         
-        if (! in_array(ApiSiteBundleInterface::class, class_implements($bundleClass), true)) {
+        if (! in_array(ApiBundleInterface::class, class_implements($bundleClass), true)) {
             throw new InvalidArgumentException(
-                'The given bundle class: "' . $bundleClass . '" does not implement the required interface: ' . ApiSiteBundleInterface::class);
+                'The given bundle class: "' . $bundleClass . '" does not implement the required interface: ' . ApiBundleInterface::class);
         }
         
         $this->bundles[$bundleClass] = $options ?? [];
