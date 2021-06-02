@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 19:23
+ * Last modified: 2021.06.01 at 11:56
  */
 
 declare(strict_types=1);
@@ -40,14 +40,13 @@ namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing;
 
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
+use LaborDigital\T3fa\Core\Cache\CacheOptionsTrait;
 use Neunerlei\Inflection\Inflector;
 
 class RouteConfig implements NoDiInterface
 {
     use MiddlewareConfigTrait;
-    
-    // @todo implement this again
-//    use CacheOptionsTrait;
+    use CacheOptionsTrait;
     
     /**
      * The ext config namespace used to create this route
@@ -316,7 +315,12 @@ class RouteConfig implements NoDiInterface
             'handler' => $this->handler,
             'middlewares' => $this->middlewares,
             'name' => $this->name,
-            'attributes' => $this->attributes,
+            'attributes' => array_merge(
+                $this->attributes,
+                [
+                    '@cacheOptions' => $this->getCacheOptions(),
+                ]
+            ),
         ];
     }
 }

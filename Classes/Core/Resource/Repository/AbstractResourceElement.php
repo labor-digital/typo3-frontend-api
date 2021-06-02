@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:23
+ * Last modified: 2021.06.02 at 11:12
  */
 
 declare(strict_types=1);
@@ -183,7 +183,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
             
             TransformerScope::$accessCheck = ! $options['noAccessCheck'];
             
-            if ($options['include'] === true) {
+            if ($options['include'] === true || $options['include'] === '*') {
                 TransformerScope::$allIncludes = true;
             } elseif (! empty($options['include'])) {
                 $fractal->parseIncludes($options['include']);

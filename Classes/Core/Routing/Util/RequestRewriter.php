@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 12:42
+ * Last modified: 2021.05.31 at 20:41
  */
 
 declare(strict_types=1);
@@ -78,6 +78,7 @@ class RequestRewriter
             $this->makeServerParams($uri)
         );
         
+        $typoRequest = $typoRequest->withCookieParams($request->getCookieParams());
         $typoRequest = $typoRequest->withAttribute('originalRequest', $request);
         
         foreach ($request->getAttributes() as $key => $attribute) {

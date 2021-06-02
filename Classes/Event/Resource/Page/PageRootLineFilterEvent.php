@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 20:09
+ * Last modified: 2021.05.31 at 20:27
  */
 
 declare(strict_types=1);
@@ -39,6 +39,8 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Event\Resource\Page;
 
 
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
+
 /**
  * Class PageRootLineFilterEvent
  * Emitted when the Page object build's its root line.
@@ -59,7 +61,7 @@ class PageRootLineFilterEvent
     /**
      * The language uid that is used to generate the root line
      *
-     * @var int
+     * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage
      */
     protected $language;
     
@@ -70,7 +72,7 @@ class PageRootLineFilterEvent
      */
     protected $rootLine;
     
-    public function __construct(int $pid, int $language, array $rootLine)
+    public function __construct(int $pid, SiteLanguage $language, array $rootLine)
     {
         $this->pid = $pid;
         $this->language = $language;
@@ -90,9 +92,9 @@ class PageRootLineFilterEvent
     /**
      * Returns the language uid that is used to generate the root line
      *
-     * @return int
+     * @return SiteLanguage
      */
-    public function getLanguage(): int
+    public function getLanguage(): SiteLanguage
     {
         return $this->language;
     }

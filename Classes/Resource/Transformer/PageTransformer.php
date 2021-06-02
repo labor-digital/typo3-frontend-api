@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 12:25
+ * Last modified: 2021.06.02 at 19:53
  */
 
 declare(strict_types=1);
@@ -26,13 +26,11 @@ namespace LaborDigital\T3fa\Resource\Transformer;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AbstractResourceTransformer;
 use LaborDigital\T3fa\Resource\Entity\PageEntity;
-use LaborDigital\T3fa\Resource\PageRootLine;
-use League\Fractal\Resource\ResourceAbstract;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
 class PageTransformer extends AbstractResourceTransformer
 {
-    protected $availableIncludes = ['rootLine'];
+    protected $availableIncludes = [];
     
     /**
      * @var \LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository
@@ -55,22 +53,30 @@ class PageTransformer extends AbstractResourceTransformer
             return ['id' => null];
         }
         
-        // @todo finish this
-        return [
-            'id' => $value->getId(),
-            'site' => $value->getSite()->getIdentifier(),
-            'languages' => array_map(static function (SiteLanguage $language): string {
-                return $language->getTwoLetterIsoCode();
-            }, $value->getSite()->getAllLanguages()),
-            'language' => $value->getLanguage()->getTwoLetterIsoCode(),
-            'links' => $value->getLinks(),
-        ];
-    }
-    
-    public function includeRootLine(PageEntity $value): ResourceAbstract
-    {
-        return $this->autoIncludeItem(
-            $this->repository->getResource(PageRootLine::class, $value->getId())
+        $attributes = $value->getAttributes();
+        $meta = $attributes['meta'] ?? [];
+        
+        return array_merge(
+            $attributes,
+            [
+                'meta' => array_merge(
+                    $meta,
+                    [
+                        'languages' => array_map(static function (SiteLanguage $language): string {
+                            return $language->getTwoLetterIsoCode();
+                        }, $this->getTypoContext()->language()->getAllFrontendLanguages($value->getSiteIdentifier())),
+                        'language' => $value->getLanguageCode(),
+                    ]
+                ),
+            ]
         );
+        
     }
+//
+//    public function includeRootLine(PageEntity $value): ResourceAbstract
+//    {
+//        return $this->autoIncludeItem(
+//            $this->repository->getResource(PageRootLine::class, $value->getId())
+//        );
+//    }
 }

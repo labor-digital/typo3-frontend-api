@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:31
+ * Last modified: 2021.06.01 at 18:00
  */
 
 declare(strict_types=1);
@@ -70,6 +70,10 @@ class ResourceCollector implements NoDiInterface
      */
     public function register(string $resourceClass, ?string $resourceType = null, ?array $options = null): self
     {
+        if (! class_exists($resourceClass)) {
+            throw new InvalidArgumentException('The given resource class: "' . $resourceClass . '" does not exist');
+        }
+        
         if (! in_array(ResourceInterface::class, class_implements($resourceClass), true)) {
             throw new InvalidArgumentException(
                 'The given resource class: "' . $resourceClass . '" does not implement the required interface: ' .

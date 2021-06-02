@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 10:50
+ * Last modified: 2021.06.02 at 19:49
  */
 
 declare(strict_types=1);
@@ -22,9 +22,6 @@ declare(strict_types=1);
 
 namespace LaborDigital\T3fa\Resource\Entity;
 
-
-use TYPO3\CMS\Core\Site\Entity\SiteInterface;
-use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
 class PageEntity
 {
@@ -36,39 +33,37 @@ class PageEntity
     protected $id;
     
     /**
-     * Holds the page's root line array after it was resolved
+     * The language code used to generate the site
      *
-     * @var array|null
+     * @var string
      */
-    protected $rootLine;
+    protected $languageCode;
     
     /**
-     * The language object used to generate the site
+     * The site identifier which contains this page
      *
-     * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage
+     * @var string
      */
-    protected $language;
+    protected $siteIdentifier;
     
     /**
-     * The site which contains this page
-     *
-     * @var \TYPO3\CMS\Core\Site\Entity\SiteInterface
-     */
-    protected $site;
-    
-    /**
-     * The list of links relevant to this page
+     * The prepared resource attributes
      *
      * @var array
      */
-    protected $links;
+    protected $attributes = [];
     
-    public function __construct(int $id, SiteLanguage $language, SiteInterface $site, array $links)
+    public function __construct(
+        int $id,
+        string $languageCode,
+        string $siteIdentifier,
+        array $attributes
+    )
     {
         $this->id = $id;
-        $this->language = $language;
-        $this->site = $site;
-        $this->links = $links;
+        $this->languageCode = $languageCode;
+        $this->siteIdentifier = $siteIdentifier;
+        $this->attributes = $attributes;
     }
     
     /**
@@ -82,23 +77,43 @@ class PageEntity
     }
     
     /**
-     * Returns the language object used to generate the site
+     * Returns the language code used to generate the site
      *
-     * @return \TYPO3\CMS\Core\Site\Entity\SiteLanguage
+     * @return string
      */
-    public function getLanguage(): SiteLanguage
+    public function getLanguageCode(): string
     {
-        return $this->language;
+        return $this->languageCode;
     }
     
     /**
-     * Returns the site which contains this page
+     * Returns the language alternatives in form of hrefLang link definitions
      *
-     * @return \TYPO3\CMS\Core\Site\Entity\SiteInterface
+     * @return array
      */
-    public function getSite(): SiteInterface
+    public function getHrefLangUrls(): array
     {
-        return $this->site;
+        return $this->attributes['meta']['hrefLang'] ?? [];
+    }
+    
+    /**
+     * Returns the site identifier which contains this page
+     *
+     * @return string
+     */
+    public function getSiteIdentifier(): string
+    {
+        return $this->siteIdentifier;
+    }
+    
+    /**
+     * Returns the prepared resource attributes
+     *
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
     }
     
     /**
@@ -108,8 +123,27 @@ class PageEntity
      */
     public function getLinks(): array
     {
-        return $this->links;
+        return $this->attributes['links'] ?? [];
     }
     
+    /**
+     * Returns the pages root line array
+     *
+     * @return array
+     */
+    public function getRootLine(): array
+    {
+        return $this->attributes['meta']['rootLine'] ?? [];
+    }
+    
+    /**
+     * Returns the list of generated meta tags for this page
+     *
+     * @return array
+     */
+    public function getMetaTags(): array
+    {
+        return $this->attributes['meta']['metaTags'] ?? [];
+    }
     
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 13:43
+ * Last modified: 2021.06.02 at 14:08
  */
 
 declare(strict_types=1);
@@ -26,10 +26,12 @@ namespace LaborDigital\T3fa\Configuration\ExtConfig;
 use LaborDigital\T3ba\ExtConfig\ExtConfigContext;
 use LaborDigital\T3ba\ExtConfigHandler\Core\ConfigureTypoCoreInterface;
 use LaborDigital\T3ba\ExtConfigHandler\Core\TypoCoreConfigurator;
+use LaborDigital\T3ba\ExtConfigHandler\Translation\ConfigureTranslationInterface;
+use LaborDigital\T3ba\ExtConfigHandler\Translation\TranslationConfigurator;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 
-class Common implements ConfigureTypoCoreInterface
+class Common implements ConfigureTypoCoreInterface, ConfigureTranslationInterface
 {
     /**
      * @inheritDoc
@@ -50,6 +52,14 @@ class Common implements ConfigureTypoCoreInterface
                 ]
             );
         
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public static function configureTranslation(TranslationConfigurator $configurator, ExtConfigContext $context): void
+    {
+        $configurator->registerNamespace('t3fa');
     }
     
 }

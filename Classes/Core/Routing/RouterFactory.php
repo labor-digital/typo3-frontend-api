@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 10:02
+ * Last modified: 2021.05.31 at 21:18
  */
 
 declare(strict_types=1);
@@ -31,6 +31,7 @@ use LaborDigital\T3ba\Core\VarFs\VarFs;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Routing\Strategy\ExtendedApplicationStrategy;
 use LaborDigital\T3fa\Middleware\Api\AttributeProviderMiddleware;
+use LaborDigital\T3fa\Middleware\Api\CacheMiddleware;
 use LaborDigital\T3fa\TypoContext\SiteConfigAwareTrait;
 use League\Route\Route;
 use League\Route\Router;
@@ -107,8 +108,10 @@ class RouterFactory
             
             $route->setName($config['name']);
             
+            $route->lazyPrependMiddleware(CacheMiddleware::class);
+            
             if (! empty($config['attributes'])) {
-                $route->middleware(new AttributeProviderMiddleware($config['attributes']));
+                $route->prependMiddleware(new AttributeProviderMiddleware($config['attributes']));
             }
             
             $route->lazyMiddlewares($config['middlewares']);

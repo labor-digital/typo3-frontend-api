@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 12:24
+ * Last modified: 2021.06.01 at 16:21
  */
 
 declare(strict_types=1);
@@ -24,8 +24,7 @@ namespace LaborDigital\T3fa\Resource\Factory\Page;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
-use LaborDigital\T3ba\Tool\Page\PageService;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use LaborDigital\T3fa\Resource\Entity\PageEntity;
 use TYPO3\CMS\Core\Site\Entity\SiteInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -33,51 +32,21 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 class PageResourceFactory
 {
     use ContainerAwareTrait;
-    
-    /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
-     */
-    protected $typoContext;
-    
-    /**
-     * @var \LaborDigital\T3ba\Tool\Page\PageService
-     */
-    protected $pageService;
-    
-    /**
-     * @var \LaborDigital\T3fa\Resource\Factory\Page\LinkGenerator
-     */
-    protected $linkGenerator;
-    
-    public function __construct(TypoContext $typoContext, PageService $pageService, LinkGenerator $linkGenerator)
-    {
-        $this->typoContext = $typoContext;
-        $this->pageService = $pageService;
-        $this->linkGenerator = $linkGenerator;
-    }
+    use T3faCacheAwareTrait;
     
     public function make(int $pid, SiteLanguage $language, SiteInterface $site): PageEntity
     {
         return $this->makeInstance(
             PageEntity::class,
-            [
-                $pid,
-                $language,
-                $site,
-                $this->getLinks($pid),
-            ]
+            $this->getCache()->remember(
+                function () use ($pid, $language, $site) {
+                    return $this->getService(DataGenerator::class)->generate($pid, $language, $site);
+                },
+                ['page_resource', $pid, $language->getTwoLetterIsoCode(), $site->getIdentifier()],
+                [
+                    'tags' => ['pages_' . $pid],
+                ]
+            )
         );
-    }
-    
-    /**
-     * Builds the links array for the instantiated page
-     *
-     * @param   int  $pid
-     *
-     * @return array
-     */
-    protected function getLinks(int $pid): array
-    {
-        return $this->linkGenerator->generate($pid);
     }
 }

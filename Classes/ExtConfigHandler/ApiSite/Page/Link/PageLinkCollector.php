@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 12:01
+ * Last modified: 2021.06.02 at 18:01
  */
 
 declare(strict_types=1);
@@ -61,7 +61,7 @@ class PageLinkCollector implements NoDiInterface
     public function registerLink(string $key, ?Link $link = null): self
     {
         $link = $link ?? $this->linkService->getLink($key);
-        $this->links[$key] = $link->build();
+        $this->links[$key] = rtrim($link->build(), '/');
         
         return $this;
     }
@@ -77,7 +77,7 @@ class PageLinkCollector implements NoDiInterface
      */
     public function registerTypoLink(string $key, $linkConfig): self
     {
-        $this->links[$key] = $this->linkService->getTypoLink($linkConfig);
+        $this->links[$key] = rtrim($this->linkService->getTypoLink($linkConfig), '/');
         
         return $this;
     }
@@ -92,7 +92,7 @@ class PageLinkCollector implements NoDiInterface
      */
     public function registerStaticLink(string $key, string $link): self
     {
-        $this->links[$key] = $link;
+        $this->links[$key] = rtrim($link, '/');
         
         return $this;
     }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><!--
+<!--
   ~ Copyright 2021 LABOR.digital
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +13,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  ~ Last modified: 2021.06.02 at 20:00
+  ~ Last modified: 2021.06.02 at 14:28
   -->
 
 <xliff version="1.0">
 	<file source-language="en" datatype="plaintext" original="messages" date="2019-10-30T17:39:36Z" product-name="typo3_frontend_api" target-language="de">
 		<header/>
 		<body>
-			<trans-unit id="t.backendLayout.field.identifier">
-				<source>Frontend Api Identifier</source>
-				<target>Frontend Api ID</target>
-			</trans-unit>
-			<trans-unit id="t.backendLayout.msg.identifierModified">
-				<source>The Frontend Api Identifier was adjusted to match the requirements. It was: "%s", and is now: "%s"</source>
-				<target>Die Frontend Api ID wurde automatisch angepasst. Der Wert war: "%s" und ist jetzt: "%s"</target>
+			<trans-unit id="t3fa_identifier.description" resname="t3fa_identifier.description">
+				<source>This identifier is used when the page layout is passed as "page" resource attribute in the frontend api.
+					
+					If the identifier is not defined, the numeric id of the backend layout is used instead.
+				</source>
 			</trans-unit>
 		</body>
 	</file>

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 21:00
+ * Last modified: 2021.06.02 at 20:11
  */
 
 declare(strict_types=1);
@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Middleware\Typo;
 
 
+use DateTime;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
 use LaborDigital\T3fa\Core\ErrorHandler\ErrorHandler;
@@ -51,7 +52,9 @@ class ApiForkMiddleware implements MiddlewareInterface, LoggerAwareInterface
         if (str_starts_with($givenPath, $apiPath)) {
             $this->logger->debug('Handle api request: [' . $request->getMethod() . '] ' . $request->getUri());
             
-            return $this->forkRequest($request);
+            return $this->addExecutionTimeHeader(
+                $this->forkRequest($request)
+            );
         }
         
         return $handler->handle($request);
@@ -69,5 +72,30 @@ class ApiForkMiddleware implements MiddlewareInterface, LoggerAwareInterface
         return $this->getService(ErrorHandler::class)->handleErrorsIn(function () use ($request) {
             return $this->getService(ApiBootstrap::class)->boot($request);
         }, $request);
+    }
+    
+    /**
+     * Helper method to calculate the execution time and add it as a header to the response before it gets emitted
+     *
+     * @param   \Psr\Http\Message\ResponseInterface  $response
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    protected function addExecutionTimeHeader(ResponseInterface $response): ResponseInterface
+    {
+        $diff = $this->getTypoContext()->date()->getDateTime()->diff(new DateTime());
+        $time = [];
+        
+        if (! empty($diff->m)) {
+            $time[] = $diff->m . 'min';
+        }
+        if (! empty($diff->s)) {
+            $time[] = $diff->s . 's';
+        }
+        if (! empty($diff->f)) {
+            $time[] = $diff->f * 100 . 'ms';
+        }
+        
+        return $response->withHeader('X-t3fa-Execution-Time', implode(' ', $time));
     }
 }

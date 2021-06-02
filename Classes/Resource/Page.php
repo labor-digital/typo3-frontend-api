@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 11:57
+ * Last modified: 2021.06.01 at 15:40
  */
 
 declare(strict_types=1);
@@ -63,6 +63,8 @@ class Page extends AbstractResource
         $configurator->registerClass(PageEntity::class);
         $configurator->registerTransformer(PageTransformer::class);
         $configurator->registerPostProcessor(TestPostProcessor::class);
+        
+        $configurator->setIsCacheEnabled(false);
     }
     
     /**

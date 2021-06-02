@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 11:55
+ * Last modified: 2021.06.01 at 19:03
  */
 
 declare(strict_types=1);
@@ -23,9 +23,12 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page;
 
 
+use InvalidArgumentException;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\Link\PageLinkProviderInterface;
+use LaborDigital\T3fa\Resource\Factory\Page\Data\PageDataModel;
+use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class PageConfigurator extends AbstractExtConfigConfigurator
 {
@@ -49,6 +52,20 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      * @var array
      */
     protected $linkProviders = [];
+    
+    /**
+     * The extbase model class to resolve the page data with
+     *
+     * @var string
+     */
+    protected $dataModelClass = PageDataModel::class;
+    
+    /**
+     * A list of database fields that should be inherited from the parent pages if their current value is empty
+     *
+     * @var array
+     */
+    protected $dataSlideFields = [];
     
     /**
      * Adds the given fields to the list of additional "pages" table fields which will be added to root line resource entries
@@ -156,7 +173,7 @@ class PageConfigurator extends AbstractExtConfigConfigurator
     {
         if (! class_exists($linkProviderClass) ||
             ! in_array(PageLinkProviderInterface::class, class_implements($linkProviderClass), true)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Invalid link provider "' . $linkProviderClass . '" given! The class has to exist, and implement: "' .
                 PageLinkProviderInterface::class . '"');
         }
@@ -187,5 +204,69 @@ class PageConfigurator extends AbstractExtConfigConfigurator
     public function getLinkProviders(): array
     {
         return array_values($this->linkProviders);
+    }
+    
+    /**
+     * Sets the extbase model class to resolve the page data with
+     *
+     * @param   string  $class  An extbase model class name that represents the page data.
+     *                          The model class must extend the AbstractEntity
+     *
+     * @return $this
+     *
+     * @see PageDataModel
+     */
+    public function setDataModelClass(string $class): self
+    {
+        if (! class_exists($class)) {
+            throw new InvalidArgumentException('The given page data model ' . $class . ' does not exist!');
+        }
+        
+        if (! in_array(AbstractEntity::class, class_parents($class), true)) {
+            throw new InvalidArgumentException('The given page data model ' . $class . ' has to extend the ' . AbstractEntity::class . ' class!');
+        }
+        
+        $this->dataModelClass = $class;
+        
+        return $this;
+    }
+    
+    /**
+     * Returns the configured extbase model class to resolve the page data with
+     *
+     * @return string
+     */
+    public function getDataModelClass(): string
+    {
+        return $this->dataModelClass;
+    }
+    
+    /**
+     * Used to configure a list of database fields that should be inherited from the parent pages if their current value is empty.
+     * Useful for page media or social media tags to inherit data easily from the parent page.
+     *
+     * Slide fields work similar to this {@link https://docs.typo3.org/m/typo3/reference-typoscript/master/en-us/ContentObjects/Content/Index.html?highlight=slide#slide}
+     * There is currently no way to use a "collect" mode.
+     *
+     * @param   array  $fields  A list of database field names to slide from the parent page if they are empty in the current page
+     *
+     * @return $this
+     */
+    public function setDataSlideFields(array $fields): self
+    {
+        $this->dataSlideFields = $fields;
+        
+        return $this;
+    }
+    
+    /**
+     * Returns the list of configured database fields that should be inherited from parent pages.
+     *
+     * @return array
+     * @see setDataSlideFields()
+     */
+    public function getDataSlideFields(): array
+    {
+        return $this->dataSlideFields;
     }
 }

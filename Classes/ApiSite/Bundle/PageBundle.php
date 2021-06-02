@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 23:39
+ * Last modified: 2021.06.01 at 18:00
  */
 
 declare(strict_types=1);
@@ -38,8 +38,7 @@ class PageBundle implements ApiSiteBundleInterface
     public static function registerResources(ResourceCollector $collector, SiteConfigContext $context, array $options): void
     {
         $collector
-            ->register(Page::class)
-            ->register(PageRootLine::class);
+            ->register(Page::class);
     }
     
     /**

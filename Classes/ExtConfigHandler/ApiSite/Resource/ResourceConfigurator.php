@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:31
+ * Last modified: 2021.06.01 at 11:56
  */
 
 declare(strict_types=1);
@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\ApiSite\Resource;
 
 
+use LaborDigital\T3fa\Core\Cache\CacheOptionsTrait;
 use LaborDigital\T3fa\Core\Resource\Query\Parser;
 use LaborDigital\T3fa\Core\Resource\Route\DefaultResourceController;
 use LaborDigital\T3fa\Core\Resource\Route\ResourceControllerInterface;
@@ -36,8 +37,7 @@ use Neunerlei\Options\Options;
 class ResourceConfigurator
 {
     use TransformerRegistrationTrait;
-    
-    // @todo implement Cache options trait
+    use CacheOptionsTrait;
     
     /**
      * The unique name of this resource type
@@ -496,25 +496,25 @@ class ResourceConfigurator
         
         // Single
         $group->get('/{id}', [$this->controllerClass, 'singleAction'])
-            // @todo pass cache options along
+              ->setCacheOptions($this->getCacheOptions())
               ->setName('resource-' . $this->getResourceType() . '-single')
               ->setAttribute('resourceType', $this->getResourceType());
         
         // Single related
         $group->get('/{id}/{related}', [$this->controllerClass, 'relationAction'])
-            // @todo pass cache options along
+              ->setCacheOptions($this->getCacheOptions())
               ->setName('resource-' . $this->getResourceType() . '-relation')
               ->setAttribute('resourceType', $this->getResourceType());
         
         // Relationships
         $group->get('/{id}/relationships/{relationship}', [$this->controllerClass, 'relationshipAction'])
-            // @todo pass cache options along
+              ->setCacheOptions($this->getCacheOptions())
               ->setName('resource-' . $this->getResourceType() . '-relationships')
               ->setAttribute('resourceType', $this->getResourceType());
         
         // Collection
         $group->get('/', [$this->controllerClass, 'collectionAction'])
-            // @todo pass cache options along
+              ->setCacheOptions($this->getCacheOptions())
               ->setName('resource-' . $this->getResourceType() . '-collection')
               ->setAttribute('resourceType', $this->getResourceType());
         

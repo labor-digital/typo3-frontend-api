@@ -1,5 +1,4 @@
-<?php
-/*
+<?php /*
  * Copyright 2021 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:10
+ * Last modified: 2021.06.01 at 14:37
  */
-
+/** @noinspection SummerTimeUnsafeTimeManipulationInspection */
 declare(strict_types=1);
 
 
@@ -28,6 +27,7 @@ use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator;
+use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiCacheOption;
 use Neunerlei\Configuration\State\ConfigState;
 
 class ApiSiteConfigurator implements NoDiInterface
@@ -53,6 +53,13 @@ class ApiSiteConfigurator implements NoDiInterface
      * @var string|null
      */
     protected $apiHost;
+    
+    /**
+     * The number of seconds how long the cache entries should be valid by default
+     *
+     * @var int
+     */
+    protected $cacheDefaultLifetime = 60 * 60 * 24 * 365;
     
     public function __construct(
         TransformerConfigurator $transformerCollector,
@@ -112,6 +119,31 @@ class ApiSiteConfigurator implements NoDiInterface
     }
     
     /**
+     * Returns the default lifetime in seconds of a cache entry when nothing other was specified
+     *
+     * @return int
+     */
+    public function getCacheDefaultLifetime(): int
+    {
+        return $this->cacheDefaultLifetime;
+    }
+    
+    /**
+     * Allows you to update the default lifetime in seconds of a cache entry when nothing other was specified
+     * DEFAULT: 60 * 60 * 24 * 365
+     *
+     * @param   int  $lifetime
+     *
+     * @return $this
+     */
+    public function setCacheDefaultTtl(int $lifetime): self
+    {
+        $this->cacheDefaultLifetime = $lifetime;
+        
+        return $this;
+    }
+    
+    /**
      * Access to the list of globally registered transformers for this site
      *
      * @return \LaborDigital\T3fa\ExtConfigHandler\ApiSite\Transformer\TransformerConfigurator
@@ -149,5 +181,6 @@ class ApiSiteConfigurator implements NoDiInterface
     public function finish(ConfigState $state): void
     {
         $state->set('apiHost', $this->apiHost);
+        $state->set('cache.defaultLifetime', $this->cacheDefaultLifetime);
     }
 }
