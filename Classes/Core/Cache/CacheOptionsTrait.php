@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 11:56
+ * Last modified: 2021.06.04 at 21:34
  */
 
 declare(strict_types=1);
@@ -59,7 +59,7 @@ trait CacheOptionsTrait
      * @return $this
      * @see \LaborDigital\T3ba\Tool\Cache\Util\CacheUtil::stringifyTag()
      */
-    public function addCacheTag($tag): self
+    public function addCacheTag($tag)
     {
         $this->cacheTags = array_unique(
             array_merge($this->cacheTags, CacheUtil::stringifyTag($tag))
@@ -75,7 +75,7 @@ trait CacheOptionsTrait
      *
      * @return $this
      */
-    public function addCacheTags(array $tags): self
+    public function addCacheTags(array $tags)
     {
         foreach ($tags as $tag) {
             $this->addCacheTag($tag);
@@ -92,7 +92,7 @@ trait CacheOptionsTrait
      * @return $this
      * @see \LaborDigital\T3ba\Tool\Cache\Util\CacheUtil::stringifyTag()
      */
-    public function setCacheTags(array $tags): self
+    public function setCacheTags(array $tags)
     {
         $this->cacheTags = [];
         
@@ -121,7 +121,7 @@ trait CacheOptionsTrait
      *
      * @return $this
      */
-    public function setCacheLifetime(?int $lifetime): self
+    public function setCacheLifetime(?int $lifetime)
     {
         $this->cacheLifetime = $lifetime;
         
@@ -147,7 +147,7 @@ trait CacheOptionsTrait
      *
      * @return $this
      */
-    public function setIsCacheEnabled(bool $state): self
+    public function setIsCacheEnabled(bool $state)
     {
         $this->cacheEnabled = $state;
         
@@ -172,7 +172,7 @@ trait CacheOptionsTrait
      * @return $this
      * @see \LaborDigital\T3fa\Core\Cache\CacheOptionsTrait
      */
-    public function setCacheOptions(array $options): self
+    public function setCacheOptions(array $options)
     {
         if (isset($options['lifetime'])) {
             $this->setCacheLifetime($options['lifetime']);
