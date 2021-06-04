@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 10:52
+ * Last modified: 2021.06.04 at 17:51
  */
 
 declare(strict_types=1);
@@ -153,6 +153,9 @@ class ApiBootstrap implements PublicServiceInterface
         if ($resolver->typoRequest === null) {
             throw new ImmediateResponseException($response);
         }
+        
+        $dispatcher->middlewares = [];
+        unset($dispatcher);
         
         // Ensure a cObject
         $GLOBALS['TSFE']->cObj = $this->makeInstance(
