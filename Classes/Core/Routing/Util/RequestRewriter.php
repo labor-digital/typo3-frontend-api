@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 20:41
+ * Last modified: 2021.06.04 at 18:00
  */
 
 declare(strict_types=1);
@@ -101,12 +101,15 @@ class RequestRewriter
      */
     public function rewriteLanguageAttribute(ServerRequestInterface $request): ServerRequestInterface
     {
-        if (isset($request->getQueryParams()['L'])) {
-            $lang = $this->resolveLanguage($request->getQueryParams()['L'], $request->getAttribute('site'));
+        if (isset($request->getQueryParams()[static::REQUEST_LANG_QUERY_KEY])) {
+            $lang = $this->resolveLanguage($request->getQueryParams()[static::REQUEST_LANG_QUERY_KEY], $request->getAttribute('site'));
         }
         
         if (! isset($lang) && $request->hasHeader(static::REQUEST_LANG_HEADER)) {
-            $lang = $this->resolveLanguage($request->getHeaderLine(static::REQUEST_LANG_HEADER), $request->getAttribute('site'));
+            $lang = $this->resolveLanguage(
+                $request->getHeaderLine(static::REQUEST_LANG_HEADER),
+                $request->getAttribute('site')
+            );
         }
         
         if ($lang !== null) {
@@ -184,8 +187,16 @@ class RequestRewriter
      */
     protected function rewriteHost(UriInterface $uri, ServerRequestInterface $request): UriInterface
     {
-        if ($request->hasHeader(static::REQUEST_SITE_HEADER)) {
+        $query = $request->getQueryParams();
+        if (! empty($query[static::REQUEST_SITE_QUERY_KEY])) {
+            $siteIdentifier = $query[static::REQUEST_SITE_QUERY_KEY];
+        }
+        
+        if (! isset($siteIdentifier) && $request->hasHeader(static::REQUEST_SITE_HEADER)) {
             $siteIdentifier = $request->getHeaderLine(static::REQUEST_SITE_HEADER);
+        }
+        
+        if (isset($siteIdentifier)) {
             if (! $this->context->site()->has($siteIdentifier)) {
                 throw new BadRequestException('The required site: "' . $siteIdentifier . '" does not exist');
             }
