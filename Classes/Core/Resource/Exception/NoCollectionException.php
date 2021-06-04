@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 19:59
+ * Last modified: 2021.06.04 at 17:49
  */
 
 declare(strict_types=1);
@@ -42,7 +42,7 @@ class NoCollectionException extends NotImplementedException implements HttpConve
      */
     public function getHttpException(): HttpExceptionInterface
     {
-        return new Exception(501, $this->message, $this, $this->getCode());
+        return new Exception(501, $this->message, $this, [], $this->getCode());
     }
     
 }
