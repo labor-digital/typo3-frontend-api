@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 19:45
+ * Last modified: 2021.06.13 at 20:34
  */
 
 declare(strict_types=1);
@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\TypoContext;
 
 
+use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\FacetInterface;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use Neunerlei\Arrays\Arrays;
