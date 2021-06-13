@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 13:48
+ * Last modified: 2021.06.09 at 12:41
  */
 
 declare(strict_types=1);
@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Schema;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
+use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Transformer\Internal\PropertyAccessResolver;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\ExtBaseReflector;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\GenericReflector;
@@ -49,15 +50,22 @@ class SchemaFactory implements PublicServiceInterface
      */
     protected $accessResolver;
     
+    /**
+     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     */
+    protected $typoContext;
+    
     public function __construct(
         ExtBaseReflector $extBaseReflector,
         GenericReflector $genericReflector,
-        PropertyAccessResolver $accessResolver
+        PropertyAccessResolver $accessResolver,
+        TypoContext $typoContext
     )
     {
         $this->extBaseReflector = $extBaseReflector;
         $this->genericReflector = $genericReflector;
         $this->accessResolver = $accessResolver;
+        $this->typoContext = $typoContext;
     }
     
     public function makeSchema(object $value): TransformationSchema
@@ -66,11 +74,18 @@ class SchemaFactory implements PublicServiceInterface
         $accessInfo = $this->accessResolver->getAccessInfo($value);
         
         $schema = $this->makeInstance(TransformationSchema::class, [$className, $accessInfo]);
-        $schema->isIterable = is_iterable($value);
         
-        if ($value instanceof AbstractEntity) {
-            $this->extBaseReflector->reflect($value, $schema);
+        if ($this->typoContext->resource()->isCollection($value)) {
+            $schema->isCollection = is_iterable($value);
+        } else {
+            if ($value instanceof AbstractEntity) {
+                $this->extBaseReflector->reflect($value, $schema);
+            } else {
+                $this->genericReflector->reflect($value, $schema);
+            }
         }
+        
+        // @todo an event would be nice here
         
         return $schema;
     }

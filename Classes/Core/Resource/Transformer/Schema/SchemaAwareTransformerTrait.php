@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 00:06
+ * Last modified: 2021.06.09 at 14:19
  */
 
 declare(strict_types=1);
@@ -39,11 +39,11 @@ trait SchemaAwareTransformerTrait
      * Returns the schema for the given value which describes how to transform
      * the value into an array
      *
-     * @param   mixed  $value  This can be literary any value
+     * @param   object  $value  This can be literary any value
      *
      * @return \LaborDigital\T3fa\Core\Resource\Transformer\Schema\TransformationSchema
      */
-    protected function getSchema($value): TransformationSchema
+    protected function getSchema(object $value): TransformationSchema
     {
         return $this->schemaRegistry->getSchema($value);
     }

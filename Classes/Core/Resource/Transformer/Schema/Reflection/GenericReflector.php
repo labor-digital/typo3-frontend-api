@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 11:55
+ * Last modified: 2021.06.09 at 12:41
  */
 
 declare(strict_types=1);
@@ -23,7 +23,33 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection;
 
 
-class GenericReflector
+use LaborDigital\T3fa\Core\Resource\Transformer\Schema\TransformationSchema;
+use ReflectionObject;
+
+class GenericReflector extends AbstractReflector
 {
-    
+    /**
+     * Receives a generic object instance and reflects a schema for the transformation for it
+     *
+     * @param   object                                                                    $value
+     * @param   \LaborDigital\T3fa\Core\Resource\Transformer\Schema\TransformationSchema  $schema
+     */
+    public function reflect(object $value, TransformationSchema $schema): void
+    {
+        $ref = new ReflectionObject($value);
+        $properties = $this->makePropertyMap($ref);
+        
+        $related = [];
+        
+        foreach ($properties as $property => [$accessType, $getter]) {
+            $propRef
+                = $accessType === AbstractReflector::PROPERTY_ACCESS_GETTER
+                ? $ref->getMethod($getter)
+                : $ref->getProperty($getter);
+            $this->reflectMethodOrPropertyRelation($property, $propRef, $related);
+        }
+        
+        $schema->properties = $properties;
+        $schema->related = $related;
+    }
 }

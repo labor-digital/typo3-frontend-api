@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 14:33
+ * Last modified: 2021.06.09 at 12:34
  */
 
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Schema;
 
 
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
+use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\AbstractReflector;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerScope;
 
 class TransformationSchema implements NoDiInterface
@@ -48,14 +49,14 @@ class TransformationSchema implements NoDiInterface
      *
      * @var bool
      */
-    public $isIterable = false;
+    public $isCollection = false;
     
     /**
      * The name of the property that contains the unique "id" attribute for the class
      *
      * @var string
      */
-    public $idProperty;
+    public $idProperty = 'id';
     
     /**
      * A list of property names and their matching getter methods
@@ -112,9 +113,13 @@ class TransformationSchema implements NoDiInterface
             return null;
         }
         
-        $method = $this->properties[$property];
+        if ($this->properties[$property][0] === AbstractReflector::PROPERTY_ACCESS_GETTER) {
+            $method = $this->properties[$property][1];
+            
+            return $value->$method();
+        }
         
-        return $value->$method();
+        return $value->$property;
     }
     
     /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 13:47
+ * Last modified: 2021.06.09 at 13:10
  */
 
 declare(strict_types=1);
@@ -65,10 +65,15 @@ class ExtBaseReflector extends AbstractReflector
         
         $related = [];
         
-        foreach ($properties as $property => $getter) {
+        foreach ($properties as $property => [$accessType, $getter]) {
             $columnMap = $dataMap->getColumnMap($property);
             if ($columnMap === null || $columnMap->getTypeOfRelation() === ColumnMap::RELATION_NONE) {
-                $this->reflectMethodRelation($property, $ref->getMethod($getter), $related);
+                $propRef
+                    = $accessType === AbstractReflector::PROPERTY_ACCESS_GETTER
+                    ? $ref->getMethod($getter)
+                    : $ref->getProperty($getter);
+                
+                $this->reflectMethodOrPropertyRelation($property, $propRef, $related);
                 continue;
             }
             
@@ -86,6 +91,5 @@ class ExtBaseReflector extends AbstractReflector
         
         $schema->properties = $properties;
         $schema->related = $related;
-        $schema->idProperty = 'id';
     }
 }
