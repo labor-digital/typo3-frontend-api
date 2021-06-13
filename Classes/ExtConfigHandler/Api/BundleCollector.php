@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.04 at 16:53
  */
 
 declare(strict_types=1);
@@ -62,6 +62,18 @@ class BundleCollector implements NoDiInterface
         }
         
         $this->bundles[$bundleClass] = $options ?? [];
+        
+        return $this;
+    }
+    
+    /**
+     * Removes all registered bundles
+     *
+     * @return $this
+     */
+    public function clear(): self
+    {
+        $this->bundles = [];
         
         return $this;
     }
