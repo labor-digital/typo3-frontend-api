@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 14:07
+ * Last modified: 2021.06.09 at 14:20
  */
 
 declare(strict_types=1);
@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Implementation;
 
 use LaborDigital\T3fa\Core\Resource\Transformer\AbstractResourceTransformer;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoMagicTransformerTrait;
+use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\SchemaAwareTransformerTrait;
 
 class DefaultResourceTransformer extends AbstractResourceTransformer
@@ -38,6 +39,8 @@ class DefaultResourceTransformer extends AbstractResourceTransformer
     public function transform($value): array
     {
         $this->availableIncludes = [];
+        
+        $value = AutoTransformUtil::unifyValue($value);
         
         if (is_array($value)) {
             return $this->autoTransform($value);
@@ -68,11 +71,14 @@ class DefaultResourceTransformer extends AbstractResourceTransformer
     {
         $schema = $this->getSchema($value);
         
+        if ($schema->isCollection) {
+            dbge($schema, $value);
+        }
         $this->availableIncludes = array_keys($schema->related);
         
         return array_merge(
             ['id' => $schema->getId($value)],
-            array_map([$this, 'autoTransform'], $schema->getAttributes($value))
+            $this->autoTransform($schema->getAttributes($value))
         );
     }
     
@@ -93,9 +99,17 @@ class DefaultResourceTransformer extends AbstractResourceTransformer
         $value = $arguments[0];
         $property = lcfirst(substr($name, 7));
         
+        if (! is_object($value)) {
+            return $this->null();
+        }
+        
         $returnValue = $this->getSchema($value)->getValue($value, $property);
         
-        if ($this->getSchema($returnValue)->isIterable) {
+        if (! is_object($returnValue)) {
+            return $this->null();
+        }
+        
+        if ($this->getSchema($returnValue)->isCollection) {
             return $this->autoIncludeCollection($returnValue);
         }
         

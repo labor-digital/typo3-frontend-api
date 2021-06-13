@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.22 at 00:03
+ * Last modified: 2021.06.10 at 10:27
  */
 
 declare(strict_types=1);
@@ -25,9 +25,10 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use LaborDigital\T3ba\Tool\OddsAndEnds\LazyLoadingUtil;
+use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
+use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use LaborDigital\T3fa\Core\Resource\Transformer\Implementation\DefaultResourceTransformer;
 use LaborDigital\T3fa\Core\Resource\Transformer\Internal\ClassResolver;
 use LaborDigital\T3fa\Core\Resource\Transformer\Internal\PropertyAccessResolver;
@@ -36,6 +37,7 @@ use LaborDigital\T3fa\Core\Resource\Transformer\Schema\SchemaRegistry;
 class TransformerFactory implements PublicServiceInterface
 {
     use ContainerAwareTrait;
+    use T3faCacheAwareTrait;
     
     /**
      * @var \LaborDigital\T3fa\Core\Resource\Transformer\Schema\SchemaRegistry
@@ -74,7 +76,7 @@ class TransformerFactory implements PublicServiceInterface
      */
     public function getTransformer($value, bool $includeValueTransformer = true): TransformerInterface
     {
-        $value = LazyLoadingUtil::getRealValue($value);
+        $value = AutoTransformUtil::unifyValue($value);
         
         if ($value instanceof ResourceCollection || $value instanceof ResourceItem) {
             $value = $value->getRaw();
@@ -88,24 +90,15 @@ class TransformerFactory implements PublicServiceInterface
     }
     
     /**
-     * Returns the instance of the default transformer for the given value
+     * Returns true if there is a registered value transformer class for that value, false if only resource transformer exist
      *
-     * @param   mixed  $value  The value to find the correct post processors for.
-     *                         Contrary to getTransformer() this method will always return the default transformer instance
+     * @param   mixed  $value  The value to find a transformer for
      *
-     * @return ResourceTransformerInterface
-     * @todo if this is not required anywhere, remove it. If it is required mark it as @internal
+     * @return bool
      */
-    public function getDefaultTransformer($value): ResourceTransformerInterface
+    public function hasValueTransformer($value): bool
     {
-        $value = LazyLoadingUtil::getRealValue($value);
-        
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->makeTransformerInstance(
-            DefaultResourceTransformer::class,
-            $this->classResolver->getPostProcessors($value),
-            $this->accessResolver->getAccessInfo($value)
-        );
+        return ! in_array(ResourceTransformerInterface::class, class_implements($this->classResolver->getTransformerClass($value, true)), true);
     }
     
     /**
@@ -145,8 +138,15 @@ class TransformerFactory implements PublicServiceInterface
             
             $transformer = $this->makeInstance(
                 ResourceTransformerProxy::class,
-                [$transformer, $postProcessors, $accessInfo ?? []]
+                [
+                    $transformer,
+                    $this->getCache(),
+                    $this->t3faCacheScopeRegistry,
+                    $postProcessors,
+                    $accessInfo ?? [],
+                ]
             );
+            
         }
         
         return $transformer;

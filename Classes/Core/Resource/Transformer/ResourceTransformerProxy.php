@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 14:27
+ * Last modified: 2021.06.10 at 10:28
  */
 
 declare(strict_types=1);
@@ -23,13 +23,20 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Resource\Transformer;
 
 
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\Core\Exception\NotImplementedException;
+use LaborDigital\T3ba\Tool\Cache\CacheInterface;
+use LaborDigital\T3fa\Core\Cache\Scope\ScopeRegistry;
+use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\Scope;
 use League\Fractal\TransformerAbstract;
 
-class ResourceTransformerProxy extends TransformerAbstract implements ResourceTransformerInterface
+class ResourceTransformerProxy extends TransformerAbstract implements ResourceTransformerInterface, NoDiInterface
 {
+    use T3faCacheAwareTrait {
+        injectT3faCache as protected;
+    }
     
     /**
      * @var \LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface
@@ -48,9 +55,17 @@ class ResourceTransformerProxy extends TransformerAbstract implements ResourceTr
      */
     protected $accessInfo;
     
-    public function __construct(ResourceTransformerInterface $concreteTransformer, array $postProcessors, array $accessInfo)
+    public function __construct(
+        ResourceTransformerInterface $concreteTransformer,
+        CacheInterface $t3faCache,
+        ScopeRegistry $cacheScopeRegistry,
+        array $postProcessors,
+        array $accessInfo
+    )
     {
         $this->concreteTransformer = $concreteTransformer;
+        $this->t3faCache = $t3faCache;
+        $this->t3faCacheScopeRegistry = $cacheScopeRegistry;
         $this->postProcessors = $postProcessors;
         $this->accessInfo = $accessInfo;
     }
@@ -60,6 +75,10 @@ class ResourceTransformerProxy extends TransformerAbstract implements ResourceTr
      */
     public function transform($value): array
     {
+        $this->runInCacheScope(function (\LaborDigital\T3fa\Core\Cache\Scope\Scope $scope) use ($value) {
+            $scope->addCacheTag($value);
+        });
+        
         $result = $this->concreteTransformer->transform($value);
         
         foreach ($this->postProcessors as $postProcessor) {
