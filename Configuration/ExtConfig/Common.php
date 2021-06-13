@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 14:08
+ * Last modified: 2021.06.11 at 14:26
  */
 
 declare(strict_types=1);
@@ -28,7 +28,7 @@ use LaborDigital\T3ba\ExtConfigHandler\Core\ConfigureTypoCoreInterface;
 use LaborDigital\T3ba\ExtConfigHandler\Core\TypoCoreConfigurator;
 use LaborDigital\T3ba\ExtConfigHandler\Translation\ConfigureTranslationInterface;
 use LaborDigital\T3ba\ExtConfigHandler\Translation\TranslationConfigurator;
-use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
+use LaborDigital\T3fa\Core\Cache\Backend\EntryLimitedTypo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 
 class Common implements ConfigureTypoCoreInterface, ConfigureTranslationInterface
@@ -42,7 +42,7 @@ class Common implements ConfigureTypoCoreInterface, ConfigureTranslationInterfac
         $configurator
             ->registerCache('t3fa_frontend',
                 VariableFrontend::class,
-                Typo3DatabaseBackend::class,
+                EntryLimitedTypo3DatabaseBackend::class,
                 [
                     'options' => [
                         'compression' => true,

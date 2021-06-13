@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.04 at 12:41
  */
 
 declare(strict_types=1);
@@ -36,12 +36,12 @@ declare(strict_types=1);
  * Last modified: 2019.09.18 at 18:27
  */
 
-namespace LaborDigital\T3fa\Api\Resource\Factory\Page\Data;
+namespace LaborDigital\T3fa\Domain\DataModel\Page;
 
 
 use LaborDigital\T3ba\ExtBase\Domain\Model\BetterEntity;
 
-class PageDataModel extends BetterEntity
+class DefaultPageDataModel extends BetterEntity
 {
     /**
      * @var string|null
@@ -92,9 +92,9 @@ class PageDataModel extends BetterEntity
     /**
      * @param   string  $navTitle
      *
-     * @return PageDataModel
+     * @return DefaultPageDataModel
      */
-    public function setNavTitle(string $navTitle): PageDataModel
+    public function setNavTitle(string $navTitle): DefaultPageDataModel
     {
         $this->navTitle = $navTitle;
         
@@ -106,14 +106,14 @@ class PageDataModel extends BetterEntity
         return (string)$this->slug;
     }
     
-    public function setSlug(string $slug): PageDataModel
+    public function setSlug(string $slug): DefaultPageDataModel
     {
         $this->slug = $slug;
         
         return $this;
     }
     
-    public function setTitle(string $title): PageDataModel
+    public function setTitle(string $title): DefaultPageDataModel
     {
         $this->title = $title;
         
@@ -125,7 +125,7 @@ class PageDataModel extends BetterEntity
         return (string)$this->seoTitle;
     }
     
-    public function setSeoTitle(string $seoTitle): PageDataModel
+    public function setSeoTitle(string $seoTitle): DefaultPageDataModel
     {
         $this->seoTitle = $seoTitle;
         
@@ -137,7 +137,7 @@ class PageDataModel extends BetterEntity
         return (bool)$this->noFollow;
     }
     
-    public function setNoFollow(bool $noFollow): PageDataModel
+    public function setNoFollow(bool $noFollow): DefaultPageDataModel
     {
         $this->noFollow = $noFollow;
         
@@ -149,7 +149,7 @@ class PageDataModel extends BetterEntity
         return (bool)$this->noIndex;
     }
     
-    public function setNoIndex(bool $noIndex): PageDataModel
+    public function setNoIndex(bool $noIndex): DefaultPageDataModel
     {
         $this->noIndex = $noIndex;
         
