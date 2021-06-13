@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.04 at 18:00
+ * Last modified: 2021.06.11 at 15:14
  */
 
 declare(strict_types=1);
@@ -25,21 +25,23 @@ namespace LaborDigital\T3fa\Core\Routing\Util;
 
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use Neunerlei\Inflection\Inflector;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Throwable;
 use TYPO3\CMS\Core\Error\Http\BadRequestException;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class RequestRewriter
 {
     public const REQUEST_SLUG_HEADER = 'x-t3fa-slug';
     public const REQUEST_SLUG_QUERY_KEY = 'slug';
     public const REQUEST_SITE_HEADER = 'x-t3fa-site-identifier';
-    public const REQUEST_SITE_HOST_HEADER = 'x-t3fa-site-host';
     public const REQUEST_SITE_QUERY_KEY = 'siteIdentifier';
     public const REQUEST_LANG_HEADER = 'x-t3fa-language';
     public const REQUEST_LANG_QUERY_KEY = 'L';
@@ -61,35 +63,103 @@ class RequestRewriter
     }
     
     /**
-     * Rewrites the given server request and creates a TYPO3 conform request object out of it.
-     * This should prevent issues where TYPO3 has issues to resolve the correct page
+     * Converts the known list of configuration headers into query parameters
      *
      * @param   \Psr\Http\Message\ServerRequestInterface  $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface
      */
-    public function rewrite(ServerRequestInterface $request): ServerRequestInterface
+    public function rewriteHeadersToQueryParams(ServerRequestInterface $request): ServerRequestInterface
     {
-        $uri = $this->rewriteUri($request->getUri(), $request);
+        $request = $this->rewriteHeaderToQueryParam(
+            $request, static::REQUEST_SLUG_HEADER, static::REQUEST_SLUG_QUERY_KEY);
         
-        $typoRequest = $this->requestFactory->createServerRequest(
-            $request->getMethod(),
-            $uri,
-            $this->makeServerParams($uri)
-        );
+        $request = $this->rewriteHeaderToQueryParam(
+            $request, static::REQUEST_SITE_HEADER, static::REQUEST_SITE_QUERY_KEY);
         
-        $typoRequest = $typoRequest->withCookieParams($request->getCookieParams());
-        $typoRequest = $typoRequest->withAttribute('originalRequest', $request);
+        $request = $this->rewriteHeaderToQueryParam(
+            $request, static::REQUEST_LANG_HEADER, static::REQUEST_LANG_QUERY_KEY);
         
-        foreach ($request->getAttributes() as $key => $attribute) {
-            $typoRequest = $typoRequest->withAttribute($key, $attribute);
+        if (! empty($request->getQueryParams())) {
+            return $request->withUri(
+                $request->getUri()->withQuery(
+                    http_build_query($request->getQueryParams())
+                )
+            );
         }
         
-        $typoRequest = $typoRequest->withAttribute('normalizedParams', NormalizedParams::createFromRequest($typoRequest));
+        return $request;
+    }
+    
+    /**
+     * Rewrites the given request for the TYPO3 core. Sadly this includes changes on $_GET and $_SERVER,
+     * which have to be reverted after the lifecycle ends. Therefore the process is wrapped by this method.
+     *
+     * @param   \Closure                                  $callback  The callback receives the modified
+     *                                                               Server request to provide to TYPO3
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request   The original request that should be rewritten
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function runWithTypoEnvironment(\Closure $callback, ServerRequestInterface $request): ResponseInterface
+    {
+        $getBackup = $_GET;
+        $getVarsBackup = $GLOBALS['HTTP_GET_VARS'];
+        $serverBackup = $_SERVER;
         
-        // @todo an event would be nice here
+        try {
+            $GLOBALS['HTTP_GET_VARS'] = null;
+            $_GET = $this->rewriteQueryParams($request->getQueryParams());
+            
+            $typoUri = $this->rewriteHost($this->rewriteSlug($request), $request);
+            if (! empty($_GET)) {
+                $typoUri = $typoUri->withQuery(http_build_query($_GET));
+            }
+            
+            $_SERVER = $this->rewriteServerParams($typoUri);
+            
+            GeneralUtility::flushInternalRuntimeCaches();
+            
+            $typoRequest = $this->requestFactory->createServerRequest($request->getMethod(), $typoUri, $_SERVER);
+            $typoRequest = $typoRequest->withQueryParams($_GET);
+            $typoRequest = $typoRequest->withCookieParams($request->getCookieParams());
+            $typoRequest = $typoRequest->withAttribute('originalRequest', $request);
+            
+            foreach ($request->getAttributes() as $key => $attribute) {
+                $typoRequest = $typoRequest->withAttribute($key, $attribute);
+            }
+            
+            $typoRequest = $typoRequest->withAttribute('normalizedParams', NormalizedParams::createFromRequest($typoRequest));
+            
+            // @todo an event would be nice here
+            
+            return $callback($typoRequest);
+            
+        } finally {
+            $_GET = $getBackup;
+            $GLOBALS['HTTP_GET_VARS'] = $getVarsBackup;
+            $_SERVER = $serverBackup;
+        }
+    }
+    
+    /**
+     * Strips out all query parameters that don't start with tx_ and therefore are not part of the extbase naming schema
+     *
+     * @param   array  $queryParams
+     *
+     * @return array
+     */
+    protected function rewriteQueryParams(array $queryParams): array
+    {
+        $inheritedQueryParams = [];
         
-        return $typoRequest;
+        foreach ($queryParams as $k => $v) {
+            if (str_starts_with($k, 'tx_')) {
+                $inheritedQueryParams[$k] = $v;
+            }
+        }
+        
+        return $inheritedQueryParams;
     }
     
     /**
@@ -101,38 +171,15 @@ class RequestRewriter
      */
     public function rewriteLanguageAttribute(ServerRequestInterface $request): ServerRequestInterface
     {
-        if (isset($request->getQueryParams()[static::REQUEST_LANG_QUERY_KEY])) {
-            $lang = $this->resolveLanguage($request->getQueryParams()[static::REQUEST_LANG_QUERY_KEY], $request->getAttribute('site'));
-        }
-        
-        if (! isset($lang) && $request->hasHeader(static::REQUEST_LANG_HEADER)) {
-            $lang = $this->resolveLanguage(
-                $request->getHeaderLine(static::REQUEST_LANG_HEADER),
-                $request->getAttribute('site')
-            );
-        }
-        
-        if ($lang !== null) {
-            return $request->withAttribute('language', $lang);
+        $language = $request->getQueryParams()[static::REQUEST_LANG_QUERY_KEY] ?? null;
+        if ($language !== null) {
+            $lang = $this->resolveLanguage($language, $request->getAttribute('site'));
+            if ($lang !== null) {
+                return $request->withAttribute('language', $lang);
+            }
         }
         
         return $request;
-    }
-    
-    /**
-     * Rewrites the uri based on the provided "host" and "slug" settings in the api request
-     *
-     * @param   \Psr\Http\Message\UriInterface            $uri
-     * @param   \Psr\Http\Message\ServerRequestInterface  $request
-     *
-     * @return \Psr\Http\Message\UriInterface
-     */
-    protected function rewriteUri(UriInterface $uri, ServerRequestInterface $request): UriInterface
-    {
-        return $this->rewriteHost(
-            $this->rewriteSlug($uri, $request),
-            $request
-        );
     }
     
     /**
@@ -143,35 +190,15 @@ class RequestRewriter
      *
      * @return \Psr\Http\Message\UriInterface
      */
-    protected function rewriteSlug(UriInterface $uri, ServerRequestInterface $request): UriInterface
+    protected function rewriteSlug(ServerRequestInterface $request): UriInterface
     {
-        $query = $request->getQueryParams();
-        if (! empty($query[static::REQUEST_SLUG_QUERY_KEY])) {
-            return $this->makeNewSlugUri($uri, $query[static::REQUEST_SLUG_QUERY_KEY]);
-        }
+        $slug = $request->getQueryParams()[static::REQUEST_SLUG_QUERY_KEY] ?? '/';
         
-        if ($request->hasHeader(static::REQUEST_SLUG_HEADER)) {
-            return $this->makeNewSlugUri($uri, $request->getHeaderLine(static::REQUEST_SLUG_HEADER));
-        }
-        
-        return $this->makeNewSlugUri($uri, '/');
-    }
-    
-    /**
-     * Creates a new uri object which combines schema and host from the given $uri and the $slug
-     * provided to the method.
-     *
-     * @param   \Psr\Http\Message\UriInterface  $uri
-     * @param   string                          $slug
-     *
-     * @return \Psr\Http\Message\UriInterface
-     * @throws \TYPO3\CMS\Core\Error\Http\BadRequestException
-     */
-    protected function makeNewSlugUri(UriInterface $uri, string $slug): UriInterface
-    {
         try {
+            $uri = $request->getUri();
+            
             return new Uri($uri->getScheme() . '://' . $uri->getHost() . '/' . ltrim($slug, '/'));
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new BadRequestException('The required slug: "' . $slug . '" seems to be invalid');
         }
     }
@@ -187,30 +214,13 @@ class RequestRewriter
      */
     protected function rewriteHost(UriInterface $uri, ServerRequestInterface $request): UriInterface
     {
-        $query = $request->getQueryParams();
-        if (! empty($query[static::REQUEST_SITE_QUERY_KEY])) {
-            $siteIdentifier = $query[static::REQUEST_SITE_QUERY_KEY];
-        }
-        
-        if (! isset($siteIdentifier) && $request->hasHeader(static::REQUEST_SITE_HEADER)) {
-            $siteIdentifier = $request->getHeaderLine(static::REQUEST_SITE_HEADER);
-        }
-        
-        if (isset($siteIdentifier)) {
+        $siteIdentifier = $request->getQueryParams()[static::REQUEST_SITE_QUERY_KEY] ?? null;
+        if ($siteIdentifier !== null) {
             if (! $this->context->site()->has($siteIdentifier)) {
                 throw new BadRequestException('The required site: "' . $siteIdentifier . '" does not exist');
             }
             
             $hostUri = $this->context->site()->get($siteIdentifier)->getBase();
-        }
-        
-        if (! isset($hostUri) && $request->hasHeader(static::REQUEST_SITE_HOST_HEADER)) {
-            $siteHost = $request->getHeaderLine(static::REQUEST_SITE_HOST_HEADER);
-            try {
-                $hostUri = new Uri($siteHost);
-            } catch (\Throwable $e) {
-                throw new BadRequestException('The required site host: "' . $siteHost . '" is an invalid url');
-            }
         }
         
         if (! isset($hostUri)) {
@@ -220,6 +230,7 @@ class RequestRewriter
         if (! empty($hostUri->getScheme())) {
             $uri = $uri->withScheme($hostUri->getScheme());
         }
+        
         if (! empty($hostUri->getHost())) {
             $uri = $uri->withHost($hostUri->getHost());
         }
@@ -234,7 +245,7 @@ class RequestRewriter
      *
      * @return array
      */
-    protected function makeServerParams(UriInterface $uri): array
+    protected function rewriteServerParams(UriInterface $uri): array
     {
         $serverParams = $_SERVER;
         
@@ -252,13 +263,39 @@ class RequestRewriter
             [
                 static::REQUEST_SITE_HEADER,
                 static::REQUEST_SLUG_HEADER,
-                static::REQUEST_SITE_HOST_HEADER,
             ] as $header
         ) {
             unset($serverParams[strtoupper(Inflector::toUnderscore($header))]);
         }
         
         return $serverParams;
+    }
+    
+    /**
+     * Internal helper that checks if a specific header exists on the request and rewrites it into the
+     * query parameters, if the configured parameter name is NOT already present there.
+     * The header in question will always be removed
+     *
+     * @param   \Psr\Http\Message\ServerRequestInterface  $request
+     * @param   string                                    $headerName
+     * @param   string                                    $queryKey
+     *
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    protected function rewriteHeaderToQueryParam(ServerRequestInterface $request, string $headerName, string $queryKey): ServerRequestInterface
+    {
+        if ($request->hasHeader($headerName)) {
+            $query = $request->getQueryParams();
+            if (! isset($query[$queryKey])) {
+                $query[$queryKey] = $request->getHeaderLine($headerName);
+                $request = $request->withQueryParams($query);
+            }
+            
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+            $request = $request->withoutHeader($headerName);
+        }
+        
+        return $request;
     }
     
     /**

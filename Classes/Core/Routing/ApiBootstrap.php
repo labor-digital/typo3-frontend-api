@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.04 at 17:51
+ * Last modified: 2021.06.11 at 15:13
  */
 
 declare(strict_types=1);
@@ -102,22 +102,15 @@ class ApiBootstrap implements PublicServiceInterface
      */
     public function boot(ServerRequestInterface $request): ResponseInterface
     {
-        $typoRequest = $this->requestRewriter->rewrite($request);
-        $typoRequest = $this->prepareTypo($typoRequest);
-        $request = $request->withAttribute('typoRequest', $typoRequest);
+        $request = $this->requestRewriter->rewriteHeadersToQueryParams($request);
         
-        // Make sure the typo request arguments are passed back into $_GET
-        $getBackup = $_GET;
-        $getVarsBackup = $GLOBALS['HTTP_GET_VARS'];
-        $_GET = $typoRequest->getQueryParams();
-        $GLOBALS['HTTP_GET_VARS'] = $_GET;
-        
-        try {
-            return $this->routerFactory->getRouter()->dispatch($request);
-        } finally {
-            $_GET = $getBackup;
-            $GLOBALS['HTTP_GET_VARS'] = $getVarsBackup;
-        }
+        return $this->requestRewriter->runWithTypoEnvironment(
+            function (ServerRequestInterface $typoRequest) use ($request) {
+                $typoRequest = $this->prepareTypo($typoRequest);
+                $request = $request->withAttribute('typoRequest', $typoRequest);
+                
+                return $this->routerFactory->getRouter()->dispatch($request);
+            }, $request);
     }
     
     /**
