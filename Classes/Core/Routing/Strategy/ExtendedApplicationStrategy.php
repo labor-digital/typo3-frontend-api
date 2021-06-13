@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 20:08
+ * Last modified: 2021.06.10 at 21:32
  */
 
 declare(strict_types=1);
@@ -23,13 +23,17 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Routing\Strategy;
 
 
+use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
 use League\Route\Route;
 use League\Route\Strategy\ApplicationStrategy;
+use League\Route\Strategy\OptionsHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ExtendedApplicationStrategy extends ApplicationStrategy
+class ExtendedApplicationStrategy extends ApplicationStrategy implements OptionsHandlerInterface
 {
+    use ResponseFactoryTrait;
+    
     public function invokeRouteCallable(Route $route, ServerRequestInterface $request): ResponseInterface
     {
         $controller = $route->getCallable($this->getContainer());
@@ -44,4 +48,14 @@ class ExtendedApplicationStrategy extends ApplicationStrategy
         return $this->decorateResponse($response);
     }
     
+    public function getOptionsCallable(array $methods): callable
+    {
+        return function () use ($methods): ResponseInterface {
+            $options = implode(', ', $methods);
+            $response = $this->getResponse();
+            $response = $response->withHeader('allow', $options);
+            
+            return $response->withHeader('access-control-allow-methods', $options);
+        };
+    }
 }
