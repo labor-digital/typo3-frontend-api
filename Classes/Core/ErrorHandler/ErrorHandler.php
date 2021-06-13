@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 21:34
+ * Last modified: 2021.06.07 at 17:32
  */
 
 declare(strict_types=1);
@@ -40,7 +40,7 @@ namespace LaborDigital\T3fa\Core\ErrorHandler;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
+use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\ErrorHandler\Handler\AbstractHandler;
 use LaborDigital\T3fa\Core\ErrorHandler\Handler\PlainHandler;
 use LaborDigital\T3fa\Core\ErrorHandler\Handler\VerboseHandler;
@@ -49,6 +49,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Core\SingletonInterface;
 
@@ -57,7 +58,11 @@ class ErrorHandler implements SingletonInterface, LoggerAwareInterface, PublicSe
     use ResponseFactoryTrait;
     use LoggerAwareTrait;
     use ContainerAwareTrait;
-    use TypoContextAwareTrait;
+    
+    /**
+     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     */
+    protected $context;
     
     /**
      * The name of the class that should be used to handle errors verbosely
@@ -87,6 +92,11 @@ class ErrorHandler implements SingletonInterface, LoggerAwareInterface, PublicSe
      * @var int
      */
     protected static $nestingLevel = 0;
+    
+    public function __construct(TypoContext $context)
+    {
+        $this->context = $context;
+    }
     
     /**
      * Can be used to execute the error handler for a given wrapper function.
@@ -143,9 +153,9 @@ class ErrorHandler implements SingletonInterface, LoggerAwareInterface, PublicSe
      *
      * @return bool
      */
-    protected function isDevMode(): bool
+    public function isDevMode(): bool
     {
-        return $this->getTypoContext()->env()->isDev();
+        return $this->context->env()->isDev();
     }
     
     /**
@@ -153,24 +163,32 @@ class ErrorHandler implements SingletonInterface, LoggerAwareInterface, PublicSe
      *
      * @return bool
      */
-    protected function useVerboseHandler(): bool
+    public function useVerboseHandler(): bool
     {
         // Check if we should use the speaking error handler
-        $useVerboseHandler = $this->getTypoContext()->config()->getConfigValue('t3fa.routing.useSpeakingErrorHandler');
+        $useVerboseHandler = $this->context->config()->getConfigValue('t3fa.routing.useSpeakingErrorHandler');
         
         if ($useVerboseHandler === null) {
-            $context = $this->getTypoContext();
-            
             // Check if we are running ina verbose environment
-            $useVerboseHandler = $this->isDevMode() || $context->env()->isFeDebug();
+            $useVerboseHandler = $this->isDevMode() || $this->context->env()->isFeDebug();
             
             // Check if we got an admin user
-            if (! $useVerboseHandler && $context->beUser()->isAdmin()) {
+            if (! $useVerboseHandler && $this->context->beUser()->isAdmin()) {
                 $useVerboseHandler = true;
             }
         }
         
         return $useVerboseHandler;
+    }
+    
+    /**
+     * Returns the error handler logger instance
+     *
+     * @return \Psr\Log\LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
     }
     
     /**

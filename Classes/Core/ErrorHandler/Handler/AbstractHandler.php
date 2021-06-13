@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 21:16
+ * Last modified: 2021.06.13 at 20:43
  */
 
 declare(strict_types=1);
@@ -42,6 +42,7 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
     use ResponseFactoryTrait;
     use LoggerAwareTrait;
     use ContainerAwareTrait;
+    use ErrorLoggerTrait;
     
     /**
      * The server request we should handle errors for
@@ -91,7 +92,7 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
         
         $errorProcessor = function (Throwable $throwable): ResponseInterface {
             $error = $this->makeInstance(UnifiedError::class, [$throwable, $this->request]);
-            $this->logError($error);
+            $this->logError($this->logger, $error);
             
             return $this->filterErrorResponse(
                 $this->makeResponse($error), $error
@@ -184,7 +185,6 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
         return $this->getResponse($error->getStatusCode())->withHeader(
             'Content-Type', ! $forceJson && $this->doesAcceptHttp()
             ? 'text/html' : 'application/vnd.api+json');
-        
     }
     
     /**
@@ -212,29 +212,4 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
         
         return $response;
     }
-    
-    /**
-     * Internal helper to log an error
-     *
-     * @param   UnifiedError  $error
-     */
-    protected function logError(UnifiedError $error): void
-    {
-        $context = $error->getLogContext();
-        $message = $error->getMessage();
-        
-        $statusCode = $error->getStatusCode();
-        if ($statusCode >= 400) {
-            if ($statusCode >= 500) {
-                $this->logger->critical($message, $context);
-            } elseif ($statusCode === 404) {
-                $this->logger->warning($message, $context);
-            } else {
-                $this->logger->error($message, $context);
-            }
-        } else {
-            $this->logger->info($message, $context);
-        }
-    }
-    
 }
