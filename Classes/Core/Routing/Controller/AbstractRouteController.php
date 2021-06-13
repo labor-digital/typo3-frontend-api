@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.28 at 16:25
+ * Last modified: 2021.06.10 at 21:01
  */
 
 declare(strict_types=1);
@@ -23,8 +23,10 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Routing\Controller;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
 
 abstract class AbstractRouteController implements RouteControllerInterface
 {
     use ContainerAwareTrait;
+    use ResponseFactoryTrait;
 }
