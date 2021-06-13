@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 14:08
+ * Last modified: 2021.06.10 at 15:17
  */
 
 declare(strict_types=1);
@@ -25,12 +25,12 @@ namespace LaborDigital\T3fa\Core\Resource\Repository\Backend;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use LaborDigital\T3ba\Tool\OddsAndEnds\LazyLoadingUtil;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Pagination;
 use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
+use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -141,6 +141,21 @@ class ResourceFactory implements PublicServiceInterface
     }
     
     /**
+     * Helper to retrieve the correct request instance
+     *
+     * @return \Psr\Http\Message\ServerRequestInterface|null
+     */
+    public function getApiRequest(): ?ServerRequestInterface
+    {
+        $request = $this->context->request()->getRootRequest();
+        if ($request && $request->getAttribute('originalRequest') !== null) {
+            return $request->getAttribute('originalRequest');
+        }
+        
+        return $request;
+    }
+    
+    /**
      * Internal helper to create a dummy resource type for not configured values
      *
      * @param   $raw
@@ -149,7 +164,7 @@ class ResourceFactory implements PublicServiceInterface
      */
     protected function makeResourceType($raw): string
     {
-        $item = LazyLoadingUtil::getRealValue($raw);
+        $item = AutoTransformUtil::unifyValue($raw);
         
         if (is_array($item)) {
             $item = reset($item);
@@ -214,20 +229,5 @@ class ResourceFactory implements PublicServiceInterface
         $params['page']['number'] = '___pageNumber___';
         
         return urldecode(http_build_query($params));
-    }
-    
-    /**
-     * Internal helper to retrieve the correct request instance
-     *
-     * @return \Psr\Http\Message\ServerRequestInterface|null
-     */
-    protected function getApiRequest(): ?ServerRequestInterface
-    {
-        $request = $this->context->request()->getRootRequest();
-        if ($request && $request->getAttribute('originalRequest') !== null) {
-            return $request->getAttribute('originalRequest');
-        }
-        
-        return $request;
     }
 }

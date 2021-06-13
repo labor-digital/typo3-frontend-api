@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.21 at 20:05
+ * Last modified: 2021.06.10 at 10:15
  */
 
 declare(strict_types=1);
@@ -24,8 +24,9 @@ namespace LaborDigital\T3fa\Core\Resource\Repository\Backend;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
-use LaborDigital\T3ba\Tool\Database\BetterQuery\AbstractBetterQuery;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
+use LaborDigital\T3fa\Core\Cache\Scope\Scope;
+use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use LaborDigital\T3fa\Core\Resource\Exception\InvalidConfigException;
 use LaborDigital\T3fa\Core\Resource\Exception\PaginationException;
 use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
@@ -37,13 +38,13 @@ use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\ResourceInterface;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Extbase\Persistence\QueryInterface;
+use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 
 class Resolver
 {
     use ContainerAwareTrait;
     use TypoContextAwareTrait;
+    use T3faCacheAwareTrait;
     
     /**
      * @var \LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator
@@ -83,12 +84,16 @@ class Resolver
             return $data;
         }
         
-        $data = $this->convertDbData($data);
+        $data = AutoTransformUtil::unifyValue($data);
         
         switch ($this->getCountOf($data)) {
             case 0:
                 return null;
             case 1:
+                $this->runInCacheScope(function (Scope $scope) use ($data) {
+                    $scope->addCacheTag($data);
+                });
+                
                 return [$data, $config['type'], $context->getMeta()];
         }
         
@@ -133,37 +138,18 @@ class Resolver
             return $data;
         }
         
-        $data = $this->convertDbData($data);
+        $data = AutoTransformUtil::unifyValue($data);
         
         [$slicedData, $pagination] = $this->paginator
             ->paginate($data, $resourceQuery->getPage(), $context->getPageSize(), $context->getPageFinder());
         
+        $this->runInCacheScope(function (Scope $scope) use ($slicedData) {
+            foreach ($slicedData as $data) {
+                $scope->addCacheTag($data);
+            }
+        });
+        
         return [$slicedData, $config['type'], $context->getMeta(), $pagination];
-    }
-    
-    /**
-     * Internal helper that makes sure that all the different database objects get unified into a query response
-     * interface
-     *
-     * @param $data
-     *
-     * @return mixed|\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
-     */
-    protected function convertDbData($data)
-    {
-        if ($data instanceof AbstractBetterQuery) {
-            $data = $data->getQuery();
-        }
-        
-        if ($data instanceof QueryInterface) {
-            return $data->execute();
-        }
-        
-        if ($data instanceof QueryBuilder || $data instanceof \Doctrine\DBAL\Query\QueryBuilder) {
-            return $data->execute()->fetchAllAssociative();
-        }
-        
-        return $data;
     }
     
     /**
@@ -193,8 +179,7 @@ class Resolver
     /**
      * Resolves and creates the resource instance based on the given configuration
      *
-     * @param   string  $resourceType
-     * @param   array   $config
+     * @param   array  $config
      *
      * @return \LaborDigital\T3fa\Core\Resource\ResourceInterface
      * @throws \LaborDigital\T3fa\Core\Resource\Exception\InvalidConfigException
@@ -206,11 +191,9 @@ class Resolver
         }
         
         if (! $this->getContainer()->has($config['class'])) {
-            $instance = $this->makeInstance($config['class']);
-        } else {
-            $instance = $this->getService($config['class']);
+            return $this->makeInstance($config['class']);
         }
         
-        return $instance;
+        return $this->getService($config['class']);
     }
 }
