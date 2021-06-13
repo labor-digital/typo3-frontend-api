@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 12:06
+ * Last modified: 2021.06.13 at 20:32
  */
 
 declare(strict_types=1);
@@ -23,8 +23,8 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\Resource\Transformer\Internal;
 
 
+use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
-use LaborDigital\T3fa\TypoContext\SiteConfigAwareTrait;
 
 class PropertyAccessResolver
 {

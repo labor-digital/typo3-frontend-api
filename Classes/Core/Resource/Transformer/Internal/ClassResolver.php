@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.19 at 21:53
+ * Last modified: 2021.06.13 at 20:32
  */
 
 declare(strict_types=1);
@@ -24,11 +24,11 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Internal;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Transformer\Implementation\DefaultResourceTransformer;
 use LaborDigital\T3fa\Core\Resource\Transformer\Implementation\SelfTransformer;
 use LaborDigital\T3fa\Core\Resource\Transformer\Special\SelfTransformingInterface;
-use LaborDigital\T3fa\TypoContext\SiteConfigAwareTrait;
 
 class ClassResolver
 {
@@ -123,7 +123,12 @@ class ClassResolver
                 }
             }
             
-            $transformerClass = $foundValueTransformer ?? $foundResourceTransformer ?? $transformerClass;
+            if ($includeValueTransformer) {
+                $transformerClass = $foundValueTransformer ?? $foundResourceTransformer ?? $transformerClass;
+            } else {
+                $transformerClass = $foundResourceTransformer ?? $transformerClass;
+            }
+            
             $this->resolvedTransformers[$key] = $transformerClass;
         }
         
