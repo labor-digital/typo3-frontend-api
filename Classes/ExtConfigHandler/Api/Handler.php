@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.13 at 20:54
  */
 
 declare(strict_types=1);
@@ -24,9 +24,11 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigHandler;
+use LaborDigital\T3ba\ExtConfig\ExtConfigException;
 use LaborDigital\T3ba\ExtConfig\ExtConfigService;
 use LaborDigital\T3ba\ExtConfig\Interfaces\SiteBasedHandlerInterface;
 use LaborDigital\T3fa\Api\Bundle\CategoryBundle;
+use LaborDigital\T3fa\Api\Bundle\CollectionBundle;
 use LaborDigital\T3fa\Api\Bundle\ContentBundle;
 use LaborDigital\T3fa\Api\Bundle\FileBundle;
 use LaborDigital\T3fa\Api\Bundle\PageBundle;
@@ -42,6 +44,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
 {
     public const DEFAULT_BUNDLES
         = [
+            CollectionBundle::class => [],
             ValueTransformerBundle::class => [],
             PageBundle::class => [],
             CategoryBundle::class => [],
@@ -162,9 +165,24 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
             $configurator->finish($this->configurator, $types, $classMap);
         }
         
+        $collectionClasses = $collector->getCollectionClasses();
+        
+        foreach ($collectionClasses as $collectionClass) {
+            if (! isset($classMap[$collectionClass])) {
+                continue;
+            }
+            
+            throw new ExtConfigException(
+                'There is an overlap between a resource and collection class for: '
+                . '"' . $collectionClass . '" which is registered as collection class, and for resource: "' .
+                $classMap[$collectionClass] . '" as well. To fix this, remove it either from the collection class list ' .
+                'or from the list of resource classes.');
+        }
+        
         $context->getState()
                 ->set('t3fa.resource.types', $types)
-                ->set('t3fa.resource.classMap', $classMap);
+                ->set('t3fa.resource.classMap', $classMap)
+                ->set('t3fa.resource.collectionClasses', $collectionClasses);
     }
     
     /**

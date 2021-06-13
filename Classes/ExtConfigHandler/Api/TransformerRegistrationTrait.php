@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.09 at 11:21
  */
 
 declare(strict_types=1);
@@ -35,7 +35,7 @@ trait TransformerRegistrationTrait
      * @param   array         $list                          The list to add the transformer definition to
      * @param   string|array  $targetClassOrInterfaceOrList  Either a single target type, or a list of target types
      * @param   string        $transformerClassName          The transformer class to register for the given target
-     * @param   string|null   $requiredInterface
+     * @param   string|null   $requiredInterface             An optional interface name the registered transformer has to implement
      *
      * @return array
      */

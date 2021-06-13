@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.09 at 11:27
  */
 
 declare(strict_types=1);
@@ -45,6 +45,13 @@ class ResourceCollector implements NoDiInterface
      * @var array
      */
     protected $resources = [];
+    
+    /**
+     * A list of classes that will always be treated as a "collection" of other types
+     *
+     * @var array
+     */
+    protected $collectionClasses = [];
     
     /**
      * @param   string  $siteKey
@@ -133,6 +140,47 @@ class ResourceCollector implements NoDiInterface
     public function get(string $resourceType): ?array
     {
         return $this->resources[$resourceType] ?? null;
+    }
+    
+    /**
+     * Registers the name of the given class to always be treated as a collection and never as resource itself.
+     * Good examples are "ObjectStorage" objects or special iterators
+     *
+     * @param   string  $class
+     *
+     * @return $this
+     */
+    public function registerCollectionClass(string $class): self
+    {
+        $this->collectionClasses = array_unique(array_merge($this->collectionClasses, [$class]));
+        
+        return $this;
+    }
+    
+    /**
+     * Sets the list of given classes to always be treated as a collection and never as resource itself.
+     * Good examples are "ObjectStorage" objects or special iterators
+     *
+     * @param   array  $classes
+     *
+     * @return $this
+     */
+    public function setCollectionClasses(array $classes): self
+    {
+        $this->collectionClasses = [];
+        array_map([$this, 'registerCollectionClass'], $classes);
+        
+        return $this;
+    }
+    
+    /**
+     * Returns the configured collection classes
+     *
+     * @return array
+     */
+    public function getCollectionClasses(): array
+    {
+        return $this->collectionClasses;
     }
     
     /**

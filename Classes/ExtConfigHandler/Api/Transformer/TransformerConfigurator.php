@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.09 at 11:28
  */
 
 declare(strict_types=1);
@@ -227,7 +227,7 @@ class TransformerConfigurator extends AbstractExtConfigConfigurator
      *
      * @return $this
      * @see \LaborDigital\T3fa\Core\Resource\Transformer\ValueTransformerInterface
-     * @see \LaborDigital\T3fa\Resource\Transformer\DateTransformer
+     * @see \LaborDigital\T3fa\Api\Resource\Transformer\DateTransformer
      */
     public function registerValueTransformer(string $transformerClassName, $targetClassOrInterfaceOrList): self
     {

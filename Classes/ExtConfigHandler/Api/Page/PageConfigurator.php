@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.04 at 13:40
  */
 
 declare(strict_types=1);
@@ -214,16 +214,17 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      *
      * @return $this
      *
-     * @see PageDataModel
+     * @see DefaultPageDataModel
+     * @see \LaborDigital\T3ba\Tool\Tca\ContentType\Domain\AbstractDataModel
      */
     public function setDataModelClass(string $class): self
     {
         if (! class_exists($class)) {
-            throw new InvalidArgumentException('The given page data model ' . $class . ' does not exist!');
+            throw new InvalidArgumentException('The given page data model: "' . $class . '" does not exist!');
         }
         
         if (! in_array(AbstractEntity::class, class_parents($class), true)) {
-            throw new InvalidArgumentException('The given page data model ' . $class . ' has to extend the ' . AbstractEntity::class . ' class!');
+            throw new InvalidArgumentException('The given page data model: "' . $class . '" has to extend the ' . AbstractEntity::class . ' class!');
         }
         
         $this->dataModelClass = $class;
