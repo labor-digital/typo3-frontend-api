@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.07 at 17:01
+ * Last modified: 2021.06.13 at 23:14
  */
 
 declare(strict_types=1);
@@ -204,10 +204,12 @@ class UnifiedError
      */
     protected function generateExtendedErrorMessage(Throwable $error, ?ServerRequestInterface $request): string
     {
+        $message = [];
+        
         // Combine the error messages of all nested errors
         $e = $error;
         while ($e !== null) {
-            $message[] = $e->getMessage();
+            $message[] = $this->extractMessage($e);
             $e = $e->getPrevious();
         }
         $count = count($message);
@@ -298,7 +300,7 @@ class UnifiedError
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         while ($error !== null) {
             $this->stack[] = [
-                'title' => empty($error->getMessage()) ? $this->error->getMessage() : $error->getMessage(),
+                'title' => $this->extractMessage($error),
                 'code' => $error->getCode(),
                 'trace' => array_map(static function ($v) {
                     unset($v['args'], $v['type']);
@@ -319,5 +321,48 @@ class UnifiedError
             ];
             $error = $error->getPrevious();
         }
+    }
+    
+    /**
+     * Helper to extract the correct error message from the given exception object
+     *
+     * @param   \Throwable  $e
+     *
+     * @return string
+     */
+    protected function extractMessage(Throwable $e): string
+    {
+        if ($e instanceof ImmediateResponseException) {
+            return $this->translateImmediateResponseException($e)->getMessage();
+        }
+        
+        return empty($e->getMessage()) ? 'Unknown' : $e->getMessage();
+    }
+    
+    /**
+     * Internal helper to translate the html content of an immediate response exception into a readable string
+     *
+     * @param   \TYPO3\CMS\Core\Http\ImmediateResponseException  $e
+     *
+     * @return \Throwable
+     */
+    protected function translateImmediateResponseException(ImmediateResponseException $e): Throwable
+    {
+        $body = (string)$e->getResponse()->getBody();
+        $markerPos = strpos($body, '<div class="media-body">');
+        if ($markerPos === false) {
+            return $e;
+        }
+        
+        $body = substr($body, $markerPos);
+        preg_match('~<h4 class="alert-title">(.*?)</h4>.*?<div class="callout-body">(.*?)</div>~msi', $body, $m);
+        
+        if (empty($m)) {
+            return $e;
+        }
+        
+        $message = ltrim(trim($m[1]) . ': ', ': ') . trim($m[2]);
+        
+        return new \Exception($message);
     }
 }

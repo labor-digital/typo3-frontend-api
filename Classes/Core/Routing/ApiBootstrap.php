@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.11 at 15:13
+ * Last modified: 2021.06.13 at 22:59
  */
 
 declare(strict_types=1);
@@ -29,12 +29,12 @@ use LaborDigital\T3ba\Middleware\RequestCollectorMiddleware;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Routing\Util\MiniDispatcher;
 use LaborDigital\T3fa\Core\Routing\Util\RequestRewriter;
+use LaborDigital\T3fa\Middleware\Typo\ExtRedirectsMiddleware;
 use LaborDigital\T3fa\Middleware\Typo\LanguageRewriterMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Middleware\BackendUserAuthenticator;
@@ -63,6 +63,7 @@ class ApiBootstrap implements PublicServiceInterface
             LanguageRewriterMiddleware::class,
             BackendUserAuthenticator::class,
             FrontendUserAuthenticator::class,
+            [ExtRedirectsMiddleware::class, 'registerIfRequired'],
             PageResolver::class,
             PreviewSimulator::class,
             PageArgumentValidator::class,
@@ -125,9 +126,61 @@ class ApiBootstrap implements PublicServiceInterface
     protected function prepareTypo(ServerRequestInterface $request): ServerRequestInterface
     {
         $dispatcher = $this->makeInstance(MiniDispatcher::class);
-        $dispatcher->middlewares = static::$typoMiddlewares;
+        $requestResolver = $this->buildRequestResolver();
+        $dispatcher->middlewares = $this->buildTypoMiddlewareStack($requestResolver);
         
-        $resolver = new class implements MiddlewareInterface {
+        $response = $dispatcher->handle($request);
+        
+        if ($requestResolver->typoRequest === null) {
+            throw new T3faImmediateResponseException($response);
+        }
+        
+        $dispatcher->middlewares = [];
+        unset($dispatcher);
+        
+        // Ensure a cObject
+        $GLOBALS['TSFE']->cObj = $this->makeInstance(
+            ContentObjectRenderer::class, [$GLOBALS['TSFE'], $this->getContainer()]);
+        
+        return $requestResolver->typoRequest;
+    }
+    
+    /**
+     * Builds the prepared typo middleware stack based on static::$typoMiddlewares
+     *
+     * @param   object  $requestResolver
+     *
+     * @return array
+     */
+    protected function buildTypoMiddlewareStack(object $requestResolver): array
+    {
+        $middlewares = [];
+        
+        foreach (static::$typoMiddlewares as $middleware) {
+            if (is_callable($middleware)) {
+                $middleware = $middleware();
+            }
+            
+            if (empty($middleware)) {
+                continue;
+            }
+            
+            $middlewares[] = $middleware;
+        }
+        
+        $middlewares[] = $requestResolver;
+        
+        return $middlewares;
+    }
+    
+    /**
+     * Creates a anonymous class that will be executed as last middleware in the stack and fetch the prepared request object
+     *
+     * @return object
+     */
+    protected function buildRequestResolver(): object
+    {
+        return new class implements MiddlewareInterface {
             public $typoRequest;
             
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -138,23 +191,5 @@ class ApiBootstrap implements PublicServiceInterface
                 return new Response();
             }
         };
-        
-        $dispatcher->middlewares[] = $resolver;
-        
-        $response = $dispatcher->handle($request);
-        
-        if ($resolver->typoRequest === null) {
-            throw new ImmediateResponseException($response);
-        }
-        
-        $dispatcher->middlewares = [];
-        unset($dispatcher);
-        
-        // Ensure a cObject
-        $GLOBALS['TSFE']->cObj = $this->makeInstance(
-            ContentObjectRenderer::class, [$GLOBALS['TSFE'], $this->getContainer()]);
-        
-        return $resolver->typoRequest;
     }
-    
 }

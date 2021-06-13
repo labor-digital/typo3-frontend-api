@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.07 at 11:53
+ * Last modified: 2021.06.13 at 22:56
  */
 
 declare(strict_types=1);
@@ -32,6 +32,7 @@ use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 use LaborDigital\T3fa\Configuration\Table\Override\BackendLayoutTable;
 use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
+use LaborDigital\T3fa\Core\Routing\Util\RedirectUtil;
 use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -96,13 +97,10 @@ class InfoGenerator
     public function generate(PageData $data): void
     {
         $data->pageInfoArray = $this->findInfoArray($data);
-        
-        $redirectUrl = $this->findRedirectUrl($data);
-        if ($redirectUrl) {
+        $redirect = $this->findRedirectConfig($data);
+        if ($redirect) {
             $data->isRedirect = true;
-            $data->attributes['redirect'] = [
-                'url' => $redirectUrl,
-            ];
+            $data->attributes = $redirect;
             
             return;
         }
@@ -146,7 +144,7 @@ class InfoGenerator
      *
      * @return string|null
      */
-    protected function findRedirectUrl(PageData $pageData): ?string
+    protected function findRedirectConfig(PageData $pageData): ?array
     {
         $info = $pageData->pageInfoArray;
         switch ((int)$info['doktype']) {
@@ -158,12 +156,16 @@ class InfoGenerator
                 );
                 
                 if (is_array($shortcutInfo) && ! empty($shortcutInfo['uid'])) {
-                    return $this->linkService->getLink()->withPid($shortcutInfo['uid'])->build(['relative']);
+                    $url = $this->linkService->getLink()->withPid($shortcutInfo['uid'])->build(['relative']);
+                    
+                    return RedirectUtil::makeRedirectAttribute($url);
                 }
                 
                 break;
             case PageRepository::DOKTYPE_LINK:
-                return $info['url'] ?? null;
+                if (! empty($info['url'])) {
+                    return RedirectUtil::makeRedirectAttribute((string)$info['url'], $info['target']);
+                }
         }
         
         return null;
