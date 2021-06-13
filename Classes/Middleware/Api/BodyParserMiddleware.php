@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2020 LABOR.digital
+ * Copyright 2021 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.08.27 at 11:49
+ * Last modified: 2021.06.10 at 21:15
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\Typo3FrontendApi\ApiRouter\Builtin\Middleware\BodyParser;
-
+namespace LaborDigital\T3fa\Middleware\Api;
 
 use League\Route\Http\Exception\BadRequestException;
 use Neunerlei\Arrays\ArrayGeneratorException;
@@ -35,22 +34,21 @@ use Throwable;
 
 class BodyParserMiddleware implements MiddlewareInterface
 {
-
+    
     /**
      * The list of all registered parsers
      *
      * @var callable[]
      */
     protected $parsers = [];
-
+    
     /**
      * The HTTP methods where this middleware should be active
      *
      * @var string[]
      */
     protected $activeMethods = ['POST', 'PUT', 'DELETE'];
-
-
+    
     /**
      * Registers a new body parser that is used for the given content types
      *
@@ -64,10 +62,10 @@ class BodyParserMiddleware implements MiddlewareInterface
         foreach ($contentTypes as $contentType) {
             $this->parsers[$contentType] = $parser;
         }
-
+        
         return $this;
     }
-
+    
     /**
      * Returns the list of all registered parsers, ordered by their respective content types.
      * This will also include all built-in default parsers
@@ -79,10 +77,10 @@ class BodyParserMiddleware implements MiddlewareInterface
         if (empty($this->parsers)) {
             $this->registerDefaultParsers();
         }
-
+        
         return $this->parsers;
     }
-
+    
     /**
      * Returns the configured HTTP methods where this middleware should be active
      *
@@ -92,7 +90,7 @@ class BodyParserMiddleware implements MiddlewareInterface
     {
         return $this->activeMethods;
     }
-
+    
     /**
      * Sets the HTTP methods where this middleware should be active
      *
@@ -103,10 +101,10 @@ class BodyParserMiddleware implements MiddlewareInterface
     public function setActiveMethods(array $activeMethods): BodyParserMiddleware
     {
         $this->activeMethods = $activeMethods;
-
+        
         return $this;
     }
-
+    
     /**
      * @inheritDoc
      */
@@ -115,25 +113,25 @@ class BodyParserMiddleware implements MiddlewareInterface
         if (! empty($request->getParsedBody())) {
             return $handler->handle($request);
         }
-
+        
         if (! in_array($request->getMethod(), $this->activeMethods, true)) {
             return $handler->handle($request);
         }
-
-        $parsers     = $this->getParsers();
+        
+        $parsers = $this->getParsers();
         $contentType = $request->getHeaderLine('Content-Type');
-
+        
         foreach ($parsers as $parserContentType => $parser) {
             if (stripos($contentType, $parserContentType) !== 0) {
                 continue;
             }
-            $request = call_user_func($parsers[$parserContentType], $request);
+            $request = $parsers[$parserContentType]($request);
             break;
         }
-
+        
         return $handler->handle($request);
     }
-
+    
     /**
      * Registers the default parsers for the most common content types
      */
@@ -141,37 +139,37 @@ class BodyParserMiddleware implements MiddlewareInterface
     {
         $this->addParser(['application/x-www-form-urlencoded'], static function (ServerRequestInterface $request) {
             $content = trim((string)$request->getBody());
-
+            
             if (empty($content)) {
                 return $request->withParsedBody([]);
             }
-
+            
             parse_str($content, $data);
-
+            
             if (empty($data)) {
                 throw new BadRequestException('Invalid form data given');
             }
-
+            
             return $request->withParsedBody($data);
         });
-
+        
         $this->addParser(['application/json'], static function (ServerRequestInterface $request) {
             try {
                 $content = Arrays::makeFromJson($request->getBody()->getContents());
-
+                
                 return $request->withParsedBody($content);
             } catch (ArrayGeneratorException $exception) {
                 throw new BadRequestException('Invalid JSON data given');
             }
         });
-
+        
         $this->addParser(['application/xml', 'text/xml', 'application/x-xml'], static function (ServerRequestInterface $request) {
             $content = trim((string)$request->getBody());
-
+            
             if (empty($content)) {
                 return $request;
             }
-
+            
             try {
                 return $request->withParsedBody(new SimpleXMLElement($content));
             } catch (Throwable $e) {

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 21:18
+ * Last modified: 2021.06.13 at 20:32
  */
 
 declare(strict_types=1);
@@ -28,11 +28,12 @@ use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\VarFs\VarFs;
+use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Routing\Strategy\ExtendedApplicationStrategy;
 use LaborDigital\T3fa\Middleware\Api\AttributeProviderMiddleware;
+use LaborDigital\T3fa\Middleware\Api\BodyParserMiddleware;
 use LaborDigital\T3fa\Middleware\Api\CacheMiddleware;
-use LaborDigital\T3fa\TypoContext\SiteConfigAwareTrait;
 use League\Route\Route;
 use League\Route\Router;
 
@@ -87,6 +88,8 @@ class RouterFactory
         $strategy->setContainer($this->getContainer());
         $router->setStrategy($strategy);
         
+        // @todo an event would be nice here
+        
         return $router;
         
     }
@@ -108,6 +111,7 @@ class RouterFactory
             
             $route->setName($config['name']);
             
+            $route->lazyPrependMiddleware(BodyParserMiddleware::class);
             $route->lazyPrependMiddleware(CacheMiddleware::class);
             
             if (! empty($config['attributes'])) {
