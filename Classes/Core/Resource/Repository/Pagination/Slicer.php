@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.25 at 10:56
+ * Last modified: 2021.06.08 at 21:24
  */
 
 declare(strict_types=1);
@@ -36,6 +36,7 @@ class Slicer
      * @param   Pagination                        $pagination  The prepared pagination object that describes how the slice should be retrieved
      *
      * @return iterable
+     * @throws \LaborDigital\T3fa\Core\Resource\Exception\PaginationException
      */
     public function slice($raw, Pagination $pagination): iterable
     {
