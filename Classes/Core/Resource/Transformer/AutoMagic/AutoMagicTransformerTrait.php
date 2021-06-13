@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 00:02
+ * Last modified: 2021.06.08 at 17:09
  */
 
 declare(strict_types=1);
@@ -51,6 +51,6 @@ trait AutoMagicTransformerTrait
      */
     protected function transformLinkReferences(string $input): string
     {
-        // @todo implement this
+        return $this->autoTransformer->transformLinkReferences($input);
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.20 at 17:56
+ * Last modified: 2021.06.04 at 22:17
  */
 
 declare(strict_types=1);
@@ -94,7 +94,7 @@ class RteContentParser implements SingletonInterface
     public function parseContent(string $content): string
     {
         // Parse the string using the simulator
-        return (string)$this->simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($content) {
+        return (string)$this->simulator->runWithEnvironment([], function () use ($content) {
             $this->ensureTsParserConfig($this->tsfeService->getTsfe());
             
             return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, null, '< lib.parseFunc_RTE');
