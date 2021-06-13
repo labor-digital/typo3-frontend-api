@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.25 at 13:50
+ * Last modified: 2021.06.07 at 17:01
  */
 
 declare(strict_types=1);
@@ -108,7 +108,7 @@ class UnifiedError
     {
         $this->rawError = $error;
         $this->error = $this->translateError($error);
-        $this->message = $this->generateExtendedErrorMessage($this->error, $request);
+        $this->message = $this->generateExtendedErrorMessage($error, $request);
         $this->generateMeta($request);
         $this->convertThrowableToStack($error);
         $this->statusCode = method_exists($error, 'getStatusCode') ? $error->getStatusCode() : $this->statusCode;
