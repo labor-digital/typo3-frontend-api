@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:22
+ * Last modified: 2021.06.10 at 10:13
  */
 
 declare(strict_types=1);
@@ -60,7 +60,7 @@ class ResourceCollection extends AbstractResourceElement implements \Iterator
     
     public function __construct(
         string $resourceType,
-        $raw,
+        ?iterable $raw,
         ?array $meta,
         string $baseUrl,
         Pagination $pagination,
