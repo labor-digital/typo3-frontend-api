@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.04 at 21:34
+ * Last modified: 2021.06.10 at 10:17
  */
 
 declare(strict_types=1);
@@ -61,11 +61,7 @@ trait CacheOptionsTrait
      */
     public function addCacheTag($tag)
     {
-        $this->cacheTags = array_unique(
-            array_merge($this->cacheTags, CacheUtil::stringifyTag($tag))
-        );
-        
-        return $this;
+        return $this->addCacheTags([$tag]);
     }
     
     /**
@@ -77,9 +73,11 @@ trait CacheOptionsTrait
      */
     public function addCacheTags(array $tags)
     {
+        $tagList[] = $this->cacheTags;
         foreach ($tags as $tag) {
-            $this->addCacheTag($tag);
+            $tagList[] = CacheUtil::stringifyTag($tag);
         }
+        $this->cacheTags = array_unique(array_merge(...$tagList) ?? []);
         
         return $this;
     }
@@ -96,11 +94,7 @@ trait CacheOptionsTrait
     {
         $this->cacheTags = [];
         
-        foreach ($tags as $tag) {
-            $this->addCacheTag($tag);
-        }
-        
-        return $this;
+        return $this->addCacheTags($tags);
     }
     
     /**
@@ -116,6 +110,8 @@ trait CacheOptionsTrait
     /**
      * Sets the given lifetime to all currently open scopes.
      * The ttl acts as a max value for all open scopes. All scopes with a lower ttl will be unaffected
+     *
+     * WARNING: 0 means forever not disable cache!
      *
      * @param   int|null  $lifetime
      *
@@ -147,7 +143,7 @@ trait CacheOptionsTrait
      *
      * @return $this
      */
-    public function setIsCacheEnabled(bool $state)
+    public function setCacheEnabled(bool $state)
     {
         $this->cacheEnabled = $state;
         
@@ -168,22 +164,28 @@ trait CacheOptionsTrait
      * Allows you to announce all caching options collected in the CacheOptionTrait at once
      *
      * @param   array  $options  The result of CacheOptionsTrait::getCacheOptionsArray();
+     * @param   bool   $addTags  By default the tags are replaced with the ones given.
+     *                           If set to true, the tags are added to the existing ones instead.
      *
      * @return $this
      * @see \LaborDigital\T3fa\Core\Cache\CacheOptionsTrait
      */
-    public function setCacheOptions(array $options)
+    public function setCacheOptions(array $options, bool $addTags = false)
     {
         if (isset($options['lifetime'])) {
             $this->setCacheLifetime($options['lifetime']);
         }
         
         if (isset($options['enabled'])) {
-            $this->setIsCacheEnabled($options['enabled']);
+            $this->setCacheEnabled($options['enabled']);
         }
         
         if (isset($options['tags'])) {
-            $this->setCacheTags($options['tags']);
+            if ($addTags) {
+                $this->addCacheTags($options['tags']);
+            } else {
+                $this->setCacheTags($options['tags']);
+            }
         }
         
         return $this;

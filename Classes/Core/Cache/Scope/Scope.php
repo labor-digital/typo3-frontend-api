@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 15:50
+ * Last modified: 2021.06.10 at 11:38
  */
 
 declare(strict_types=1);
@@ -89,12 +89,12 @@ class Scope implements NoDiInterface
      *
      * @return $this
      */
-    public function setIsCacheEnabled(bool $state): self
+    public function setCacheEnabled(bool $state): self
     {
         $this->cacheEnabled = $state;
         
         if ($this->parent) {
-            $this->parent->setIsCacheEnabled($state);
+            $this->parent->setCacheEnabled($state);
         }
         
         return $this;
@@ -143,7 +143,8 @@ class Scope implements NoDiInterface
     {
         if ($thisIsMe) {
             $this->cacheLifetime = $lifetime;
-        } elseif ($lifetime !== null && ($this->cacheLifetime === null || $this->cacheLifetime > $lifetime)) {
+        } elseif ($lifetime !== null &&
+                  ($this->cacheLifetime === null || $this->cacheLifetime > $lifetime || $this->cacheLifetime === 0)) {
             $this->cacheLifetime = $lifetime;
         }
         
@@ -151,7 +152,7 @@ class Scope implements NoDiInterface
             return;
         }
         
-        if ($this->parent) {
+        if ($this->parent && $lifetime !== 0) {
             $this->parent->setLifetimeInternal($lifetime, false);
         }
     }

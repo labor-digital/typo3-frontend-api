@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 14:43
+ * Last modified: 2021.06.10 at 21:10
  */
 
 declare(strict_types=1);
@@ -55,12 +55,20 @@ class MetricsRenderer implements PublicServiceInterface
     {
         $output = [];
         
+        $output[] = 'NOW: ' . (new DateTimy())->formatSql();
         $output[] = 'BASE CACHE KEY: ' . $this->environmentCacheKeyGenerator->makeCacheKey();
         $output[] = '';
         
+        $metricsOutput = [];
         foreach ($this->metricsTracker->getAll() as $node) {
-            $output[] = $this->renderNode($node, 0);
+            $metricsOutput[] = $this->renderNode($node, 0);
         }
+        
+        if (empty($metricsOutput)) {
+            $metricsOutput[] = 'There are no cache operations tracked - The cache was probably disabled globally';
+        }
+        
+        $output = array_merge($output, $metricsOutput);
         
         return implode(PHP_EOL, $output);
     }
@@ -151,6 +159,10 @@ class MetricsRenderer implements PublicServiceInterface
     {
         if (! isset($node['generated'], $node['lifetime'])) {
             return '';
+        }
+        
+        if ((int)$node['lifetime'] === 0) {
+            return ' | VALID FOREVER';
         }
         
         $timestamp = (new DateTimy($node['lifetime'] + $node['generated']))->formatSql();

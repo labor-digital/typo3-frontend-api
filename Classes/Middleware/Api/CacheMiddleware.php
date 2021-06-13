@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 15:50
+ * Last modified: 2021.06.11 at 14:28
  */
 
 declare(strict_types=1);
@@ -26,9 +26,9 @@ namespace LaborDigital\T3fa\Middleware\Api;
 use GuzzleHttp\Psr7\Utils;
 use LaborDigital\T3ba\Tool\Cache\KeyGenerator\RequestCacheKeyGenerator;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
+use LaborDigital\T3fa\Core\Cache\Implementation\T3faCache;
 use LaborDigital\T3fa\Core\Cache\Metrics\MetricsRenderer;
 use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
-use LaborDigital\T3fa\Core\Routing\Util\RequestRewriter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -90,7 +90,13 @@ class CacheMiddleware implements MiddlewareInterface, LoggerAwareInterface
             header_remove($key);
         }
         
-        $response = $this->getCache()->remember(static function () use ($request, $handler): ResponseInterface {
+        $cache = $this->getCache();
+        
+        if (! $isCacheable && $cache instanceof T3faCache) {
+            $cache->setGloballyDisabled();
+        }
+        
+        $response = $cache->remember(static function () use ($request, $handler): ResponseInterface {
             $response = $handler->handle($request);
             $response = $response->withHeader(static::CACHE_STATUS_HEADER, 'new');
             
@@ -99,12 +105,12 @@ class CacheMiddleware implements MiddlewareInterface, LoggerAwareInterface
         }, null, array_merge(
             $cacheOptions,
             [
-                'keyGenerator' => new RequestCacheKeyGenerator($request, [
-                    RequestRewriter::REQUEST_LANG_HEADER,
-                    RequestRewriter::REQUEST_SLUG_HEADER,
-                    RequestRewriter::REQUEST_SITE_HEADER,
-                    RequestRewriter::REQUEST_SITE_HOST_HEADER,
-                ]),
+                'keyGenerator' => new RequestCacheKeyGenerator($request),
+                // I limit the lifetime of the cache to a day here,
+                // because the request cache handles a lot of possible permutations.
+                // This allows the garbage collector to flush the cache more frequently.
+                // @todo a config option would be nice here
+                'lifetime' => 60 * 60 * 24,
                 'enabled' => static function (ResponseInterface $response) use (&$isCacheable) {
                     $isCacheable = $isCacheable && in_array($response->getStatusCode(), [200, 203, 204, 206], true);
                     

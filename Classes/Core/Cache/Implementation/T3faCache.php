@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 15:49
+ * Last modified: 2021.06.11 at 16:18
  */
 
 declare(strict_types=1);
@@ -25,12 +25,19 @@ namespace LaborDigital\T3fa\Core\Cache\Implementation;
 
 use Closure;
 use LaborDigital\T3ba\Tool\Cache\Implementation\FrontendCache;
+use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Core\Cache\Constraint\ConstraintBuilder;
 use LaborDigital\T3fa\Core\Cache\Scope\Scope;
 use LaborDigital\T3fa\Core\Cache\Scope\ScopeRegistry;
 
 class T3faCache extends FrontendCache
 {
+    /**
+     * @var \LaborDigital\T3fa\Core\Cache\Constraint\ConstraintBuilder
+     */
+    protected $constraintBuilder;
+    
     /**
      * @var \LaborDigital\T3fa\Core\Cache\Scope\ScopeRegistry
      */
@@ -44,17 +51,54 @@ class T3faCache extends FrontendCache
     protected $generator;
     
     /**
+     * True if the cache was globally disabled
+     *
+     * @var bool
+     */
+    protected $globallyDisabled = false;
+    
+    /**
      * @inheritDoc
      */
     public function remember(callable $callback, ?array $keyArgs = null, array $options = [])
     {
         $this->generator = $callback;
         
+        if ($this->isGloballyDisabled()) {
+            $options['enabled'] = false;
+        } else {
+            $keyArgs = $this->handleQueryParamHash($keyArgs);
+        }
+        
         try {
             return parent::remember($callback, $keyArgs, $options);
         } finally {
             $this->generator = null;
         }
+    }
+    
+    /**
+     * This option allows the outside world to forcefully disable the t3fa cache globally.
+     *
+     * @param   bool  $state  True to disable the cache, false to reenable it.
+     *
+     * @return $this
+     */
+    public function setGloballyDisabled(bool $state = true): self
+    {
+        $this->globallyDisabled = $state;
+        
+        return $this;
+    }
+    
+    /**
+     * Returns true if the cache was globally disabled, false if not.
+     *
+     * @return bool
+     */
+    public function isGloballyDisabled(): bool
+    {
+        return $this->globallyDisabled;
     }
     
     /**
@@ -70,18 +114,20 @@ class T3faCache extends FrontendCache
                 
                        $scope->setCacheLifetime($lifetime);
                        $scope->addCacheTags($tags);
-                       $scope->setIsCacheEnabled($enabled);
+                       $scope->setCacheEnabled($enabled);
                 
                        $result = parent::wrapGeneratorCall($key, $generator, $options, $tags, $lifetime, $enabled);
                 
-                       if (is_callable($options['enabled'])) {
-                           $scope->setIsCacheEnabled($enabled);
+                       if (is_callable($options['enabled']) && $scope->isCacheEnabled()) {
+                           $scope->setCacheEnabled($enabled);
                        }
                 
                        if (is_callable($options['lifetime']) && is_int($lifetime)
                            && ($scope->getCacheLifetime() === null || $scope->getCacheLifetime() > $lifetime)) {
                            $scope->setCacheLifetime($lifetime);
                        }
+                
+                       $this->getConstraintBuilder()->buildRecordConstraints($scope);
                 
                        return $result;
                    }, $key);
@@ -154,6 +200,61 @@ class T3faCache extends FrontendCache
         }
         
         return $this->scopeRegistry;
+    }
+    
+    /**
+     * Internal helper to find the instance of the constraint builder and return it
+     *
+     * @return \LaborDigital\T3fa\Core\Cache\Constraint\ConstraintBuilder
+     */
+    protected function getConstraintBuilder(): ConstraintBuilder
+    {
+        if (! isset($this->constraintBuilder)) {
+            $this->constraintBuilder = TypoContext::getInstance()->di()->getService(ConstraintBuilder::class);
+        }
+        
+        return $this->constraintBuilder;
+    }
+    
+    /**
+     * Internal helper that checks if the @query special key was set in the key args.
+     * If the key has a value of TRUE the whole query is taken into account
+     * If a string is set as the value only this argument is taken into account
+     *
+     * @param   null|array  $keyArgs  The list of provided key args
+     *
+     * @return array
+     */
+    protected function handleQueryParamHash(?array $keyArgs): ?array
+    {
+        if (! $keyArgs || ! isset($keyArgs['@query'])) {
+            return $keyArgs;
+        }
+        
+        $queryConfig = $keyArgs['@query'];
+        unset($keyArgs['@query']);
+        
+        if (empty($queryConfig)) {
+            return $keyArgs;
+        }
+        
+        $request = TypoContext::getInstance()->request()->getRootRequest();
+        if (! $request) {
+            return $keyArgs;
+        }
+        
+        $query = $request->getQueryParams();
+        if (empty($query)) {
+            return $keyArgs;
+        }
+        
+        if ($queryConfig === true) {
+            $keyArgs[] = md5(SerializerUtil::serializeJson($query));
+        } elseif (isset($query[$queryConfig])) {
+            $keyArgs[] = md5(SerializerUtil::serializeJson($query[$queryConfig]));
+        }
+        
+        return $keyArgs;
     }
     
     /**
