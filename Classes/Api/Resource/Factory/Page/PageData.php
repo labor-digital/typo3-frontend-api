@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.07 at 12:00
  */
 
 declare(strict_types=1);
@@ -106,13 +106,17 @@ class PageData implements NoDiInterface
         $this->site = $site;
     }
     
+    /**
+     * Mini transformer to return all registered options as constructor args for the PageEntity
+     *
+     * @return array
+     * @see \LaborDigital\T3fa\Api\Resource\Entity\PageEntity
+     */
     public function getConstructorArgs(): array
     {
         return array_values(
             [
-                'pid' => $this->pid,
-                'language' => $this->language->getTwoLetterIsoCode(),
-                'site' => $this->site->getIdentifier(),
+                'id' => $this->pid,
                 'attributes' => $this->attributes,
             ]
         );

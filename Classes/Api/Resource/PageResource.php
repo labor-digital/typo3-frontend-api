@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.10 at 12:47
  */
 
 declare(strict_types=1);
@@ -24,34 +24,27 @@ namespace LaborDigital\T3fa\Api\Resource;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Api\Resource\Entity\PageEntity;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageResourceFactory;
-use LaborDigital\T3fa\Api\Resource\PostProcessor\TestPostProcessor;
-use LaborDigital\T3fa\Api\Resource\Transformer\PageTransformer;
 use LaborDigital\T3fa\Core\Resource\AbstractResource;
 use LaborDigital\T3fa\Core\Resource\Exception\InvalidIdException;
 use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
+use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
+use TYPO3\CMS\Core\Exception\Page\PageNotFoundException;
 
 class PageResource extends AbstractResource
 {
-    /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
-     */
-    protected $context;
-    
     /**
      * @var \LaborDigital\T3fa\Api\Resource\Factory\Page\PageResourceFactory
      */
     protected $factory;
     
-    public function __construct(TypoContext $context, PageResourceFactory $factory)
+    public function __construct(PageResourceFactory $factory)
     {
-        $this->context = $context;
         $this->factory = $factory;
     }
     
@@ -61,14 +54,11 @@ class PageResource extends AbstractResource
     public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
     {
         $configurator->registerClass(PageEntity::class);
-        $configurator->registerTransformer(PageTransformer::class);
-        $configurator->registerPostProcessor(TestPostProcessor::class);
-        
-        $configurator->setIsCacheEnabled(false);
     }
     
     /**
      * @inheritDoc
+     * @noinspection DuplicatedCode
      */
     public function findSingle($id, ResourceContext $context)
     {
@@ -76,14 +66,20 @@ class PageResource extends AbstractResource
             throw new InvalidIdException();
         }
         
+        $typoContext = $context->getTypoContext();
+        
         if ($id === 'current') {
-            $id = $this->context->pid()->getCurrent();
+            $id = $typoContext->pid()->getCurrent();
         }
         
-        return $this->factory->make(
-            (int)$id,
-            $this->context->language()->getCurrentFrontendLanguage(),
-            $this->context->site()->getCurrent());
+        try {
+            return $this->factory->make(
+                (int)$id,
+                $typoContext->language()->getCurrentFrontendLanguage(),
+                $typoContext->site()->getCurrent());
+        } catch (PageNotFoundException $exception) {
+            throw new ResourceNotFoundException('There is no page with the given id: ' . $id);
+        }
     }
     
     /**

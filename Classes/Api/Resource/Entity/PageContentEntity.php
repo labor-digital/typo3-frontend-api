@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:22
+ * Last modified: 2021.06.10 at 12:47
  */
 
 declare(strict_types=1);
@@ -23,7 +23,11 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Api\Resource\Entity;
 
 
-class PageContentEntity
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
+use LaborDigital\T3ba\Tool\Cache\CacheTagProviderInterface;
+use LaborDigital\T3fa\Core\Resource\Transformer\Special\SelfTransformingInterface;
+
+class PageContentEntity implements NoDiInterface, SelfTransformingInterface, CacheTagProviderInterface
 {
     /**
      * The page id we hold the representation for
@@ -33,18 +37,71 @@ class PageContentEntity
     protected $id;
     
     /**
-     * The language code used to generate the site
+     * The prepared resource attributes
      *
-     * @var string
+     * @var array
      */
-    protected $languageCode;
+    protected $attributes = [];
+    
+    public function __construct(
+        int $id,
+        array $attributes
+    )
+    {
+        $this->id = $id;
+        $this->attributes = $attributes;
+    }
     
     /**
-     * The site identifier which contains this page
+     * Returns the page id this object represents
      *
-     * @var string
+     * @return int
      */
-    protected $siteIdentifier;
+    public function getId(): int
+    {
+        return $this->id;
+    }
+    
+    /**
+     * Returns the language code used to generate the site
+     *
+     * @return string
+     */
+    public function getLanguageCode(): string
+    {
+        return $this->attributes['meta']['language'] ?? 'en';
+    }
+    
+    /**
+     * Returns the prepared resource attributes
+     *
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array
+    {
+        return array_merge(
+            [
+                'id' => $this->id,
+            ],
+            $this->attributes
+        );
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function getCacheTags(): array
+    {
+        return ['page_' . $this->id, 'pages_' . $this->id];
+    }
     
     
 }

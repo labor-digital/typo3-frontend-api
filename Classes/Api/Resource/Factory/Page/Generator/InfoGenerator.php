@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:23
+ * Last modified: 2021.06.07 at 11:53
  */
 
 declare(strict_types=1);
@@ -28,14 +28,15 @@ use LaborDigital\T3ba\Tool\ExtBase\Hydrator\Hydrator;
 use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\Page\PageService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
-use LaborDigital\T3fa\Api\Resource\Factory\Page\Data\PageDataModel;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 use LaborDigital\T3fa\Configuration\Table\Override\BackendLayoutTable;
 use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
+use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class InfoGenerator
@@ -108,7 +109,10 @@ class InfoGenerator
         
         $data->attributes = $this->findAttributes($data);
         
+        $data->attributes['meta']['site'] = $data->site->getIdentifier();
         $data->attributes['meta']['layout'] = $this->findLayout($data);
+        $data->attributes['meta']['language'] = $data->language->getTwoLetterIsoCode();
+        $data->attributes['meta']['languages'] = $this->findSiteLanguages($data);
     }
     
     /**
@@ -259,7 +263,7 @@ class InfoGenerator
      */
     protected function hydrateDataModel(PageData $data): AbstractEntity
     {
-        $modelClass = $this->typoContext->t3fa()->getConfigValue('page.dataModelClass', PageDataModel::class);
+        $modelClass = $this->typoContext->t3fa()->getConfigValue('page.dataModelClass', DefaultPageDataModel::class);
         $model = $this->hydrator->hydrateObject(
             $modelClass,
             $data->pageInfoArray
@@ -360,5 +364,19 @@ class InfoGenerator
         }
         
         return $identifier;
+    }
+    
+    /**
+     * Retrieves the iso codes of all enabled site languages and returns them
+     *
+     * @param   \LaborDigital\T3fa\Api\Resource\Factory\Page\PageData  $data
+     *
+     * @return array
+     */
+    protected function findSiteLanguages(PageData $data): array
+    {
+        return array_map(static function (SiteLanguage $language): string {
+            return $language->getTwoLetterIsoCode();
+        }, $data->site->getLanguages());
     }
 }

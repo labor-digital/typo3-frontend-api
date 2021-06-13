@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.07 at 11:24
  */
 
 declare(strict_types=1);
@@ -24,28 +24,62 @@ namespace LaborDigital\T3fa\Api\Resource;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
+use LaborDigital\T3fa\Api\Resource\Entity\PageContentEntity;
+use LaborDigital\T3fa\Api\Resource\Factory\PageContent\PageContentResourceFactory;
 use LaborDigital\T3fa\Core\Resource\AbstractResource;
+use LaborDigital\T3fa\Core\Resource\Exception\InvalidIdException;
+use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
+use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
+use TYPO3\CMS\Core\Exception\Page\PageNotFoundException;
 
 class PageContentResource extends AbstractResource
 {
     /**
-     * @inheritDoc
+     * @var \LaborDigital\T3fa\Api\Resource\Factory\PageContent\PageContentResourceFactory
      */
-    public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
+    protected $factory;
+    
+    public function __construct(PageContentResourceFactory $factory)
     {
-        // TODO: Implement configure() method.
+        $this->factory = $factory;
     }
     
     /**
      * @inheritDoc
      */
+    public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
+    {
+        $configurator->registerClass(PageContentEntity::class);
+    }
+    
+    /**
+     * @inheritDoc
+     * @noinspection DuplicatedCode
+     */
     public function findSingle($id, ResourceContext $context)
     {
-        // TODO: Implement findSingle() method.
+        if (! is_numeric($id) && $id !== 'current') {
+            throw new InvalidIdException();
+        }
+        
+        $typoContext = $context->getTypoContext();
+        
+        if ($id === 'current') {
+            $id = $typoContext->pid()->getCurrent();
+        }
+        
+        try {
+            return $this->factory->make(
+                (int)$id,
+                $typoContext->language()->getCurrentFrontendLanguage(),
+                $typoContext->site()->getCurrent());
+        } catch (PageNotFoundException $exception) {
+            throw new ResourceNotFoundException('There is no page with the given id: ' . $id);
+        }
     }
     
     /**
@@ -53,7 +87,7 @@ class PageContentResource extends AbstractResource
      */
     public function findCollection(ResourceQuery $resourceQuery, ResourceCollectionContext $context)
     {
-        // TODO: Implement findCollection() method.
+        throw new NoCollectionException($context->getResourceType());
     }
     
 }

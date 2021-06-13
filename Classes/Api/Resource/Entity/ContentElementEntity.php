@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.07 at 11:55
+ * Last modified: 2021.06.13 at 21:42
  */
 
 declare(strict_types=1);
@@ -26,7 +26,7 @@ namespace LaborDigital\T3fa\Api\Resource\Entity;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\Special\SelfTransformingInterface;
 
-class PageEntity implements NoDiInterface, SelfTransformingInterface
+class ContentElementEntity implements NoDiInterface, SelfTransformingInterface
 {
     /**
      * The page id we hold the representation for
@@ -42,17 +42,14 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
      */
     protected $attributes = [];
     
-    public function __construct(
-        int $id,
-        array $attributes
-    )
+    public function __construct(int $id, array $attributes)
     {
         $this->id = $id;
         $this->attributes = $attributes;
     }
     
     /**
-     * Returns the page id this object represents
+     * Returns the uid id this object represents
      *
      * @return int
      */
@@ -62,33 +59,13 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
     }
     
     /**
-     * Returns the language code used to generate the site
+     * Returns the language code used to generate the content element
      *
      * @return string
      */
     public function getLanguageCode(): string
     {
         return $this->attributes['meta']['language'] ?? 'en';
-    }
-    
-    /**
-     * Returns the language alternatives in form of hrefLang link definitions
-     *
-     * @return array
-     */
-    public function getHrefLangUrls(): array
-    {
-        return $this->attributes['meta']['hrefLang'] ?? [];
-    }
-    
-    /**
-     * Returns the site identifier which contains this page
-     *
-     * @return string
-     */
-    public function getSiteIdentifier(): string
-    {
-        return $this->attributes['meta']['site'] ?? '';
     }
     
     /**
@@ -102,33 +79,17 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
     }
     
     /**
-     * Returns the list of links relevant to this page
+     * May contain the children of this element.
+     * This is used when you content element is something like a grid element.
+     * IMPORTANT: If not directly filled by the content element controller,
+     * the children are only defined when retrieving the "pageContent" resource
      *
-     * @return array
+     * @return array|null
+     * @see \LaborDigital\T3ba\Tool\Page\PageService::getPageContents() for the content syntax
      */
-    public function getLinks(): array
+    public function getChildren(): ?array
     {
-        return $this->attributes['links'] ?? [];
-    }
-    
-    /**
-     * Returns the pages root line array
-     *
-     * @return array
-     */
-    public function getRootLine(): array
-    {
-        return $this->attributes['meta']['rootLine'] ?? [];
-    }
-    
-    /**
-     * Returns the list of generated meta tags for this page
-     *
-     * @return array
-     */
-    public function getMetaTags(): array
-    {
-        return $this->attributes['meta']['metaTags'] ?? [];
+        return $this->attributes['children'] ?? null;
     }
     
     /**
@@ -136,11 +97,20 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
      */
     public function asArray(): array
     {
-        return array_merge(
+        $data = array_merge(
             [
                 'id' => $this->id,
             ],
             $this->attributes
         );
+        
+        // Make sure that those keys are always transferred as object
+        foreach (['children', 'data', 'initialState'] as $key) {
+            if (is_array($data[$key] ?? null)) {
+                $data[$key] = (object)$data[$key];
+            }
+        }
+        
+        return $data;
     }
 }

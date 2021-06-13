@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 15:17
+ * Last modified: 2021.06.13 at 21:17
  */
 
 declare(strict_types=1);
@@ -68,7 +68,7 @@ class DataResolver
      *
      * @return array
      */
-    public function generateData(array $responseData, AbstractView $view, array $transformerOptions): array
+    public function generateData(array $responseData, AbstractView $view, array $transformerOptions): ?array
     {
         // Extract the data from the view
         if ($view instanceof JsonView) {
@@ -77,9 +77,11 @@ class DataResolver
             $viewData = ViewAdapter::getVariables($view);
         }
         
-        return $this->autoTransformer->transform(
+        $data = $this->autoTransformer->transform(
             array_merge($viewData, $responseData), $transformerOptions
         );
+        
+        return empty($data) ? null : $data;
     }
     
     /**
@@ -89,10 +91,10 @@ class DataResolver
      *
      * @return array
      */
-    public function generateInitialState(?array $initialStateQuery): array
+    public function generateInitialState(?array $initialStateQuery): ?array
     {
         if ($initialStateQuery === null) {
-            return [];
+            return null;
         }
         
         $collection = $this->resourceRepository->getCollection(

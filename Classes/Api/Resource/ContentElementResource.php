@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.02 at 21:36
  */
 
 declare(strict_types=1);
@@ -24,7 +24,11 @@ namespace LaborDigital\T3fa\Api\Resource;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
+use LaborDigital\T3fa\Api\Resource\Entity\ContentElementEntity;
+use LaborDigital\T3fa\Api\Resource\Factory\ContentElement\ContentElementResourceFactory;
 use LaborDigital\T3fa\Core\Resource\AbstractResource;
+use LaborDigital\T3fa\Core\Resource\Exception\InvalidIdException;
+use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
@@ -33,11 +37,21 @@ use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
 class ContentElementResource extends AbstractResource
 {
     /**
+     * @var \LaborDigital\T3fa\Api\Resource\Factory\ContentElement\ContentElementResourceFactory
+     */
+    protected $factory;
+    
+    public function __construct(ContentElementResourceFactory $factory)
+    {
+        $this->factory = $factory;
+    }
+    
+    /**
      * @inheritDoc
      */
     public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
     {
-        // TODO: Implement configure() method.
+        $configurator->registerClass(ContentElementEntity::class);
     }
     
     /**
@@ -45,7 +59,14 @@ class ContentElementResource extends AbstractResource
      */
     public function findSingle($id, ResourceContext $context)
     {
-        // TODO: Implement findSingle() method.
+        if (! is_numeric($id)) {
+            throw new InvalidIdException();
+        }
+        
+        return $this->factory->makeFromId(
+            (int)$id,
+            $context->getTypoContext()->language()->getCurrentFrontendLanguage()
+        );
     }
     
     /**
@@ -53,7 +74,7 @@ class ContentElementResource extends AbstractResource
      */
     public function findCollection(ResourceQuery $resourceQuery, ResourceCollectionContext $context)
     {
-        // TODO: Implement findCollection() method.
+        throw new NoCollectionException($context->getResourceType());
     }
     
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:24
+ * Last modified: 2021.06.07 at 11:20
  */
 
 declare(strict_types=1);
@@ -115,6 +115,8 @@ class DataGenerator implements PublicServiceInterface
     
     /**
      * Executes the internal data generators in order to fill the current data object
+     *
+     * @internal You should always use generate()!
      */
     public function runGenerators(): void
     {
