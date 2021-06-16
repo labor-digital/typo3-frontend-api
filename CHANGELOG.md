@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.0...v10.0.0-beta.1) (2021-06-16)
+
 ## [10.0.0-beta.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.2...v10.0.0-beta.0) (2021-06-16)
 
 
