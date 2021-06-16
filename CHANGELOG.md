@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.2...v10.0.0-beta.3) (2021-06-16)
+
+
+### Bug Fixes
+
+* update t3ba to beta 11 ([99fe157](https://github.com/labor-digital/typo3-frontend-api/commit/99fe157848c6d248f3ebed39ab83263c4b81f408))
+* **Middleware\ExtRedirectsMiddleware:** fix issue when ext:redirects was not installed ([c6b73f8](https://github.com/labor-digital/typo3-frontend-api/commit/c6b73f83ec30ffc36e1e462a1d3b82c126df1654))
+
 ## [10.0.0-beta.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.1...v10.0.0-beta.2) (2021-06-16)
 
 
