@@ -23,7 +23,7 @@
 		"docs": "https://typo3-frontend-api.labor.tools"
 	},
 	"require": {
-		"labor-digital/typo3-better-api": "10.0.0-beta.10",
+		"labor-digital/typo3-better-api": "10.0.0-beta.11",
 		"league/route": "^5.0.1",
 		"laminas/laminas-httphandlerrunner": "^1.4.0",
 		"league/fractal": "^0.18",
