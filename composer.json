@@ -37,7 +37,7 @@
 			"LaborDigital\\T3fa\\": "Classes"
 		}
 	},
-	"version": "10.0.0-beta.1",
+	"version": "10.0.0-beta.2",
 	"extra": {
 		"t3ba": {
 			"isDev": true
