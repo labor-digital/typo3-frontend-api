@@ -29,28 +29,29 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler;
 
-class ExtRedirectsMiddleware extends RedirectHandler
+class ExtRedirectsMiddleware
 {
-    use ResponseFactoryTrait;
-    
-    /**
-     * @inheritDoc
-     */
-    protected function buildRedirectResponse(UriInterface $uri, array $redirectRecord): ResponseInterface
-    {
-        return $this->getJsonResponse(
-            RedirectUtil::makeRedirectData(
-                (string)$uri,
-                null,
-                (int)$redirectRecord['target_statuscode']
-            )
-        );
-    }
-    
-    public static function registerIfRequired(): ?string
+    public static function registerIfRequired(): ?object
     {
         if (class_exists(RedirectHandler::class)) {
-            return static::class;
+            return new class extends RedirectHandler {
+                
+                use ResponseFactoryTrait;
+                
+                /**
+                 * @inheritDoc
+                 */
+                protected function buildRedirectResponse(UriInterface $uri, array $redirectRecord): ResponseInterface
+                {
+                    return $this->getJsonResponse(
+                        RedirectUtil::makeRedirectData(
+                            (string)$uri,
+                            null,
+                            (int)$redirectRecord['target_statuscode']
+                        )
+                    );
+                }
+            };
         }
         
         return null;
