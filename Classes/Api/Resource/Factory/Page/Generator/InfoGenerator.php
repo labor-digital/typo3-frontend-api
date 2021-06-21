@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 22:56
+ * Last modified: 2021.06.21 at 14:06
  */
 
 declare(strict_types=1);
@@ -123,7 +123,7 @@ class InfoGenerator
      */
     protected function findInfoArray(PageData $data): array
     {
-        $info = $this->pageService->getPageInfo($data->pid);
+        $info = $this->pageService->getPageInfo($data->pid, $this->typoContext->preview()->isPreview());
         
         if (empty($info)) {
             throw new ResourceNotFoundException('There is no page with the required pid: ' . $data->pid);

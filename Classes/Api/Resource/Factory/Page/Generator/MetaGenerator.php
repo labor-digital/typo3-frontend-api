@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:24
+ * Last modified: 2021.06.21 at 14:15
  */
 
 declare(strict_types=1);
@@ -110,6 +110,10 @@ class MetaGenerator
      */
     protected function findHrefLangUrls(PageData $data): array
     {
+        $tsfe = $this->tsfeService->getTsfe();
+        $pageBackup = $tsfe->page;
+        $tsfe->page = $data->pageInfoArray;
+        
         $languages = $this->makeInstance(LanguageMenuProcessor::class)
                           ->process($this->tsfeService->getContentObjectRenderer(), [], [], []);
         
@@ -123,6 +127,8 @@ class MetaGenerator
                 ];
             }
         }
+        
+        $tsfe->page = $pageBackup;
         
         return $urls;
     }
