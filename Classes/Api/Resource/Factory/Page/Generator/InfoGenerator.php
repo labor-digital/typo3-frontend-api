@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 14:06
+ * Last modified: 2021.06.21 at 14:19
  */
 
 declare(strict_types=1);
@@ -111,6 +111,7 @@ class InfoGenerator
         $data->attributes['meta']['layout'] = $this->findLayout($data);
         $data->attributes['meta']['language'] = $data->language->getTwoLetterIsoCode();
         $data->attributes['meta']['languages'] = $this->findSiteLanguages($data);
+        $data->attributes['meta']['isPreview'] = $this->typoContext->preview()->isPreview();
     }
     
     /**

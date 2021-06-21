@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:42
+ * Last modified: 2021.06.21 at 14:18
  */
 
 declare(strict_types=1);
@@ -26,6 +26,7 @@ namespace LaborDigital\T3fa\Api\Resource\Factory\PageContent;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\Tool\Page\PageService;
 use LaborDigital\T3ba\Tool\Simulation\EnvironmentSimulator;
+use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Api\Resource\Factory\ContentElement\ContentElementResourceFactory;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -59,13 +60,19 @@ class DataGenerator implements PublicServiceInterface
      */
     protected $resourceFactory;
     
+    /**
+     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     */
+    protected $typoContext;
+    
     
     public function __construct(
         EnvironmentSimulator $simulator,
         EventDispatcherInterface $eventDispatcher,
         PageService $pageService,
         ContentElementResourceFactory $elementFactory,
-        ResourceFactory $resourceFactory
+        ResourceFactory $resourceFactory,
+        TypoContext $typoContext
     )
     {
         $this->simulator = $simulator;
@@ -73,6 +80,7 @@ class DataGenerator implements PublicServiceInterface
         $this->pageService = $pageService;
         $this->elementFactory = $elementFactory;
         $this->resourceFactory = $resourceFactory;
+        $this->typoContext = $typoContext;
     }
     
     /**
@@ -118,7 +126,11 @@ class DataGenerator implements PublicServiceInterface
         // because TYPO3s content elements are that generic. But to resolve potential children
         // of extensions like grid elements we need the data to be resolved.
         // If I ever come across a better solution, I will rewrite this.
-        foreach ($this->pageService->getPageContents($pid) as $colPos => $elements) {
+        foreach (
+            $this->pageService->getPageContents(
+                $pid, ['includeHiddenPages' => $this->typoContext->preview()->isPreview()]
+            ) as $colPos => $elements
+        ) {
             $cols[$colPos] = $this->processColumn($elements);
         }
         
