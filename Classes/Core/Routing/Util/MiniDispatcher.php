@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 10:15
+ * Last modified: 2021.06.21 at 13:21
  */
 
 declare(strict_types=1);
@@ -54,9 +54,7 @@ class MiniDispatcher implements RequestHandlerInterface
     {
         $middleware = array_shift($this->middlewares);
         if (is_string($middleware)) {
-            $middleware = $this->getContainer()->has($middleware)
-                ? $this->getService($middleware)
-                : $this->makeInstance($middleware);
+            $middleware = $this->getServiceOrInstance($middleware);
         }
         
         if (! is_object($middleware)) {

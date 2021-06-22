@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 10:15
+ * Last modified: 2021.06.21 at 13:21
  */
 
 declare(strict_types=1);
@@ -190,10 +190,6 @@ class Resolver
             throw new InvalidConfigException('The resource configuration of "' . $config['type'] . '" is invalid, the resource class is not defined, or does not exist');
         }
         
-        if (! $this->getContainer()->has($config['class'])) {
-            return $this->makeInstance($config['class']);
-        }
-        
-        return $this->getService($config['class']);
+        return $this->getServiceOrInstance($config['class']);
     }
 }
