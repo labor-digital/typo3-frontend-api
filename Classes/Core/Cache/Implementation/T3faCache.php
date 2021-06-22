@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.11 at 16:18
+ * Last modified: 2021.06.21 at 11:47
  */
 
 declare(strict_types=1);
@@ -238,6 +238,8 @@ class T3faCache extends FrontendCache
             return $keyArgs;
         }
         
+        // @todo we should try to fetch the original request here, to ensure we have access on ALL query params
+        // not only the ones filtered by the request rewriter
         $request = TypoContext::getInstance()->request()->getRootRequest();
         if (! $request) {
             return $keyArgs;
