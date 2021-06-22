@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.31 at 13:37
+ * Last modified: 2021.06.21 at 19:18
  */
 
 declare(strict_types=1);
@@ -58,14 +58,7 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
      *
      * @param   mixed       $resourceType  Either the name of a class, or an object that represents the resource type to find
      * @param   string|int  $id            The unique id of the resource to find
-     * @param   array       $options       Additional options to apply when resolving the resource
-     *                                     - pid int: Can be used to change the page id of the executed process.
-     *                                     If this is left empty the current page id is used
-     *                                     - language int|string|SiteLanguage: The language to set the environment to.
-     *                                     Either as sys_language_uid value, as iso code or as language object
-     *                                     - site string: Can be set to a valid site identifier to simulate the request
-     *                                     on a specific TYPO3 site.
-     *                                     - asAdmin bool (FALSE): Take a look at "asAdmin" here:
+     * @param   array       $options       Additional options to simulate a specific environment:
      *                                     {@link EnvironmentSimulator::runWithEnvironment()}
      *
      *
@@ -73,14 +66,14 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
      */
     public function getResource($resourceType, $id, array $options = []): ?ResourceItem
     {
-        return $this->runInSimulation(function () use ($resourceType, $id) {
+        return $this->simulator->runWithEnvironment($options, function () use ($resourceType, $id) {
             $config = $this->context->resource()->getResourceConfig($resourceType);
             if ($config === null) {
                 return null;
             }
             
             return $this->backend->getResource($id, $config);
-        }, $options);
+        });
     }
     
     /**
@@ -89,21 +82,14 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
      * @param   mixed       $resourceType  Either the name of a class, or an object that represents the resource type to find
      * @param   array|null  $query         An optional resource query (in a similar syntax as your query parameters in the url)
      *                                     {@see https://jsonapi.org/format/#fetching}
-     * @param   array       $options       Additional options to apply when resolving the resource
-     *                                     - pid int: Can be used to change the page id of the executed process.
-     *                                     If this is left empty the current page id is used
-     *                                     - language int|string|SiteLanguage: The language to set the environment to.
-     *                                     Either as sys_language_uid value, as iso code or as language object
-     *                                     - site string: Can be set to a valid site identifier to simulate the request
-     *                                     on a specific TYPO3 site.
-     *                                     - asAdmin bool (FALSE): Take a look at "asAdmin" here:
+     * @param   array       $options       Additional options to simulate a specific environment:
      *                                     {@link EnvironmentSimulator::runWithEnvironment()}
      *
      * @return \LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection
      */
     public function getCollection($resourceType, ?array $query = null, array $options = []): ResourceCollection
     {
-        return $this->runInSimulation(function () use ($resourceType, $query) {
+        return $this->simulator->runWithEnvironment($options, function () use ($resourceType, $query) {
             $config = $this->context->resource()->getResourceConfig($resourceType);
             
             if ($config === null) {
@@ -111,29 +97,6 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
             }
             
             return $this->backend->getCollection($query, $config);
-        }, $options);
-    }
-    
-    /**
-     * Internal helper to extract potential environment constraints from the query options
-     * and run the given callback with these options applied
-     *
-     * @param   callable  $callback  The callback to execute
-     * @param   array     $options   The options provided to the query method
-     *
-     * @return mixed|null
-     */
-    protected function runInSimulation(callable $callback, array &$options)
-    {
-        $simulatorOptions = [];
-        
-        foreach (['pid', 'language', 'site', 'asAdmin'] as $field) {
-            if (isset($options[$field])) {
-                $simulatorOptions[$field] = $options[$field];
-            }
-            unset($options[$field]);
-        }
-        
-        return $this->simulator->runWithEnvironment($simulatorOptions, $callback);
+        });
     }
 }
