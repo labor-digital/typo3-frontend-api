@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 14:20
+ * Last modified: 2021.06.22 at 13:11
  */
 
 declare(strict_types=1);
@@ -70,10 +70,6 @@ class DefaultResourceTransformer extends AbstractResourceTransformer
     protected function handleObjectTransform(object $value): array
     {
         $schema = $this->getSchema($value);
-        
-        if ($schema->isCollection) {
-            dbge($schema, $value);
-        }
         $this->availableIncludes = array_keys($schema->related);
         
         return array_merge(
