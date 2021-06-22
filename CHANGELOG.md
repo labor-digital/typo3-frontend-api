@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.3...v10.0.0-beta.4) (2021-06-22)
+
+
+### Features
+
+* implement layout object handling ([2ad8482](https://github.com/labor-digital/typo3-frontend-api/commit/2ad8482a9c453e4770922535e2c220b3e1ec4ba4))
+* migrate up and scheduler routes ([7a0b33b](https://github.com/labor-digital/typo3-frontend-api/commit/7a0b33bfec0c16e3162351b0d865c38e07afd0d7))
+* **ContentBundle:** add routes for RESTful content element requests ([211f592](https://github.com/labor-digital/typo3-frontend-api/commit/211f5928d144bd906c71a88ccaca3e55fa8ea2df))
+* **ContentElement:** allow usage of StandaloneView in JsonResponse ([79f7be2](https://github.com/labor-digital/typo3-frontend-api/commit/79f7be296ebd8eb25417dc04187ec70812191823))
+* **ContentElement:** implement getFormInfo() in JsonContentElementControllerTrait ([81ff7c3](https://github.com/labor-digital/typo3-frontend-api/commit/81ff7c397beb0407984981209de9df9e6274b888))
+* **ContentElement:** make controller data resolution more generic ([2996205](https://github.com/labor-digital/typo3-frontend-api/commit/2996205f1fffa258b6e41bd2434200b52e36f590))
+* **Link:** implement ApiLink as api link builder ([78458eb](https://github.com/labor-digital/typo3-frontend-api/commit/78458eb3b1d6d5a464aadae9895bb69afe58a8d5))
+
+
+### Bug Fixes
+
+* **JsonContentActionController:** break processRequest when error boundary is disabled ([c260610](https://github.com/labor-digital/typo3-frontend-api/commit/c26061030bd240652e5ce67d8ca00e4a9bba02db))
+* **JsonContentActionController:** disable error boundary when using the backend preview renderer ([d7130d7](https://github.com/labor-digital/typo3-frontend-api/commit/d7130d7256a35f6c262c2f5be581ff1e975d86f7))
+* **resource\page:** fix issues when previewing pages ([cc2a672](https://github.com/labor-digital/typo3-frontend-api/commit/cc2a672f65e9ece990b7b946aa4f48c27393789b))
+* **resource\pageContent:** implement support for page preview ([ab621e7](https://github.com/labor-digital/typo3-frontend-api/commit/ab621e7c612551fb8a696912e0ce172ebfb8a2ab))
+* **Routing:** inherit parsed body from base request to typo request ([a3bf941](https://github.com/labor-digital/typo3-frontend-api/commit/a3bf9419cc29a4349dcc463695d8b522e6af7709))
+
 ## [10.0.0-beta.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.2...v10.0.0-beta.3) (2021-06-16)
 
 
