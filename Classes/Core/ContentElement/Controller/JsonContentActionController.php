@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.22 at 18:18
+ * Last modified: 2021.06.22 at 18:30
  */
 
 declare(strict_types=1);
@@ -61,6 +61,8 @@ class JsonContentActionController extends BetterContentActionController
         // In that case we simply ignore the error boundary, so the backend preview renderer can render a nice error message.
         if (! $this->useErrorBoundary || ! empty(static::$transfer)) {
             parent::processRequest($request, $response);
+            
+            return;
         }
         
         $this->jsonErrorBoundary(function () use ($request, $response) {
