@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.22 at 13:14
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
 use LaborDigital\T3ba\Tool\Link\Link;
 use LaborDigital\T3fa\Api\Resource\Transformer\DateTransformer;
 use LaborDigital\T3fa\Api\Resource\Transformer\TypoLinkTransformer;
+use LaborDigital\T3fa\Core\Link\ApiLink;
 use LaborDigital\T3fa\ExtConfigHandler\Api\ApiBundleInterface;
 use LaborDigital\T3fa\ExtConfigHandler\Api\ApiConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
@@ -52,6 +53,7 @@ class ValueTransformerBundle implements ApiBundleInterface
                          UriInterface::class,
                          \League\Uri\Contracts\UriInterface::class,
                          UriBuilder::class,
+                         ApiLink::class,
                      ]);
     }
     

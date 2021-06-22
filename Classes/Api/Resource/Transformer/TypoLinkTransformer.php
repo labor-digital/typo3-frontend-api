@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:25
+ * Last modified: 2021.06.22 at 13:17
  */
 
 declare(strict_types=1);
@@ -24,24 +24,32 @@ namespace LaborDigital\T3fa\Api\Resource\Transformer;
 
 
 use LaborDigital\T3ba\Tool\Link\Link;
+use LaborDigital\T3fa\Core\Cache\Scope\Scope;
+use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
+use LaborDigital\T3fa\Core\Link\ApiLink;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerInterface;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
 
 class TypoLinkTransformer implements TransformerInterface
 {
+    use T3faCacheAwareTrait;
+    
     /**
      * @inheritDoc
      */
     public function transform($value)
     {
+        if ($value instanceof ApiLink) {
+            return $value->build();
+        }
+        
         if ($value instanceof Link) {
-            // Announce argument instances as tags for the caching system
-            // @todo implement cache announcement
-//            $this->FrontendApiContext()->CacheService()
-//                 ->announceTags($value->getArgs())
-//                 ->announceTag($value->getPid() !== null ? 'pages_' . $value->getPid() : null);
-//
+            $this->runInCacheScope(static function (Scope $scope) use ($value) {
+                $scope->addCacheTags($value->getArgs());
+                $scope->addCacheTag($value->getPid() !== null ? 'pages_' . $value->getPid() : null);
+            });
+            
             return $value->build();
         }
         
@@ -50,9 +58,11 @@ class TypoLinkTransformer implements TransformerInterface
         }
         
         if ($value instanceof UriBuilder) {
-            // @todo implement announcement
-            // $value->getTargetPageUid()
-            // $value->getArguments()
+            $this->runInCacheScope(static function (Scope $scope) use ($value) {
+                $scope->addCacheTags($value->getArguments());
+                $scope->addCacheTag($value->getTargetPageUid() !== null ? 'pages_' . $value->getTargetPageUid() : null);
+            });
+            
             return $value->buildFrontendUri();
         }
         
