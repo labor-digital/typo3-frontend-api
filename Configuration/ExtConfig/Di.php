@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.12 at 14:56
+ * Last modified: 2021.06.17 at 18:49
  */
 
 declare(strict_types=1);
@@ -45,9 +45,7 @@ class Di implements ConfigureDiInterface
         ExtConfigContext $context
     ): void
     {
-        static::autoWire([
-            'Classes/Core/ErrorHandler/DummySymfonyVarDumper',
-        ]);
+        static::autoWire();
         
         $containerBuilder->getDefinition(T3faCache::class)
                          ->addTag('t3ba.cache', ['identifier' => 't3fa,frontendApi', 'cacheIdentifier' => 't3fa_frontend']);
