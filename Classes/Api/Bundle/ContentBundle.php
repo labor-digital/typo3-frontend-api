@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.22 at 13:29
  */
 
 declare(strict_types=1);
@@ -44,6 +44,17 @@ class ContentBundle implements ApiBundleInterface
      */
     public static function configureSite(ApiConfigurator $configurator, SiteConfigContext $context, array $options): void
     {
+        // To allow content elements to be REST-able we pass through all requests to the element handler
+        $group = $configurator->routing()->routes('/resources/contentElement');
+        $getRoute = $group->getRoute('GET', '/{id}');
+        if ($getRoute) {
+            foreach (['POST', 'PUT', 'DELETE', 'PATCH'] as $method) {
+                $group->registerRoute($method, '/{id}', $getRoute->getHandler())
+                      ->setCacheEnabled(false)
+                      ->setName($getRoute->getName() . '-' . $method)
+                      ->setAttribute('resourceType', $getRoute->getAttributes()['resourceType']);
+            }
+        }
     }
     
 }
