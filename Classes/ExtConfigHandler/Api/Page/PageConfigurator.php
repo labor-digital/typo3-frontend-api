@@ -26,8 +26,8 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page;
 use InvalidArgumentException;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
+use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link\PageLinkProviderInterface;
-use LaborDigital\T3fa\Resource\Factory\Page\Data\PageDataModel;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class PageConfigurator extends AbstractExtConfigConfigurator
@@ -58,7 +58,7 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      *
      * @var string
      */
-    protected $dataModelClass = PageDataModel::class;
+    protected $dataModelClass = DefaultPageDataModel::class;
     
     /**
      * A list of database fields that should be inherited from the parent pages if their current value is empty
@@ -73,7 +73,7 @@ class PageConfigurator extends AbstractExtConfigConfigurator
      * @param   array  $fields
      *
      * @return $this
-     * @see \LaborDigital\T3fa\Resource\Entity\PageRootLineEntity
+     * @see \LaborDigital\T3fa\Api\Resource\Entity\PageEntity
      */
     public function registerAdditionalRootLineFields(array $fields): self
     {
