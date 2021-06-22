@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.08 at 14:47
+ * Last modified: 2021.06.22 at 18:18
  */
 
 declare(strict_types=1);
@@ -57,7 +57,9 @@ class JsonContentActionController extends BetterContentActionController
             $this->defaultViewObjectName = DataView::class;
         }
         
-        if (! $this->useErrorBoundary) {
+        // static::$transfer is set when the backend preview renderer was called using the simulateRequest() method.
+        // In that case we simply ignore the error boundary, so the backend preview renderer can render a nice error message.
+        if (! $this->useErrorBoundary || ! empty(static::$transfer)) {
             parent::processRequest($request, $response);
         }
         
