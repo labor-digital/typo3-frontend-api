@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 20:32
+ * Last modified: 2021.06.22 at 21:35
  */
 
 declare(strict_types=1);
@@ -30,6 +30,8 @@ use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\VarFs\VarFs;
 use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Api\Route\SchedulerController;
+use LaborDigital\T3fa\Api\Route\UpController;
 use LaborDigital\T3fa\Core\Routing\Strategy\ExtendedApplicationStrategy;
 use LaborDigital\T3fa\Middleware\Api\AttributeProviderMiddleware;
 use LaborDigital\T3fa\Middleware\Api\BodyParserMiddleware;
@@ -101,24 +103,32 @@ class RouterFactory
      */
     public function buildRouter(Router $router): void
     {
-        $apiPath = rtrim(trim(
-                $this->context->config()->getConfigValue('t3fa.routing.apiPath', '')
-            ), '/') . '/';
+        $config = $this->context->config()->getConfigValue('t3fa.routing', []);
+        $apiPath = rtrim(trim($config['apiPath'] ?? ''), '/') . '/';
         
-        foreach ($this->getSiteConfig() as $config) {
-            $path = $apiPath . ltrim(trim($config['path']), '/');
-            $route = $router->map($config['method'], $path, $config['handler']);
+        foreach ($this->getSiteConfig() as $routeConfig) {
+            $path = $apiPath . ltrim(trim($routeConfig['path']), '/');
+            $route = $router->map($routeConfig['method'], $path, $routeConfig['handler']);
             
-            $route->setName($config['name']);
+            $route->setName($routeConfig['name']);
             
             $route->lazyPrependMiddleware(BodyParserMiddleware::class);
             $route->lazyPrependMiddleware(CacheMiddleware::class);
             
-            if (! empty($config['attributes'])) {
-                $route->prependMiddleware(new AttributeProviderMiddleware($config['attributes']));
+            if (! empty($routeConfig['attributes'])) {
+                $route->prependMiddleware(new AttributeProviderMiddleware($routeConfig['attributes']));
             }
             
-            $route->lazyMiddlewares($config['middlewares']);
+            $route->lazyMiddlewares($routeConfig['middlewares']);
+        }
+        
+        if ($config['upRoute']) {
+            $router->get($apiPath . 'up', [UpController::class, 'upAction']);
+        }
+        
+        if (! empty($config['schedulerRoute'])) {
+            $router->get($apiPath . 'scheduler/run[/{id}]', [SchedulerController::class, 'runAction'])
+                   ->prependMiddleware(new AttributeProviderMiddleware($config['schedulerRoute']));
         }
     }
 }
