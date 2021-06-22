@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:17
+ * Last modified: 2021.06.22 at 18:21
  */
 
 declare(strict_types=1);
@@ -28,8 +28,8 @@ use LaborDigital\T3fa\Core\ContentElement\Adapter\ViewAdapter;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformer;
-use TYPO3\CMS\Extbase\Mvc\View\AbstractView;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
+use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 
 class DataResolver
 {
@@ -62,13 +62,13 @@ class DataResolver
     /**
      * Generates the "data" based on the entries inside the response and provided view object
      *
-     * @param   array                                     $responseData
-     * @param   \TYPO3\CMS\Extbase\Mvc\View\AbstractView  $view
-     * @param   array                                     $transformerOptions
+     * @param   array          $responseData
+     * @param   ViewInterface  $view
+     * @param   array          $transformerOptions
      *
      * @return array
      */
-    public function generateData(array $responseData, AbstractView $view, array $transformerOptions): ?array
+    public function generateData(array $responseData, ViewInterface $view, array $transformerOptions): ?array
     {
         // Extract the data from the view
         if ($view instanceof JsonView) {

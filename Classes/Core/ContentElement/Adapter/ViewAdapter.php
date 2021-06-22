@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.11 at 17:45
+ * Last modified: 2021.06.22 at 18:22
  */
 
 declare(strict_types=1);
@@ -26,6 +26,7 @@ namespace LaborDigital\T3fa\Core\ContentElement\Adapter;
 use LaborDigital\T3ba\Core\Exception\NotImplementedException;
 use TYPO3\CMS\Extbase\Mvc\View\AbstractView;
 use TYPO3\CMS\Extbase\Mvc\View\NotFoundView;
+use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 
 class ViewAdapter extends AbstractView
 {
@@ -54,9 +55,21 @@ class ViewAdapter extends AbstractView
      *
      * @return array
      */
-    public static function getVariables(AbstractView $view): array
+    public static function getVariables(ViewInterface $view): array
     {
-        $vars = $view->variables;
+        if ($view instanceof AbstractView) {
+            $vars = $view->variables;
+        } else {
+            $vars = [];
+            
+            $ref = new \ReflectionObject($view);
+            if ($ref->hasProperty('variables')) {
+                $propRef = $ref->getProperty('variables');
+                $propRef->setAccessible(true);
+                $vars = $propRef->getValue($view);
+            }
+        }
+        
         
         if ($view instanceof NotFoundView) {
             unset($vars['errorMessage']);

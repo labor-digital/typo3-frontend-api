@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 10:18
+ * Last modified: 2021.06.22 at 18:20
  */
 
 declare(strict_types=1);
@@ -34,7 +34,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Extbase\Mvc\View\AbstractView;
+use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 
 class JsonResponse extends Response implements NoDiInterface
 {
@@ -83,7 +83,7 @@ class JsonResponse extends Response implements NoDiInterface
     /**
      * The view which is used to collect the data for the element
      *
-     * @var \TYPO3\CMS\Extbase\Mvc\View\AbstractView
+     * @var ViewInterface
      */
     protected $view;
     
@@ -147,7 +147,7 @@ class JsonResponse extends Response implements NoDiInterface
         string $typeNs,
         string $type,
         ?string $subType,
-        AbstractView $view,
+        ViewInterface $view,
         array $row,
         array $cssClasses
     )

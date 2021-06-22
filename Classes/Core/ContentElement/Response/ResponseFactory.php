@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 16:30
+ * Last modified: 2021.06.22 at 19:17
  */
 
 declare(strict_types=1);
@@ -25,12 +25,10 @@ namespace LaborDigital\T3fa\Core\ContentElement\Response;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use LaborDigital\T3ba\Tool\BackendPreview\BackendPreviewRendererContext;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\Inflection\Inflector;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Request;
-use TYPO3\CMS\Extbase\Mvc\View\AbstractView;
+use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 
 class ResponseFactory implements PublicServiceInterface
 {

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:16
+ * Last modified: 2021.06.22 at 18:21
  */
 
 declare(strict_types=1);
@@ -29,7 +29,7 @@ use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\ContentElement\HtmlSerializer;
 use Neunerlei\TinyTimy\DateTimy;
 use Psr\Http\Message\StreamInterface;
-use TYPO3\CMS\Extbase\Mvc\View\AbstractView;
+use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 
 class BodyBuilder implements PublicServiceInterface
 {
@@ -56,12 +56,12 @@ class BodyBuilder implements PublicServiceInterface
      * Retrieves
      *
      * @param   \LaborDigital\T3fa\Core\ContentElement\Response\JsonResponse  $response
-     * @param   \TYPO3\CMS\Extbase\Mvc\View\AbstractView                      $view
+     * @param   ViewInterface                                                 $view
      * @param   array                                                         $row
      *
      * @return \Psr\Http\Message\StreamInterface
      */
-    public function build(JsonResponse $response, AbstractView $view, array $row): StreamInterface
+    public function build(JsonResponse $response, ViewInterface $view, array $row): StreamInterface
     {
         $meta = [
             'cache' => $response->getCacheOptions(),
