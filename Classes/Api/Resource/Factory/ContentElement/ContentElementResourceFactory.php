@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:45
+ * Last modified: 2021.06.21 at 20:26
  */
 
 declare(strict_types=1);
@@ -121,15 +121,39 @@ class ContentElementResourceFactory
                     '@query' => $this->findQueryParameterNs($row),
                 ],
                 [
-                    'tags' => ['tt_content_' . $uid],
+                    'tags' => ['contentElement', 'tt_content_' . $uid],
                 ]
             )
         );
     }
     
+    /**
+     * Generates a new content element entity based on a typo script definition at the provided path.
+     *
+     * @param   string                                    $typoScriptObjectPath
+     * @param   \TYPO3\CMS\Core\Site\Entity\SiteLanguage  $language
+     *
+     * @return \LaborDigital\T3fa\Api\Resource\Entity\ContentElementEntity
+     */
     public function makeFromTypoScriptPath(string $typoScriptObjectPath, SiteLanguage $language): ContentElementEntity
     {
-        // @todo is this method at the correct place?
+        return $this->makeInstance(
+            ContentElementEntity::class,
+            $this->getCache()->remember(
+                function () use ($typoScriptObjectPath, $language) {
+                    return $this->getService(DataGenerator::class)->makeFromTsPath($typoScriptObjectPath, $language);
+                },
+                [
+                    'ce_resource',
+                    $typoScriptObjectPath,
+                    $language->getTwoLetterIsoCode(),
+                    '@query' => true,
+                ],
+                [
+                    'tags' => ['contentElement'],
+                ]
+            )
+        );
     }
     
     /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:25
+ * Last modified: 2021.06.21 at 20:35
  */
 
 declare(strict_types=1);
@@ -24,22 +24,19 @@ namespace LaborDigital\T3fa\Api\Resource\Factory\ContentElement;
 
 
 use Closure;
-use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\Tool\Simulation\EnvironmentSimulator;
-use LaborDigital\T3ba\Tool\Tsfe\TsfeService;
 use LaborDigital\T3ba\Tool\TypoScript\TypoScriptService;
 use LaborDigital\T3fa\Api\Resource\Factory\ContentElement\ContentObject\ThrowingRecordsContentObject;
 use LaborDigital\T3fa\Core\Cache\Scope\Scope;
 use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use LaborDigital\T3fa\Core\ContentElement\HtmlSerializer;
+use Neunerlei\Inflection\Inflector;
 use Neunerlei\TinyTimy\DateTimy;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class DataGenerator implements PublicServiceInterface
 {
-    use ContainerAwareTrait;
     use T3faCacheAwareTrait;
     
     /**
@@ -52,20 +49,13 @@ class DataGenerator implements PublicServiceInterface
      */
     protected $typoScriptService;
     
-    /**
-     * @var \LaborDigital\T3ba\Tool\Tsfe\TsfeService
-     */
-    protected $tsfeService;
-    
     public function __construct(
         EnvironmentSimulator $simulator,
-        TypoScriptService $typoScriptService,
-        TsfeService $tsfeService
+        TypoScriptService $typoScriptService
     )
     {
         $this->simulator = $simulator;
         $this->typoScriptService = $typoScriptService;
-        $this->tsfeService = $tsfeService;
     }
     
     /**
@@ -84,45 +74,51 @@ class DataGenerator implements PublicServiceInterface
             ],
             function () use ($uid, $language) {
                 return $this->process($uid, $language, function () use ($uid) {
-                    try {
-                        // I have to be a bit creative here,
-                        // to find out if a content element exists I use an extension of the records content element
-                        // that will throw a not found exception if the result is empty and no data was resolved.
-                        $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects']['RECORDS_THROWING'] = ThrowingRecordsContentObject::class;
-                        
-                        $cObj = $this->makeInstance(
-                            ContentObjectRenderer::class,
-                            [
-                                $this->tsfeService->getTsfe(),
-                                $this->getContainer(),
-                            ]
-                        );
-                        
-                        $result = $cObj->cObjGetSingle(
-                            'RECORDS_THROWING',
-                            [
-                                'tables' => 'tt_content',
-                                'source' => $uid,
-                                'dontCheckPid' => 1,
-                            ]
-                        );
-                        
-                        if (ThrowingRecordsContentObject::$lastRenderedPid !== null) {
-                            $this->runInCacheScope(static function (Scope $scope): void {
-                                $pid = ThrowingRecordsContentObject::$lastRenderedPid;
-                                $scope->addCacheTags(['page_' . $pid, 'pages_' . $pid]);
-                            });
-                        }
-                        
-                        return $result;
-                    } finally {
-                        unset($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects']['RECORDS_THROWING']);
+                    // I have to be a bit creative here,
+                    // to find out if a content element exists I use an extension of the records content element
+                    // that will throw a not found exception if the result is empty and no data was resolved.
+                    $result = $this->typoScriptService->renderContentObject(
+                        'T3FA_RECORDS_THROWING',
+                        [
+                            'tables' => 'tt_content',
+                            'source' => $uid,
+                            'dontCheckPid' => 1,
+                        ]
+                    );
+                    
+                    if (ThrowingRecordsContentObject::$lastRenderedPid !== null) {
+                        $this->runInCacheScope(static function (Scope $scope): void {
+                            $pid = ThrowingRecordsContentObject::$lastRenderedPid;
+                            $scope->addCacheTags(['page_' . $pid, 'pages_' . $pid]);
+                        });
                     }
                     
+                    return $result;
                 });
             }
         );
-        
+    }
+    
+    /**
+     * Generates the data for a single content element based on a typo script definition at the provided path
+     *
+     * @param   string                                    $typoScriptObjectPath
+     * @param   \TYPO3\CMS\Core\Site\Entity\SiteLanguage  $language
+     *
+     * @return array
+     */
+    public function makeFromTsPath(string $typoScriptObjectPath, SiteLanguage $language): array
+    {
+        return $this->simulator->runWithEnvironment(
+            [
+                'language' => $language,
+            ],
+            function () use ($typoScriptObjectPath, $language) {
+                return $this->process($typoScriptObjectPath, $language, function () use ($typoScriptObjectPath) {
+                    return $this->typoScriptService->renderContentObjectWith($typoScriptObjectPath);
+                });
+            }
+        );
     }
     
     /**
@@ -138,7 +134,7 @@ class DataGenerator implements PublicServiceInterface
     protected function process($uidOrPath, SiteLanguage $language, Closure $generator): array
     {
         $attributes = [
-            'id' => is_numeric($uidOrPath) ? $uidOrPath : md5($uidOrPath),
+            'id' => is_numeric($uidOrPath) ? $uidOrPath : Inflector::toFile($uidOrPath),
             'componentType' => 'html',
             'data' => null,
             'initialState' => null,

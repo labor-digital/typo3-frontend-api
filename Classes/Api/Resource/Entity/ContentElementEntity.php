@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 21:42
+ * Last modified: 2021.06.21 at 19:45
  */
 
 declare(strict_types=1);
@@ -31,7 +31,7 @@ class ContentElementEntity implements NoDiInterface, SelfTransformingInterface
     /**
      * The page id we hold the representation for
      *
-     * @var int
+     * @var int|string
      */
     protected $id;
     
@@ -42,7 +42,7 @@ class ContentElementEntity implements NoDiInterface, SelfTransformingInterface
      */
     protected $attributes = [];
     
-    public function __construct(int $id, array $attributes)
+    public function __construct($id, array $attributes)
     {
         $this->id = $id;
         $this->attributes = $attributes;
@@ -51,9 +51,9 @@ class ContentElementEntity implements NoDiInterface, SelfTransformingInterface
     /**
      * Returns the uid id this object represents
      *
-     * @return int
+     * @return int|string
      */
-    public function getId(): int
+    public function getId()
     {
         return $this->id;
     }

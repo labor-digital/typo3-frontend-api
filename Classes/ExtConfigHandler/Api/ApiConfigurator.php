@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.21 at 11:34
  */
 /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 use GuzzleHttp\Psr7\Uri;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
+use LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
@@ -48,6 +49,11 @@ class ApiConfigurator implements NoDiInterface
     protected $routingConfigurator;
     
     /**
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector
+     */
+    protected $layoutObjectCollector;
+    
+    /**
      * The host and schema the framework should always use when api links are generated
      *
      * @var string|null
@@ -64,12 +70,14 @@ class ApiConfigurator implements NoDiInterface
     public function __construct(
         TransformerConfigurator $transformerCollector,
         PageConfigurator $pageConfigurator,
-        RoutingConfigurator $routingConfigurator
+        RoutingConfigurator $routingConfigurator,
+        LayoutObjectCollector $layoutObjectCollector
     )
     {
         $this->transformerCollector = $transformerCollector;
         $this->pageConfigurator = $pageConfigurator;
         $this->routingConfigurator = $routingConfigurator;
+        $this->layoutObjectCollector = $layoutObjectCollector;
     }
     
     /**
@@ -171,6 +179,17 @@ class ApiConfigurator implements NoDiInterface
     public function routing(): RoutingConfigurator
     {
         return $this->routingConfigurator;
+    }
+    
+    /**
+     * Access to the list of layout objects to be provided for this site.
+     * Layout objects are meant for static parts of your page layout, like menus, breadcrumbs or login forms.
+     *
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector
+     */
+    public function layoutObjects(): LayoutObjectCollector
+    {
+        return $this->layoutObjectCollector;
     }
     
     /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 20:54
+ * Last modified: 2021.06.21 at 12:15
  */
 
 declare(strict_types=1);
@@ -31,8 +31,10 @@ use LaborDigital\T3fa\Api\Bundle\CategoryBundle;
 use LaborDigital\T3fa\Api\Bundle\CollectionBundle;
 use LaborDigital\T3fa\Api\Bundle\ContentBundle;
 use LaborDigital\T3fa\Api\Bundle\FileBundle;
+use LaborDigital\T3fa\Api\Bundle\LayoutBundle;
 use LaborDigital\T3fa\Api\Bundle\PageBundle;
 use LaborDigital\T3fa\Api\Bundle\ValueTransformerBundle;
+use LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
@@ -50,6 +52,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
             CategoryBundle::class => [],
             FileBundle::class => [],
             ContentBundle::class => [],
+            LayoutBundle::class => [],
         ];
     
     /**
@@ -88,6 +91,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
                 $this->getInstanceWithoutDi(TransformerConfigurator::class),
                 $this->getInstanceWithoutDi(PageConfigurator::class),
                 $this->getInstanceWithoutDi(RoutingConfigurator::class),
+                $this->getInstanceWithoutDi(LayoutObjectCollector::class),
             ]
         );
     }
@@ -197,6 +201,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         $state->useNamespace('t3fa.transformer', [$this->configurator->transformer(), 'finish']);
         $state->useNamespace('t3fa.page', [$this->configurator->page(), 'finish']);
         $state->useNamespace('t3fa.routing', [$this->configurator->routing(), 'finish']);
+        $state->useNamespace('t3fa.layoutObject', [$this->configurator->layoutObjects(), 'finish']);
         
         $state->useNamespace('t3fa.site', [$this->configurator, 'finish']);
     }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.17 at 18:37
+ * Last modified: 2021.06.21 at 12:12
  */
 
 declare(strict_types=1);
@@ -24,23 +24,22 @@ namespace LaborDigital\T3fa\Api\Resource;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
-use LaborDigital\T3fa\Api\Resource\Entity\PageEntity;
-use LaborDigital\T3fa\Api\Resource\Factory\Page\PageResourceFactory;
-use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
+use LaborDigital\T3fa\Api\Resource\Entity\LayoutObjectEntity;
+use LaborDigital\T3fa\Api\Resource\Factory\LayoutObject\LayoutObjectFactory;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
+use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
+use LaborDigital\T3fa\Core\Resource\ResourceInterface;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
-use TYPO3\CMS\Core\Site\Entity\SiteInterface;
-use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
-class PageResource extends AbstractPageResource
+class LayoutObjectResource implements ResourceInterface
 {
     /**
-     * @var \LaborDigital\T3fa\Api\Resource\Factory\Page\PageResourceFactory
+     * @var \LaborDigital\T3fa\Api\Resource\Factory\LayoutObject\LayoutObjectFactory
      */
     protected $factory;
     
-    public function __construct(PageResourceFactory $factory)
+    public function __construct(LayoutObjectFactory $factory)
     {
         $this->factory = $factory;
     }
@@ -50,15 +49,18 @@ class PageResource extends AbstractPageResource
      */
     public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
     {
-        $configurator->registerClass(PageEntity::class);
+        $configurator->registerClass(LayoutObjectEntity::class);
     }
     
     /**
      * @inheritDoc
      */
-    protected function resolveSingle(int $id, SiteLanguage $language, SiteInterface $site)
+    public function findSingle($id, ResourceContext $context)
     {
-        return $this->factory->make($id, $language, $site);
+        return $this->factory->makeSingle(
+            (string)$id,
+            $context->getTypoContext()->language()->getCurrentFrontendLanguage()
+        );
     }
     
     /**
@@ -66,7 +68,15 @@ class PageResource extends AbstractPageResource
      */
     public function findCollection(ResourceQuery $resourceQuery, ResourceCollectionContext $context)
     {
-        throw new NoCollectionException($context->getResourceType());
+        $identifiers = $resourceQuery->getFilterValue('identifier', []);
+        if (! is_array($identifiers)) {
+            $identifiers = [];
+        }
+        
+        return $this->factory->makeCollection(
+            $context->getTypoContext()->language()->getCurrentFrontendLanguage(),
+            $identifiers
+        );
     }
     
 }

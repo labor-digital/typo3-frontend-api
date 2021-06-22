@@ -26,14 +26,14 @@ namespace LaborDigital\T3fa\Api\Resource\Entity;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\Special\SelfTransformingInterface;
 
-class PageEntity implements NoDiInterface, SelfTransformingInterface
+class LayoutObjectEntity implements NoDiInterface, SelfTransformingInterface
 {
     /**
-     * The page id we hold the representation for
+     * The unique identifier of this
      *
-     * @var int
+     * @var string
      */
-    protected $id;
+    protected $identifier;
     
     /**
      * The prepared resource attributes
@@ -43,52 +43,32 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
     protected $attributes = [];
     
     public function __construct(
-        int $id,
+        string $identifier,
         array $attributes
     )
     {
-        $this->id = $id;
+        $this->identifier = $identifier;
         $this->attributes = $attributes;
     }
     
     /**
-     * Returns the page id this object represents
+     * Returns the unique identifier of this
      *
-     * @return int
+     * @return string
      */
-    public function getId(): int
+    public function getIdentifier()
     {
-        return $this->id;
+        return $this->identifier;
     }
     
     /**
-     * Returns the language code used to generate the page
+     * Returns the language code used to generate the object with
      *
      * @return string
      */
     public function getLanguageCode(): string
     {
         return $this->attributes['meta']['language'] ?? 'en';
-    }
-    
-    /**
-     * Returns the language alternatives in form of hrefLang link definitions
-     *
-     * @return array
-     */
-    public function getHrefLangUrls(): array
-    {
-        return $this->attributes['meta']['hrefLang'] ?? [];
-    }
-    
-    /**
-     * Returns the site identifier which contains this page
-     *
-     * @return string
-     */
-    public function getSiteIdentifier(): string
-    {
-        return $this->attributes['meta']['site'] ?? '';
     }
     
     /**
@@ -102,43 +82,13 @@ class PageEntity implements NoDiInterface, SelfTransformingInterface
     }
     
     /**
-     * Returns the list of links relevant to this page
-     *
-     * @return array
-     */
-    public function getLinks(): array
-    {
-        return $this->attributes['links'] ?? [];
-    }
-    
-    /**
-     * Returns the pages root line array
-     *
-     * @return array
-     */
-    public function getRootLine(): array
-    {
-        return $this->attributes['meta']['rootLine'] ?? [];
-    }
-    
-    /**
-     * Returns the list of generated meta tags for this page
-     *
-     * @return array
-     */
-    public function getMetaTags(): array
-    {
-        return $this->attributes['meta']['metaTags'] ?? [];
-    }
-    
-    /**
      * @inheritDoc
      */
     public function asArray(): array
     {
         return array_merge(
             [
-                'id' => $this->id,
+                'id' => $this->identifier,
             ],
             $this->attributes
         );
