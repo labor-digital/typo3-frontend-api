@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 16:41
+ * Last modified: 2021.06.22 at 19:17
  */
 
 declare(strict_types=1);
@@ -81,5 +81,50 @@ trait JsonContentElementControllerTrait
         return TypoContext::getInstance()->di()
                           ->getService(ResponseFactory::class)
                           ->make($this->request, $this->view, JsonControllerUtil::resolveRow($this));
+    }
+    
+    /**
+     * Helper to generate the information for RESTful requests on other actions.
+     * You would want to use it if your element should have a special action on POST, PUT or DELETE requests.
+     *
+     * It creates an array containing two values:
+     * - "endpoint" is the unique url your frontend implementation can submit its data to
+     * - "namespace" is the namespace in which the body data, e.g. your form field name should be prefixed with.
+     * This is required for extbase to map the body data to the actual content element.
+     *
+     * @param   string|null  $actionName  Can be used to set the action name that should handle the request.
+     *                                    If omitted the current action name will be used.
+     *
+     * @return array
+     */
+    protected function getFormInfo(?string $actionName = null): array
+    {
+        /** @var \TYPO3\CMS\Extbase\Mvc\Controller\ActionController $this */
+        ControllerUtil::requireActionController($this);
+        
+        if (! $actionName) {
+            $actionName = $this->request->getControllerActionName();
+        }
+        
+        $row = JsonControllerUtil::resolveRow($this);
+        $di = TypoContext::getInstance()->di();
+        
+        $link = $di->makeInstance(ApiLink::class)
+                   ->withRouteName('resource-contentElement-single')
+                   ->withRouteArguments(['id' => $row['uid']])
+                   ->withSlugLinkBuilder(
+                       $di->getService(LinkService::class)
+                          ->getLink()
+                          ->withRequest($this->request)
+                          ->withControllerAction($actionName)
+                   );
+        
+        $namespace = $this->getService(ExtensionService::class)->getPluginNamespace(
+            $this->request->getControllerExtensionName(), $this->request->getPluginName());
+        
+        return [
+            'endpoint' => $link,
+            'namespace' => $namespace,
+        ];
     }
 }
