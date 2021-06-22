@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.11 at 15:14
+ * Last modified: 2021.06.22 at 13:37
  */
 
 declare(strict_types=1);
@@ -122,6 +122,7 @@ class RequestRewriter
             
             $typoRequest = $this->requestFactory->createServerRequest($request->getMethod(), $typoUri, $_SERVER);
             $typoRequest = $typoRequest->withQueryParams($_GET);
+            $typoRequest = $typoRequest->withParsedBody($request->getParsedBody());
             $typoRequest = $typoRequest->withCookieParams($request->getCookieParams());
             $typoRequest = $typoRequest->withAttribute('originalRequest', $request);
             
@@ -153,8 +154,10 @@ class RequestRewriter
     {
         $inheritedQueryParams = [];
         
+        $allowedParams = ['cHash', 'id'];
+        
         foreach ($queryParams as $k => $v) {
-            if (str_starts_with($k, 'tx_')) {
+            if (str_starts_with($k, 'tx_') || in_array($k, $allowedParams, true)) {
                 $inheritedQueryParams[$k] = $v;
             }
         }
