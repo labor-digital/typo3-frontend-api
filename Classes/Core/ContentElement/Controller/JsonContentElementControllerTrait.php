@@ -24,12 +24,15 @@ namespace LaborDigital\T3fa\Core\ContentElement\Controller;
 
 
 use LaborDigital\T3ba\ExtBase\Controller\ControllerUtil;
+use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\ContentElement\ErrorHandler;
 use LaborDigital\T3fa\Core\ContentElement\Response\JsonResponse;
 use LaborDigital\T3fa\Core\ContentElement\Response\ResponseFactory;
+use LaborDigital\T3fa\Core\Link\ApiLink;
 use Throwable;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+use TYPO3\CMS\Extbase\Service\ExtensionService;
 
 trait JsonContentElementControllerTrait
 {
@@ -65,18 +68,18 @@ trait JsonContentElementControllerTrait
         return null;
     }
     
+    /**
+     * Factory to create a new json response object for this content element.
+     *
+     * @return \LaborDigital\T3fa\Core\ContentElement\Response\JsonResponse
+     */
     protected function getJsonResponse(): JsonResponse
     {
         ControllerUtil::requireActionController($this);
         
-        $canUseGetData = isset($this->__dataCache) && is_array($this->__dataCache) && method_exists($this, 'getData');
-        
+        /** @noinspection PhpParamsInspection */
         return TypoContext::getInstance()->di()
                           ->getService(ResponseFactory::class)
-                          ->make($this->request, $this->view,
-                              $canUseGetData
-                                  ? $this->getData()
-                                  : $this->previewRendererContext ?? $this->configurationManager ?? []
-                          );
+                          ->make($this->request, $this->view, JsonControllerUtil::resolveRow($this));
     }
 }

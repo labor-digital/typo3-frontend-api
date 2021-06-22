@@ -41,14 +41,13 @@ class ResponseFactory implements PublicServiceInterface
      *
      * @param   \TYPO3\CMS\Extbase\Mvc\Request            $request
      * @param   \TYPO3\CMS\Extbase\Mvc\View\AbstractView  $view
-     * @param   mixed                                     $rowProvider
+     * @param   array                                     $row
      *
      * @return \LaborDigital\T3fa\Core\ContentElement\Response\JsonResponse
      * @internal
      */
-    public function make(Request $request, AbstractView $view, $rowProvider): JsonResponse
+    public function make(Request $request, ViewInterface $view, array $row): JsonResponse
     {
-        $row = $this->resolveRow($rowProvider);
         $cssClasses = $this->resolveCmsCssClasses($row);
         
         return $this->makeInstance(
@@ -62,30 +61,6 @@ class ResponseFactory implements PublicServiceInterface
                 $cssClasses,
             ]
         );
-    }
-    
-    /**
-     * Tries to retrieve the database row based on the given row provider
-     *
-     * @param   mixed  $rowProvider
-     *
-     * @return array
-     */
-    protected function resolveRow($rowProvider): array
-    {
-        if (is_array($rowProvider)) {
-            return $rowProvider;
-        }
-        
-        if ($rowProvider instanceof ConfigurationManagerInterface) {
-            return $rowProvider->getContentObject()->data ?? [];
-        }
-        
-        if ($rowProvider instanceof BackendPreviewRendererContext) {
-            return $rowProvider->getRow();
-        }
-        
-        return [];
     }
     
     /**
