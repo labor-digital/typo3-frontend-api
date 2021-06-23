@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 11:34
+ * Last modified: 2021.06.23 at 12:21
  */
 /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
 declare(strict_types=1);
@@ -23,12 +23,13 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api;
 
 
 use GuzzleHttp\Psr7\Uri;
+use InvalidArgumentException;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
-use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiCacheOption;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Translation\TranslationConfigurator;
 use Neunerlei\Configuration\State\ConfigState;
 
 class ApiConfigurator implements NoDiInterface
@@ -54,6 +55,11 @@ class ApiConfigurator implements NoDiInterface
     protected $layoutObjectCollector;
     
     /**
+     * @var \LaborDigital\T3fa\ExtConfigHandler\Api\Translation\TranslationConfigurator
+     */
+    protected $translationConfigurator;
+    
+    /**
      * The host and schema the framework should always use when api links are generated
      *
      * @var string|null
@@ -71,13 +77,15 @@ class ApiConfigurator implements NoDiInterface
         TransformerConfigurator $transformerCollector,
         PageConfigurator $pageConfigurator,
         RoutingConfigurator $routingConfigurator,
-        LayoutObjectCollector $layoutObjectCollector
+        LayoutObjectCollector $layoutObjectCollector,
+        TranslationConfigurator $translationConfigurator
     )
     {
         $this->transformerCollector = $transformerCollector;
         $this->pageConfigurator = $pageConfigurator;
         $this->routingConfigurator = $routingConfigurator;
         $this->layoutObjectCollector = $layoutObjectCollector;
+        $this->translationConfigurator = $translationConfigurator;
     }
     
     /**
@@ -117,7 +125,7 @@ class ApiConfigurator implements NoDiInterface
                 $host = $path;
                 $path = '';
             } else {
-                throw new \InvalidArgumentException('The given api host is invalid. You must define a host name');
+                throw new InvalidArgumentException('The given api host is invalid. You must define a host name');
             }
         }
         
@@ -190,6 +198,16 @@ class ApiConfigurator implements NoDiInterface
     public function layoutObjects(): LayoutObjectCollector
     {
         return $this->layoutObjectCollector;
+    }
+    
+    /**
+     * Access to the translation provider, available under the /api/resources/translation endpoint
+     *
+     * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Translation\TranslationConfigurator
+     */
+    public function translation(): TranslationConfigurator
+    {
+        return $this->translationConfigurator;
     }
     
     /**

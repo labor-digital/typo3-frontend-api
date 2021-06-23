@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 12:15
+ * Last modified: 2021.06.23 at 13:07
  */
 
 declare(strict_types=1);
@@ -27,12 +27,14 @@ use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigHandler;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
 use LaborDigital\T3ba\ExtConfig\ExtConfigService;
 use LaborDigital\T3ba\ExtConfig\Interfaces\SiteBasedHandlerInterface;
+use LaborDigital\T3ba\Tool\Translation\Translator;
 use LaborDigital\T3fa\Api\Bundle\CategoryBundle;
 use LaborDigital\T3fa\Api\Bundle\CollectionBundle;
 use LaborDigital\T3fa\Api\Bundle\ContentBundle;
 use LaborDigital\T3fa\Api\Bundle\FileBundle;
 use LaborDigital\T3fa\Api\Bundle\LayoutBundle;
 use LaborDigital\T3fa\Api\Bundle\PageBundle;
+use LaborDigital\T3fa\Api\Bundle\TranslationBundle;
 use LaborDigital\T3fa\Api\Bundle\ValueTransformerBundle;
 use LaborDigital\T3fa\ExtConfigHandler\Api\LayoutObject\LayoutObjectCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\PageConfigurator;
@@ -40,6 +42,7 @@ use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceCollector;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Resource\ResourceConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
+use LaborDigital\T3fa\ExtConfigHandler\Api\Translation\TranslationConfigurator;
 use Neunerlei\Configuration\Handler\HandlerConfigurator;
 
 class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterface
@@ -53,6 +56,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
             FileBundle::class => [],
             ContentBundle::class => [],
             LayoutBundle::class => [],
+            TranslationBundle::class => [],
         ];
     
     /**
@@ -92,6 +96,9 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
                 $this->getInstanceWithoutDi(PageConfigurator::class),
                 $this->getInstanceWithoutDi(RoutingConfigurator::class),
                 $this->getInstanceWithoutDi(LayoutObjectCollector::class),
+                $this->getInstanceWithoutDi(TranslationConfigurator::class,
+                    [$this->getInstance(Translator::class)]
+                ),
             ]
         );
     }
@@ -202,6 +209,7 @@ class Handler extends AbstractExtConfigHandler implements SiteBasedHandlerInterf
         $state->useNamespace('t3fa.page', [$this->configurator->page(), 'finish']);
         $state->useNamespace('t3fa.routing', [$this->configurator->routing(), 'finish']);
         $state->useNamespace('t3fa.layoutObject', [$this->configurator->layoutObjects(), 'finish']);
+        $state->useNamespace('t3fa.translation', [$this->configurator->translation(), 'finish']);
         
         $state->useNamespace('t3fa.site', [$this->configurator, 'finish']);
     }
