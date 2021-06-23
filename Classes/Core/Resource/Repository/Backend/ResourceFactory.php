@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 15:17
+ * Last modified: 2021.06.23 at 10:30
  */
 
 declare(strict_types=1);
@@ -196,7 +196,7 @@ class ResourceFactory implements PublicServiceInterface
             return $this->baseUrlCache[$siteIdentifier];
         }
         
-        $host = $this->context->t3fa()->getConfigValue('site.apiHost');
+        $host = $this->context->config()->getSiteBasedConfigValue('t3fa.site.apiHost');
         
         if (! is_string($host)) {
             $request = $this->getApiRequest();

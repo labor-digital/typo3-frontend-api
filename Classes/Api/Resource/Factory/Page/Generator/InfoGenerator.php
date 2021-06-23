@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 14:19
+ * Last modified: 2021.06.23 at 10:25
  */
 
 declare(strict_types=1);
@@ -182,7 +182,7 @@ class InfoGenerator
      */
     protected function applySlideFields(array $info, PageData $data): array
     {
-        $slideFields = $this->typoContext->t3fa()->getConfigValue('page.dataSlideFields', []);
+        $slideFields = $this->typoContext->config()->getSiteBasedConfigValue('t3fa.page.dataSlideFields', []);
         if (empty($slideFields)) {
             return $info;
         }
@@ -220,11 +220,11 @@ class InfoGenerator
             return $data->rootLine;
         }
         
-        $t3fa = $this->typoContext->t3fa();
+        $config = $this->typoContext->config();
         $additionalFields = array_unique(
             array_merge(
-                $t3fa->getConfigValue('page.dataSlideFields', []),
-                $t3fa->getConfigValue('page.additionalRootLineFields', [])
+                $config->getSiteBasedConfigValue('t3fa.page.dataSlideFields', []),
+                $config->getSiteBasedConfigValue('t3fa.page.additionalRootLineFields', [])
             )
         );
         
@@ -266,7 +266,8 @@ class InfoGenerator
      */
     protected function hydrateDataModel(PageData $data): AbstractEntity
     {
-        $modelClass = $this->typoContext->t3fa()->getConfigValue('page.dataModelClass', DefaultPageDataModel::class);
+        $modelClass = $this->typoContext
+            ->config()->getSiteBasedConfigValue('t3fa.page.dataModelClass', DefaultPageDataModel::class);
         $model = $this->hydrator->hydrateObject(
             $modelClass,
             $data->pageInfoArray
@@ -328,7 +329,7 @@ class InfoGenerator
      */
     protected function findLayout(PageData $data): string
     {
-        $layoutField = $this->typoContext->t3fa()->getConfigValue('page.layoutField', 'backend_layout');
+        $layoutField = $this->typoContext->config()->getSiteBasedConfigValue('t3fa.page.layoutField', 'backend_layout');
         $info = $data->pageInfoArray;
         
         if (! empty($info[$layoutField])) {

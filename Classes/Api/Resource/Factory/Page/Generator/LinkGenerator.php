@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.23 at 10:25
  */
 
 declare(strict_types=1);
@@ -83,7 +83,7 @@ class LinkGenerator
         $collector->registerStaticLink('base', (string)$this->findBaseUrl($data));
         $collector->registerStaticLink('canonical', $this->generateCanonicalUrl());
         
-        foreach ($this->context->t3fa()->getConfigValue('page.linkProviders', []) as $linkProvider) {
+        foreach ($this->context->config()->getSiteBasedConfigValue('t3fa.page.linkProviders', []) as $linkProvider) {
             $linkProvider::provideLinks($collector, $this->linkService, $data->pid);
         }
         

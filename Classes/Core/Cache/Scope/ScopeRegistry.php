@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.01 at 14:37
+ * Last modified: 2021.06.23 at 10:28
  */
 
 declare(strict_types=1);
@@ -60,7 +60,8 @@ class ScopeRegistry implements PublicServiceInterface
     {
         $this->metricsTracker = $metricsTracker;
         /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
-        $this->defaultLifetime = $context->t3fa()->getConfigValue('site.cache.defaultLifetime', 60 * 60 * 24 * 365);
+        $this->defaultLifetime = $context
+            ->config()->getSiteBasedConfigValue('t3fa.site.cache.defaultLifetime', 60 * 60 * 24 * 365);
     }
     
     /**

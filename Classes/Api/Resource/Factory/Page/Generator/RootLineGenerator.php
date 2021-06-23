@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.23 at 10:26
  */
 
 declare(strict_types=1);
@@ -81,7 +81,7 @@ class RootLineGenerator
      */
     protected function findRootLine(PageData $data): array
     {
-        $config = $this->getTypoContext()->t3fa()->getConfigValue('page', []);
+        $config = $this->getTypoContext()->config()->getSiteBasedConfigValue('t3fa.page', []);
         
         $container = $this->getContainer();
         /** @var RootLineDataProviderInterface[] $dataProviders */

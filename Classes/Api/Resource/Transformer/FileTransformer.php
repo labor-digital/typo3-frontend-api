@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:25
+ * Last modified: 2021.06.23 at 10:28
  */
 
 declare(strict_types=1);
@@ -168,7 +168,7 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
         
         
         // @todo modify this to match the imaging requirements
-        if ($this->getTypoContext()->t3fa()->getConfigValue('t3fa.tool.imaging.enabled') === true) {
+        if ($this->getTypoContext()->config()->getSiteBasedConfigValue('t3fa.imaging.enabled') === true) {
             $this->imagingGlue($imageInfo, $image);
         } else {
             // Build all crop variants
