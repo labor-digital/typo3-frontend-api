@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.04 at 13:40
+ * Last modified: 2021.06.23 at 12:04
  */
 
 declare(strict_types=1);
@@ -24,13 +24,14 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page;
 
 
 use InvalidArgumentException;
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3ba\ExtConfig\ExtConfigException;
 use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
 use LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link\PageLinkProviderInterface;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
-class PageConfigurator extends AbstractExtConfigConfigurator
+class PageConfigurator extends AbstractExtConfigConfigurator implements NoDiInterface
 {
     /**
      * The list of additional "pages" table fields which will be added to root line resource entries

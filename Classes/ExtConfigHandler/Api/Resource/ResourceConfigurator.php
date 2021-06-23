@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:40
+ * Last modified: 2021.06.23 at 12:04
  */
 
 declare(strict_types=1);
@@ -23,6 +23,8 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\Api\Resource;
 
 
+use InvalidArgumentException;
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3fa\Api\Route\DefaultResourceController;
 use LaborDigital\T3fa\Api\Route\ResourceControllerInterface;
 use LaborDigital\T3fa\Core\Cache\CacheOptionsTrait;
@@ -34,7 +36,7 @@ use LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator;
 use LaborDigital\T3fa\ExtConfigHandler\Api\TransformerRegistrationTrait;
 use Neunerlei\Options\Options;
 
-class ResourceConfigurator
+class ResourceConfigurator implements NoDiInterface
 {
     use TransformerRegistrationTrait;
     use CacheOptionsTrait;
@@ -419,11 +421,11 @@ class ResourceConfigurator
     public function setControllerClass(string $controllerClass): self
     {
         if (! class_exists($controllerClass)) {
-            throw new \InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class does not exist');
+            throw new InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class does not exist');
         }
         
         if (! in_array(ResourceControllerInterface::class, class_implements($controllerClass), true)) {
-            throw new \InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class has to implement the required interface: "' . ResourceControllerInterface::class . '"');
+            throw new InvalidArgumentException('Invalid resource controller class: "' . $controllerClass . '" the class has to implement the required interface: "' . ResourceControllerInterface::class . '"');
         }
         
         $this->controllerClass = $controllerClass;

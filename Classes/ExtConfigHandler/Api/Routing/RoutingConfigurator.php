@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.23 at 12:03
  */
 
 declare(strict_types=1);
@@ -24,12 +24,13 @@ namespace LaborDigital\T3fa\ExtConfigHandler\Api\Routing;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\Configuration\State\ConfigState;
 use Neunerlei\Configuration\Util\IntuitiveTopSorter;
 
-class RoutingConfigurator extends AbstractExtConfigConfigurator
+class RoutingConfigurator extends AbstractExtConfigConfigurator implements NoDiInterface
 {
     
     use ContainerAwareTrait;

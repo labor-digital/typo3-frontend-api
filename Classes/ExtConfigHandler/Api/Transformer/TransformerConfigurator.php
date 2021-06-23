@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 11:28
+ * Last modified: 2021.06.23 at 12:04
  */
 
 declare(strict_types=1);
@@ -23,13 +23,14 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\Api\Transformer;
 
 
+use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\ExtConfig\Abstracts\AbstractExtConfigConfigurator;
 use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerInterface;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerInterface;
 use LaborDigital\T3fa\ExtConfigHandler\Api\TransformerRegistrationTrait;
 use Neunerlei\Configuration\State\ConfigState;
 
-class TransformerConfigurator extends AbstractExtConfigConfigurator
+class TransformerConfigurator extends AbstractExtConfigConfigurator implements NoDiInterface
 {
     use TransformerRegistrationTrait;
     
