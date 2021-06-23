@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 22:34
+ * Last modified: 2021.06.23 at 11:35
  */
 
 declare(strict_types=1);
@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Middleware\Typo;
 
 
+use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Routing\Util\RedirectUtil;
 use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
 use Psr\Http\Message\ResponseInterface;
@@ -37,6 +38,12 @@ class ExtRedirectsMiddleware
             return new class extends RedirectHandler {
                 
                 use ResponseFactoryTrait;
+                
+                public function __construct()
+                {
+                    $di = TypoContext::getInstance()->di();
+                    parent::__construct($di->getService(RedirectHandler::class)->redirectService);
+                }
                 
                 /**
                  * @inheritDoc
