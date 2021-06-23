@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 19:18
+ * Last modified: 2021.06.23 at 11:24
  */
 
 declare(strict_types=1);
@@ -25,17 +25,12 @@ namespace LaborDigital\T3fa\Core\Resource\Repository;
 
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\Tool\Simulation\EnvironmentSimulator;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceBackend;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use TYPO3\CMS\Core\SingletonInterface;
 
 class ResourceRepository implements PublicServiceInterface, SingletonInterface
 {
-    /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
-     */
-    protected $context;
-    
     /**
      * @var \LaborDigital\T3ba\Tool\Simulation\EnvironmentSimulator
      */
@@ -46,11 +41,20 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
      */
     protected $backend;
     
-    public function __construct(TypoContext $context, EnvironmentSimulator $simulator, ResourceBackend $backend)
+    /**
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
+     */
+    protected $configRepository;
+    
+    public function __construct(
+        EnvironmentSimulator $simulator,
+        ResourceBackend $backend,
+        ResourceConfigRepository $configRepository
+    )
     {
-        $this->context = $context;
         $this->simulator = $simulator;
         $this->backend = $backend;
+        $this->configRepository = $configRepository;
     }
     
     /**
@@ -67,7 +71,7 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
     public function getResource($resourceType, $id, array $options = []): ?ResourceItem
     {
         return $this->simulator->runWithEnvironment($options, function () use ($resourceType, $id) {
-            $config = $this->context->resource()->getResourceConfig($resourceType);
+            $config = $this->configRepository->getResourceConfig($resourceType);
             if ($config === null) {
                 return null;
             }
@@ -90,7 +94,7 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
     public function getCollection($resourceType, ?array $query = null, array $options = []): ResourceCollection
     {
         return $this->simulator->runWithEnvironment($options, function () use ($resourceType, $query) {
-            $config = $this->context->resource()->getResourceConfig($resourceType);
+            $config = $this->configRepository->getResourceConfig($resourceType);
             
             if ($config === null) {
                 return $this->backend->getEmptyCollection($config['type']);

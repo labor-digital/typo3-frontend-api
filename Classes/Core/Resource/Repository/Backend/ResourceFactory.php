@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 10:30
+ * Last modified: 2021.06.23 at 11:19
  */
 
 declare(strict_types=1);
@@ -30,6 +30,7 @@ use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Pagination;
 use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,17 +58,28 @@ class ResourceFactory implements PublicServiceInterface
     protected $paginator;
     
     /**
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
+     */
+    protected $configRepository;
+    
+    /**
      * The resolved base urls by their matching site identifiers
      *
      * @var array
      */
     protected $baseUrlCache = [];
     
-    public function __construct(TransformerFactory $transformerFactory, TypoContext $context, Paginator $paginator)
+    public function __construct(
+        TransformerFactory $transformerFactory,
+        TypoContext $context,
+        Paginator $paginator,
+        ResourceConfigRepository $configRepository
+    )
     {
         $this->transformerFactory = $transformerFactory;
         $this->context = $context;
         $this->paginator = $paginator;
+        $this->configRepository = $configRepository;
     }
     
     /**
@@ -87,7 +99,7 @@ class ResourceFactory implements PublicServiceInterface
         }
         
         if (empty($resourceType)) {
-            $resourceType = $this->context->resource()->getResourceType($raw) ?? $this->makeResourceType($raw);
+            $resourceType = $this->configRepository->getResourceType($raw) ?? $this->makeResourceType($raw);
         }
         
         return $this->makeInstance(
@@ -120,7 +132,7 @@ class ResourceFactory implements PublicServiceInterface
                 break;
             }
             
-            $resourceType = $this->context->resource()->getResourceType($first) ?? $this->makeResourceType($first);
+            $resourceType = $this->configRepository->getResourceType($first) ?? $this->makeResourceType($first);
         }
         
         // Create a fallback pagination object

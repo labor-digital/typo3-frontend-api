@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 12:41
+ * Last modified: 2021.06.23 at 11:23
  */
 
 declare(strict_types=1);
@@ -25,7 +25,7 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Schema;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\Internal\PropertyAccessResolver;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\ExtBaseReflector;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\GenericReflector;
@@ -51,23 +51,30 @@ class SchemaFactory implements PublicServiceInterface
     protected $accessResolver;
     
     /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
      */
-    protected $typoContext;
+    protected $configRepository;
     
     public function __construct(
         ExtBaseReflector $extBaseReflector,
         GenericReflector $genericReflector,
         PropertyAccessResolver $accessResolver,
-        TypoContext $typoContext
+        ResourceConfigRepository $configRepository
     )
     {
         $this->extBaseReflector = $extBaseReflector;
         $this->genericReflector = $genericReflector;
         $this->accessResolver = $accessResolver;
-        $this->typoContext = $typoContext;
+        $this->configRepository = $configRepository;
     }
     
+    /**
+     * Generates the transformation schema that describes how an object can be transformed into a json ready array.
+     *
+     * @param   object  $value
+     *
+     * @return \LaborDigital\T3fa\Core\Resource\Transformer\Schema\TransformationSchema
+     */
     public function makeSchema(object $value): TransformationSchema
     {
         $className = get_class($value);
@@ -75,7 +82,7 @@ class SchemaFactory implements PublicServiceInterface
         
         $schema = $this->makeInstance(TransformationSchema::class, [$className, $accessInfo]);
         
-        if ($this->typoContext->resource()->isCollection($value)) {
+        if ($this->configRepository->isCollection($value)) {
             $schema->isCollection = is_iterable($value);
         } else {
             if ($value instanceof AbstractEntity) {

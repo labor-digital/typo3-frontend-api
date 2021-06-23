@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 12:28
+ * Last modified: 2021.06.23 at 11:20
  */
 
 declare(strict_types=1);
@@ -24,17 +24,27 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection;
 
 
 use LaborDigital\T3ba\Tool\OddsAndEnds\ReflectionUtil;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContextAwareTrait;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use Neunerlei\Inflection\Inflector;
+use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 
 abstract class AbstractReflector
 {
-    use TypoContextAwareTrait;
     
     public const PROPERTY_ACCESS_DIRECT = 'directAccess';
     public const PROPERTY_ACCESS_GETTER = 'getterAccess';
+    
+    /**
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
+     */
+    protected $configRepository;
+    
+    public function injectConfigRepository(ResourceConfigRepository $configRepository): void
+    {
+        $this->configRepository = $configRepository;
+    }
     
     /**
      * Generates a list of getter methods and their property names based on the given reflection
@@ -43,7 +53,7 @@ abstract class AbstractReflector
      *
      * @return array
      */
-    protected function makePropertyMap(\ReflectionClass $ref): array
+    protected function makePropertyMap(ReflectionClass $ref): array
     {
         $properties = [];
         
@@ -119,7 +129,7 @@ abstract class AbstractReflector
         
         $type = reset($types);
         
-        if ($this->getTypoContext()->resource()->getResourceType($type) !== null) {
+        if ($this->configRepository->getResourceType($type) !== null) {
             $related[$propertyName] = false;
         }
     }

@@ -14,24 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 20:34
+ * Last modified: 2021.06.23 at 11:16
  */
 
 declare(strict_types=1);
 
 
-namespace LaborDigital\T3fa\TypoContext;
+namespace LaborDigital\T3fa\Core\Resource;
 
 
+use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
-use LaborDigital\T3ba\Tool\TypoContext\FacetInterface;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use Neunerlei\Arrays\Arrays;
 
-class ResourceFacet implements FacetInterface
+class ResourceConfigRepository implements PublicServiceInterface
 {
     use SiteConfigAwareTrait;
     
@@ -56,14 +56,6 @@ class ResourceFacet implements FacetInterface
             $this->resourceTypeCache = [];
             $this->collectionTypeCache = [];
         });
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    public static function getIdentifier(): string
-    {
-        return 'resource';
     }
     
     /**

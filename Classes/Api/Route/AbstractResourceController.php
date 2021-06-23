@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:40
+ * Last modified: 2021.06.23 at 11:16
  */
 
 declare(strict_types=1);
@@ -23,9 +23,9 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Api\Route;
 
 
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Exception\InvalidConfigException;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceRepository;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -39,14 +39,14 @@ abstract class AbstractResourceController implements ResourceControllerInterface
     protected $resourceRepository;
     
     /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
      */
-    protected $typoContext;
+    protected $configRepository;
     
-    public function __construct(ResourceRepository $resourceRepository, TypoContext $typoContext)
+    public function __construct(ResourceRepository $resourceRepository, ResourceConfigRepository $configRepository)
     {
         $this->resourceRepository = $resourceRepository;
-        $this->typoContext = $typoContext;
+        $this->configRepository = $configRepository;
     }
     
     /**
@@ -60,7 +60,7 @@ abstract class AbstractResourceController implements ResourceControllerInterface
      */
     protected function validateResourceType(array $vars): string
     {
-        $resourceType = $this->typoContext->resource()->getResourceType($vars['resourceType'] ?? null);
+        $resourceType = $this->configRepository->getResourceType($vars['resourceType'] ?? null);
         
         if ($resourceType === null) {
             throw new InvalidConfigException('The route had no provided resource type');

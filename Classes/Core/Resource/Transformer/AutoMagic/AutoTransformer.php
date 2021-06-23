@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 15:16
+ * Last modified: 2021.06.23 at 11:21
  */
 
 declare(strict_types=1);
@@ -25,10 +25,10 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
-use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
+use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\Link\RteContentParser;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
 use Throwable;
@@ -69,21 +69,20 @@ class AutoTransformer
      * @var \LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory
      */
     protected $resourceFactory;
-    
     /**
-     * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
+     * @var \LaborDigital\T3fa\Core\Resource\ResourceConfigRepository
      */
-    protected $typoContext;
+    protected $configRepository;
     
     public function __construct(
         TransformerFactory $transformerFactory,
         ResourceFactory $resourceFactory,
-        TypoContext $typoContext
+        ResourceConfigRepository $configRepository
     )
     {
         $this->transformerFactory = $transformerFactory;
         $this->resourceFactory = $resourceFactory;
-        $this->typoContext = $typoContext;
+        $this->configRepository = $configRepository;
     }
     
     /**
@@ -250,7 +249,7 @@ class AutoTransformer
         
         if ($value instanceof ResourceItem || $value instanceof ResourceCollection) {
             $res = $value;
-        } elseif ($this->typoContext->resource()->isCollection($value) && is_iterable($value)) {
+        } elseif (is_iterable($value) && $this->configRepository->isCollection($value)) {
             /** @noinspection PhpParamsInspection */
             $res = $this->resourceFactory->makeResourceCollection($value);
         } else {
