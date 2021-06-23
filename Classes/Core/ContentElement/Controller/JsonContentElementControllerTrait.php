@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.22 at 19:17
+ * Last modified: 2021.06.23 at 12:29
  */
 
 declare(strict_types=1);
@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\Core\ContentElement\Controller;
 
 
+use HttpException;
 use LaborDigital\T3ba\ExtBase\Controller\ControllerUtil;
 use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
@@ -30,7 +31,9 @@ use LaborDigital\T3fa\Core\ContentElement\ErrorHandler;
 use LaborDigital\T3fa\Core\ContentElement\Response\JsonResponse;
 use LaborDigital\T3fa\Core\ContentElement\Response\ResponseFactory;
 use LaborDigital\T3fa\Core\Link\ApiLink;
+use League\Route\Http\Exception;
 use Throwable;
+use TYPO3\CMS\Core\Error\Http\StatusException;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Service\ExtensionService;
 
@@ -52,7 +55,7 @@ trait JsonContentElementControllerTrait
         
         try {
             return $callback();
-        } catch (StopActionException $e) {
+        } catch (StopActionException | HttpException | Exception | StatusException $e) {
             throw $e;
         } catch (Throwable $e) {
             /** @var \TYPO3\CMS\Extbase\Mvc\Controller\ActionController $this */
