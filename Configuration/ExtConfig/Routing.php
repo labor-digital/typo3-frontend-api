@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.17 at 16:00
+ * Last modified: 2021.06.23 at 18:17
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use LaborDigital\T3ba\ExtConfig\ExtConfigContext;
 use LaborDigital\T3ba\ExtConfigHandler\Routing\ConfigureRoutingInterface;
 use LaborDigital\T3ba\ExtConfigHandler\Routing\RoutingConfigurator;
 use LaborDigital\T3fa\Middleware\Typo\ApiForkMiddleware;
+use LaborDigital\T3fa\Middleware\Typo\ImagingMiddleware;
 
 class Routing implements ConfigureRoutingInterface
 {
@@ -40,6 +41,9 @@ class Routing implements ConfigureRoutingInterface
                 'typo3/cms-frontend/eid',
             ],
             'before' => 'typo3/cms-frontend/site',
+        ]);
+        $configurator->registerMiddleware(ImagingMiddleware::class, [
+            'before' => 'typo3/cms-frontend/timetracker',
         ]);
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 10:28
+ * Last modified: 2021.06.24 at 12:43
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use LaborDigital\T3ba\Tool\Fal\FalService;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\FileInfo;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\ImageFileInfo;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\VideoFileInfo;
+use LaborDigital\T3fa\Core\Imaging\LinkBuilder;
 use LaborDigital\T3fa\Core\Resource\Transformer\AbstractResourceTransformer;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -87,8 +88,6 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
                 'mime' => $fileInfo->getMimeType(),
                 'size' => $fileInfo->getSize(),
                 'extension' => $fileInfo->getExtension(),
-                // @todo the host should be changeable -> For using a proxy
-                'url' => $fileInfo->getUrl(),
             ];
             
             if ($fileInfo->isVideo()) {
@@ -101,6 +100,10 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
                 if ($image !== null) {
                     $info['image'] = $image;
                 }
+            }
+            
+            if (! isset($info['image']) && ! isset($info['video'])) {
+                $info['url'] = $this->processFileUrl($fileInfo->getUrl());
             }
             
             return $info;
@@ -133,13 +136,19 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
             return null;
         }
         
+        $id = $videoInfo->getVideoId();
+        /** @noinspection BypassedUrlValidationInspection */
+        if (filter_var((string)$id, FILTER_VALIDATE_URL)) {
+            $id = $this->processFileUrl($id);
+        }
+        
         return [
             'title' => $videoInfo->getTitle(),
             'description' => $videoInfo->getDescription(),
             'autoPlay' => $videoInfo->isAutoPlay(),
             'isYouTube' => $videoInfo->isYouTube(),
             'isVimeo' => $videoInfo->isVimeo(),
-            'videoId' => $videoInfo->getVideoId(),
+            'videoId' => $id,
         ];
     }
     
@@ -166,20 +175,23 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
             'alignment' => $imageInfo->getImageAlignment(),
         ];
         
-        
         // @todo modify this to match the imaging requirements
-        if ($this->getTypoContext()->config()->getSiteBasedConfigValue('t3fa.imaging.enabled') === true) {
-            $this->imagingGlue($imageInfo, $image);
+        if ($this->getTypoContext()->config()->getConfigValue('t3fa.imaging.enabled') === true) {
+            // Render Imaging url
+            $image['url'] = $this->processFileUrl(LinkBuilder::build($fileInfo));
+            $image['variants'] = array_keys($imageInfo->getCropVariants());
         } else {
-            // Build all crop variants
+            // Non-Imaging-Behaviour
             $variants = [];
             $file = $fileInfo->isFileReference() ? $fileInfo->getFileReference() : $fileInfo->getFile();
             foreach ($imageInfo->getCropVariants() as $k => $conf) {
                 $processed = $this->falService->getResizedImage($file, ['crop' => $k]);
                 $variants[$k] = [
                     // @todo the host should be changeable -> For using a proxy
-                    'url' => $this->getTypoContext()->request()->getHost() . '/' .
-                             $processed->getPublicUrl(false) . '?hash=' . md5($processed->getSha1()),
+                    'url' => $this->processFileUrl(
+                        $this->getTypoContext()->request()->getHost() . '/' .
+                        $processed->getPublicUrl(false) . '?hash=' . md5($processed->getSha1())
+                    ),
                     'width' => (int)$processed->getProperty('width'),
                     'height' => (int)$processed->getProperty('height'),
                     'size' => $processed->getSize(),
@@ -198,29 +210,16 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
     }
     
     /**
-     * Provides the transformation glue layer to build image links for the imaging tool belt
+     * Helper to mangle file urls to match the configured requirements
      *
-     * @param   \LaborDigital\T3ba\Tool\Fal\FileInfo\ImageFileInfo  $info
-     * @param   array                                               $image
+     * @param   string  $url
+     *
+     * @return string
      */
-    protected function imagingGlue(ImageFileInfo $info, array &$image): void
+    protected function processFileUrl(string $url): string
     {
+        // @todo this should trigger some kind of event?
         // @todo implement something to proxy the images from somewhere else
-//        // Make the identifier
-//        $cropVariants = $imageInfo->getCropVariants();
-//        $identifier   = $fileInfo->getFileName();
-//        $identifier   = substr($identifier, 0, -strlen($fileInfo->getExtension()) - 1);
-//        $identifier   = Inflector::toSlug($identifier);
-//        $identifier   = preg_replace('~-+~', '-', $identifier);
-//        $identifier   .= '.' . md5($fileInfo->getHash() . \GuzzleHttp\json_encode($cropVariants));
-//        $identifier   .= '.' . ($fileInfo->isFileReference() ? 'r' : 'f') . $fileInfo->getUid();
-//        $identifier   .= '.' . $fileInfo->getExtension();
-//
-//        // Advanced endpoint
-//        $endpointPath              = $configRepo->tool()->get('imaging.options.endpointDirectoryPath');
-//        $endpointUrl               = Path::makeRelative($endpointPath, $this->TypoContext()->Path()->getPublicPath());
-//        $info['url']               = $this->Links()->getHost() . '/' . $endpointUrl .
-//                                     '/imaging.php?file=' . urlencode($identifier);
-//        $info['image']['variants'] = array_keys($cropVariants);
+        return $url;
     }
 }

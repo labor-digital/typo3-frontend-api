@@ -25,6 +25,7 @@
 	"require": {
 		"labor-digital/typo3-better-api": "10.0.0-beta.11",
 		"league/route": "^5.0.1",
+		"0.0.0/composer-include-files": "^1.6",
 		"laminas/laminas-httphandlerrunner": "^1.4.0",
 		"league/fractal": "^0.18",
 		"rosell-dk/webp-convert": "^2.3"
@@ -37,13 +38,16 @@
 			"LaborDigital\\T3fa\\": "Classes"
 		}
 	},
-	"version": "10.0.0-beta.4",
+	"version": "10.0.0-beta.4.1",
 	"extra": {
 		"t3ba": {
 			"isDev": true
 		},
 		"typo3/cms": {
 			"extension-key": "t3fa"
-		}
+		},
+		"include_files": [
+			"imagingAutoload.php"
+		]
 	}
 }

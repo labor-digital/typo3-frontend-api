@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 11:35
+ * Last modified: 2021.06.23 at 13:48
  */
 
 declare(strict_types=1);
@@ -32,6 +32,12 @@ use TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler;
 
 class ExtRedirectsMiddleware
 {
+    /**
+     * Because ext:redirects is an optional extension, that could be not installed,
+     * I have to provide the middleware only if we detect that the dependency exists.
+     *
+     * @return object|null
+     */
     public static function registerIfRequired(): ?object
     {
         if (class_exists(RedirectHandler::class)) {
