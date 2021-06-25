@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 16:27
+ * Last modified: 2021.06.25 at 18:47
  */
 
 declare(strict_types=1);
@@ -91,9 +91,7 @@ class PageMenuItemDataProcessor implements DataProcessorInterface
         
         // Run the post processor if required
         if (! empty($processorConfiguration['postProcessor'])) {
-            /** @var PageMenuItemPostProcessorInterface $processor */
-            $processor = $processorConfiguration['postProcessor'];
-            $processedData = $processor->processItem(
+            $processedData = $processorConfiguration['postProcessor'](
                 $processedData,
                 $data,
                 $processorConfiguration['options'],

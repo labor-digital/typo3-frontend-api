@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:35
+ * Last modified: 2021.06.25 at 18:08
  */
 
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\Api\Resource;
 
 
 use LaborDigital\T3ba\ExtConfig\SiteBased\SiteConfigContext;
+use LaborDigital\T3fa\Core\Resource\Exception\NoCollectionException;
 use LaborDigital\T3fa\Core\Resource\Query\ResourceQuery;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceCollectionContext;
 use LaborDigital\T3fa\Core\Resource\Repository\Context\ResourceContext;
@@ -50,8 +51,7 @@ class CategoryResource implements ResourceInterface
     public static function configure(ResourceConfigurator $configurator, SiteConfigContext $context): void
     {
         $configurator->registerClass(CategoryModel::class);
-        // @todo remove "parent" again
-        $configurator->registerPropertyAccess(CategoryModel::class, ['title', 'description', 'parent']);
+        $configurator->registerPropertyAccess(CategoryModel::class, ['title', 'description']);
     }
     
     /**
@@ -67,7 +67,7 @@ class CategoryResource implements ResourceInterface
      */
     public function findCollection(ResourceQuery $resourceQuery, ResourceCollectionContext $context)
     {
-        // TODO: Implement findCollection() method.
+        throw new NoCollectionException($context->getResourceType());
     }
     
 }

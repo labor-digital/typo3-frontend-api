@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.13 at 20:43
+ * Last modified: 2021.06.25 at 18:22
  */
 
 declare(strict_types=1);
@@ -28,6 +28,7 @@ use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\Core\EventBus\TypoEventBus;
 use LaborDigital\T3fa\Core\ErrorHandler\UnifiedError;
 use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
+use LaborDigital\T3fa\Event\ErrorHandler\ApiErrorResponseFilterEvent;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -188,7 +189,7 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
     }
     
     /**
-     * Triggers the ApiErrorFilterEvent and the ErrorFilterEvent events to allow output filtering and
+     * Triggers the ApiErrorResponseFilterEvent and the ErrorFilterEvent events to allow output filtering and
      * notifies other event listeners that an error occurred
      *
      * @param   \Psr\Http\Message\ResponseInterface  $response
@@ -198,18 +199,9 @@ abstract class AbstractHandler implements LoggerAwareInterface, NoDiInterface
      */
     protected function filterErrorResponse(ResponseInterface $response, UnifiedError $error): ResponseInterface
     {
-        // Emit event
-        $eventBus = TypoEventBus::getInstance();
-        // @todo reimplement this
-//        $eventBus->dispatch(($e = new ApiErrorFilterEvent($error->getError(), $response)));
-//        $response = $e->getResponse();
-//
-//        // Emit the global event
-//        // The Result is given for compatibility but is noop here...
-//        if ($e->isEmitErrorEvent()) {
-//            $eventBus->dispatch(new ErrorFilterEvent($error->getError(), null));
-//        }
+        $this->getService(TypoEventBus::class)
+             ->dispatch($e = new ApiErrorResponseFilterEvent($error, $response));
         
-        return $response;
+        return $e->getResponse();
     }
 }

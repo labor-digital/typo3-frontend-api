@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.24 at 18:08
+ * Last modified: 2021.06.24 at 18:16
  */
 
 declare(strict_types=1);
-/*
- * Copyright 2021 LABOR.digital
+/**
+ * Copyright 2020 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,93 +33,84 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.03 at 12:59
+ * Last modified: 2020.03.30 at 21:50
  */
 
 namespace LaborDigital\T3fa\Event\Resource\Page;
 
-
-use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
+use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 
 /**
- * Class PageRootLineFilterEvent
- * Emitted when the Page object build's its root line.
- * It is used to filter the raw data that was retrieved from TYPO3 for the current page
+ * Class PageDataPageInfoFilterEvent
+ *
+ * Emitted when the page resource information is generated.
+ * Allows you to filter the table data, where the slide-fields already have been applied.
  *
  * @package LaborDigital\T3fa\Event\Resource\Page
  */
-class PageRootLineFilterEvent
+class PageInfoFilterEvent
 {
     
     /**
-     * The page id that currently tries to resolve it's root line
-     *
-     * @var int
-     */
-    protected $pid;
-    
-    /**
-     * The language uid that is used to generate the root line
-     *
-     * @var \TYPO3\CMS\Core\Site\Entity\SiteLanguage
-     */
-    protected $language;
-    
-    /**
-     * The raw root line array TYPO3 responded for this page
+     * The raw page data as an array to filter
      *
      * @var array
      */
-    protected $rootLine;
+    protected $info;
     
-    public function __construct(int $pid, SiteLanguage $language, array $rootLine)
+    /**
+     * The page data object that gets currently filled (NOTE: not all fields have content yet!)
+     *
+     * @var \LaborDigital\T3fa\Api\Resource\Factory\Page\PageData
+     */
+    protected $pageData;
+    
+    public function __construct(array $row, PageData $pageData)
     {
-        $this->pid = $pid;
-        $this->language = $language;
-        $this->rootLine = $rootLine;
+        $this->info = $row;
+        $this->pageData = $pageData;
     }
     
     /**
-     * Returns the page id that currently tries to resolve it's root line
+     * Returns the unique id of the page the data should be filtered for
      *
      * @return int
      */
-    public function getPid(): int
+    public function getUid(): int
     {
-        return $this->pid;
+        return $this->pageData->uid;
     }
     
     /**
-     * Returns the language uid that is used to generate the root line
+     * Returns the page data object that gets currently filled (NOTE: not all fields have content yet!)
      *
-     * @return SiteLanguage
+     * @return \LaborDigital\T3fa\Api\Resource\Factory\Page\PageData
      */
-    public function getLanguage(): SiteLanguage
+    public function getPageData(): PageData
     {
-        return $this->language;
+        return $this->pageData;
     }
     
-    
     /**
-     * Returns the raw root line array TYPO3 responded for this page
+     * Returns the raw page data as an array to filter
      *
      * @return array
      */
-    public function getRootLine(): array
+    public function getInfo(): array
     {
-        return $this->rootLine;
+        return $this->info;
     }
     
     /**
-     * Updates the raw root line array TYPO3 responded for this page
+     * Updates the raw page data as an array to filter
      *
-     * @param   array  $rootLine
+     * @param   array  $info
      *
-     * @return PageRootLineFilterEvent
+     * @return PageInfoFilterEvent
      */
-    public function setRootLine(array $rootLine): PageRootLineFilterEvent
+    public function setInfo(array $info): PageInfoFilterEvent
     {
-        $this->rootLine = $rootLine;
+        $this->info = $info;
         
         return $this;
     }

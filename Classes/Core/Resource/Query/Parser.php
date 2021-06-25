@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.25 at 12:34
+ * Last modified: 2021.06.25 at 18:52
  */
 
 declare(strict_types=1);
@@ -91,7 +91,6 @@ class Parser
                 }
                 
                 // While given via PHP we allow providing the fields as an array
-                // @todo check if this works correctly
                 $fieldsClean[$fieldResourceType] = array_filter($fields, 'is_string');
                 continue;
             }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 13:13
+ * Last modified: 2021.06.24 at 18:34
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\Tool\Simulation\EnvironmentSimulator;
 use LaborDigital\T3ba\Tool\Translation\Translator;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Event\Resource\Translation\TranslationLabelFilterEvent;
 use Neunerlei\Arrays\Arrays;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteInterface;
@@ -85,7 +86,12 @@ class DataGenerator implements PublicServiceInterface
             return [
                 $language->getTwoLetterIsoCode(),
                 [
-                    'labels' => $this->generateLabels(),
+                    'labels' => $this->eventDispatcher->dispatch(
+                        new TranslationLabelFilterEvent(
+                            $this->generateLabels(),
+                            $language, $site
+                        )
+                    )->getLabels(),
                     'meta' => [
                         'language' => $language->getTwoLetterIsoCode(),
                         'site' => $site->getIdentifier(),
@@ -134,11 +140,8 @@ class DataGenerator implements PublicServiceInterface
             }
         }
         
-        $labels = array_merge($labels, $pluralLabels);
-        $labels = Arrays::unflatten($labels);
-        
-        // @todo an event would be nice here
-        
-        return $labels;
+        return Arrays::unflatten(
+            array_merge($labels, $pluralLabels)
+        );
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.09 at 14:56
+ * Last modified: 2021.06.25 at 13:24
  */
 
 declare(strict_types=1);
@@ -80,7 +80,7 @@ class AutoTransformUtil implements NoDiInterface
     protected static function unifyDbData($value)
     {
         if ($value instanceof ExtBaseBetterQuery) {
-            $value = $value->getAll();
+            return $value->getAll();
         }
         
         if ($value instanceof AbstractBetterQuery) {

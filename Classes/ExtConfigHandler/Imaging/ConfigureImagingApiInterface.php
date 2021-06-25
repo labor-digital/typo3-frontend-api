@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.24 at 11:53
+ * Last modified: 2021.06.24 at 18:58
  */
 
 declare(strict_types=1);
@@ -34,5 +34,5 @@ interface ConfigureImagingApiInterface
      * @param   \LaborDigital\T3fa\ExtConfigHandler\Imaging\ImagingConfigurator  $imagingConfigurator
      * @param   \LaborDigital\T3ba\ExtConfig\ExtConfigContext                    $context
      */
-    public function configureImagingApi(ImagingConfigurator $imagingConfigurator, ExtConfigContext $context): void;
+    public static function configureImagingApi(ImagingConfigurator $imagingConfigurator, ExtConfigContext $context): void;
 }

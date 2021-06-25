@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 11:21
+ * Last modified: 2021.06.25 at 18:56
  */
 
 declare(strict_types=1);
@@ -305,8 +305,6 @@ class AutoTransformer
         if (! $isCircular) {
             return $value;
         }
-        
-        // @todo implement TransformerCircularDependencyFilterEvent
         
         $this->circularReferences[$referenceKey] = true;
         

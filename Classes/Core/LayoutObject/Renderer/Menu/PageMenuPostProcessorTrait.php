@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 12:53
+ * Last modified: 2021.06.24 at 19:04
  */
 
 declare(strict_types=1);
@@ -52,7 +52,7 @@ trait PageMenuPostProcessorTrait
         }
         
         /** @var AbstractMenuRenderer $renderer */
-        $renderer = TypoContext::getInstance()->di()->getService($rendererClass);
+        $renderer = TypoContext::getInstance()->di()->getServiceOrInstance($rendererClass);
         
         // Render the menu including the level offset
         $levelOffsetBackup = ExtendedMenuProcessor::$levelOffset;
@@ -60,7 +60,7 @@ trait PageMenuPostProcessorTrait
             ExtendedMenuProcessor::$levelOffset = (int)($options['levelOffset'] ?? 0);
             unset($options['levelOffset']);
             
-            return $renderer->render($key, $options);
+            return $renderer->render($options);
         } finally {
             ExtendedMenuProcessor::$levelOffset = $levelOffsetBackup;
         }

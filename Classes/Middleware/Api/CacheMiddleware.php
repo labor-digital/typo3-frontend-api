@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.11 at 14:28
+ * Last modified: 2021.06.25 at 19:17
  */
 
 declare(strict_types=1);
@@ -109,8 +109,9 @@ class CacheMiddleware implements MiddlewareInterface, LoggerAwareInterface
                 // I limit the lifetime of the cache to a day here,
                 // because the request cache handles a lot of possible permutations.
                 // This allows the garbage collector to flush the cache more frequently.
-                // @todo a config option would be nice here
-                'lifetime' => 60 * 60 * 24,
+                'lifetime' => $this->getTypoContext()->config()->getSiteBasedConfigValue(
+                    't3fa.site.cache.requestLifetime', 60 * 60 * 24
+                ),
                 'enabled' => static function (ResponseInterface $response) use (&$isCacheable) {
                     $isCacheable = $isCacheable && in_array($response->getStatusCode(), [200, 203, 204, 206], true);
                     

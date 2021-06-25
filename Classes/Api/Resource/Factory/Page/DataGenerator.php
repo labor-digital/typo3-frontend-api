@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.07 at 11:20
+ * Last modified: 2021.06.24 at 18:29
  */
 
 declare(strict_types=1);
@@ -30,6 +30,7 @@ use LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\InfoGenerator;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\LinkGenerator;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\MetaGenerator;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\RootLineGenerator;
+use LaborDigital\T3fa\Event\Resource\Page\PageAttributesFilterEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -92,6 +93,15 @@ class DataGenerator implements PublicServiceInterface
         $this->metaGenerator = $metaGenerator;
     }
     
+    /**
+     * Generates the constructor arguments for a single Page resource entity
+     *
+     * @param   int                                        $pid
+     * @param   \TYPO3\CMS\Core\Site\Entity\SiteLanguage   $language
+     * @param   \TYPO3\CMS\Core\Site\Entity\SiteInterface  $site
+     *
+     * @return array
+     */
     public function generate(int $pid, SiteLanguage $language, SiteInterface $site): array
     {
         $this->data = $this->makeInstance(PageData::class, [$pid, $language, $site]);
@@ -129,7 +139,6 @@ class DataGenerator implements PublicServiceInterface
         $this->metaGenerator->generate($this->data);
         $this->rootLineGenerator->generate($this->data);
         
-        // @todo an event to filter "attributes" dedicatedly would be nice here
-        // @todo an event would be nice here
+        $this->eventDispatcher->dispatch(new PageAttributesFilterEvent($this->data));
     }
 }

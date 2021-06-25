@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 14:04
+ * Last modified: 2021.06.25 at 18:49
  */
 
 declare(strict_types=1);
@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\Core\LayoutObject\Renderer\Menu;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
+use LaborDigital\T3ba\Tool\OddsAndEnds\NamingUtil;
 use LaborDigital\T3ba\Tool\Tsfe\TsfeService;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Cache\Scope\Scope;
@@ -139,10 +140,11 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
         $this->options = $this->validateMenuOptions($options, $this->getMenuOptionDefinition());
         
         $tsConfig = $this->getMenuTsConfig($this->getDefaultMenuTsConfig());
-        // @todo implement this again
-//        $tsConfig = $this->FrontendApiContext()->EventBus()->dispatch(
-//            new SiteMenuPreProcessorEvent($tsConfig, static::class, $this->key, $this->options)
-//        )->getDefinition();
+        
+        if (! empty($this->options['preProcessor'])) {
+            $tsConfig = NamingUtil::resolveCallable($this->options['preProcessor'])
+            ($tsConfig, $this->options, static::class);
+        }
         
         PageMenuItemDataProcessor::$cacheTags = [];
         
@@ -156,7 +158,12 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
             });
         }
         
-        return $this->runPostProcessing($result);
+        if (! empty($this->options['postProcessor'])) {
+            return NamingUtil::resolveCallable($this->options['postProcessor'])
+            ($result, $this->options, static::class);
+        }
+        
+        return $result;
     }
     
     /**
@@ -219,34 +226,10 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
             'fileFields' => $this->options['fileFields'],
             'autoTransformer' => $this->autoTransformer,
             'postProcessor' => empty($this->options['itemPostProcessor']) ? null
-                : $this->getServiceOrInstance($this->options['itemPostProcessor']),
+                : NamingUtil::resolveCallable($this->options['itemPostProcessor']),
         ];
         
         return $config;
-    }
-    
-    /**
-     * Internal helper to allow the event based post processing to occur.
-     *
-     * @param   array  $menu  The generated menu array
-     *
-     * @return array
-     */
-    protected function runPostProcessing(array $menu): array
-    {
-        // Check if we have a post processor
-        if (! empty($this->options['postProcessor']) && class_exists($this->options['postProcessor'])) {
-            /** @var PageMenuPostProcessorInterface $processor */
-            $processor = $this->getServiceOrInstance($this->options['postProcessor']);
-            $menu = $processor->process($menu, $this->options, static::class);
-        }
-        
-        // Allow event based processing
-        return $menu;
-        // @todo implement this
-//        return $context->EventBus()->dispatch(
-//            new SiteMenuPostProcessorEvent($this->key, $menu, static::class, $this->options)
-//        )->getMenu();
     }
     
     /**
@@ -256,6 +239,8 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
      */
     protected function getDefaultMenuOptionDefinition(): array
     {
+        $callableDef = ['default' => null];
+        
         return [
             'entryLevel' => [
                 'type' => 'int',
@@ -284,46 +269,9 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
                 'type' => 'array',
                 'default' => [],
             ],
-            'useV10Renderer' => [
-                'type' => 'bool',
-                'default' => false,
-            ],
-            'postProcessor' => [
-                'type' => ['string', 'null'],
-                'default' => null,
-                'validator' => static function (?string $class) {
-                    if ($class === null) {
-                        return true;
-                    }
-                    if (! class_exists($class)) {
-                        return 'The given post processor class: "' . $class . '" does not exist!';
-                    }
-                    if (! in_array(PageMenuPostProcessorInterface::class, class_implements($class), true)) {
-                        return 'The given post processor "' . $class . '" must implement the required interface: ' .
-                               PageMenuPostProcessorInterface::class;
-                    }
-                    
-                    return true;
-                },
-            ],
-            'itemPostProcessor' => [
-                'type' => ['string', 'null'],
-                'default' => null,
-                'validator' => static function (?string $class) {
-                    if ($class === null) {
-                        return true;
-                    }
-                    if (! class_exists($class)) {
-                        return 'The given item post processor class: "' . $class . '" does not exist!';
-                    }
-                    if (! in_array(PageMenuItemPostProcessorInterface::class, class_implements($class), true)) {
-                        return 'The given item post processor "' . $class . '" must implement the required interface: ' .
-                               PageMenuItemPostProcessorInterface::class;
-                    }
-                    
-                    return true;
-                },
-            ],
+            'preProcessor' => $callableDef,
+            'postProcessor' => $callableDef,
+            'itemPostProcessor' => $callableDef,
         ];
     }
     

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 20:40
+ * Last modified: 2021.06.25 at 18:10
  */
 
 declare(strict_types=1);
@@ -36,7 +36,6 @@ interface ResourceControllerInterface extends PublicServiceInterface
      * @param   array                                     $vars
      *
      * @return \Psr\Http\Message\ResponseInterface
-     * @throws \LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException
      */
     public function singleAction(ServerRequestInterface $request, array $vars): ResponseInterface;
     
@@ -57,7 +56,6 @@ interface ResourceControllerInterface extends PublicServiceInterface
      * @param   array                                     $vars
      *
      * @return \Psr\Http\Message\ResponseInterface
-     * @throws \LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException
      */
     public function relationshipAction(ServerRequestInterface $request, array $vars): ResponseInterface;
     

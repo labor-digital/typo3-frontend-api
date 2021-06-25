@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 21:30
+ * Last modified: 2021.06.25 at 18:10
  */
 
 declare(strict_types=1);
@@ -104,7 +104,7 @@ class DefaultResourceController extends AbstractResourceController
      * @param   string  $field
      *
      * @return array
-     * @throws \LaborDigital\T3ba\ExtConfigHandler\Routing\Exceptions\NotFoundException
+     * @throws \League\Route\Http\Exception\NotFoundException
      */
     protected function resolveRelationData(array $vars, string $field): array
     {

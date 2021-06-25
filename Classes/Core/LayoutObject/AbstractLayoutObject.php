@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 20:22
+ * Last modified: 2021.06.25 at 18:49
  */
 
 declare(strict_types=1);
@@ -47,16 +47,20 @@ abstract class AbstractLayoutObject implements LayoutObjectInterface
      *                            that are marked as "don't show in menu"
      *                            - additionalFields array: An optional list of additional database fields to fetch
      *                            and append to each menu item
-     *                            - postProcessor string: A class that can be used to filter/alter the menu array
-     *                            before it is passed to the frontend api. Has to implement the
-     *                            PageMenuPostProcessorInterface
+     *                            - preProcessor callable: A callable that is used to filter the typoScript configuration
+     *                            that is used to generate the menu before it is passed to the data processor.
+     *                            The callback receives $tsConfig (The raw typoScript array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $tsConfig array, modified or not!
+     *                            - postProcessor callable: A callable that is used to filter the finished menu array before it is returned
+     *                            The callback receives $menu (The generated menu array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $menu array, modified or not!
+     *                            - itemPostProcessor callable: Quite similar to postProcessor, but is applied on a per-item
+     *                            level while the menu tree is generated. The callback receives $item (The generated menu item array),
+     *                            $row (The database row of the page), $options (The provided options) and $rendererClass
+     *                            (The name of the renderer class). It MUST return the $item array, modified or not!
      *                            - fileFields array: A list of page fields that should be resolved as fal file references
-     *                            - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item
-     *                            level while the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
      *
      * @return array
-     * @see PageMenuPostProcessorInterface
-     * @see PageMenuItemPostProcessorInterface
      */
     protected function makeRootLineMenu(array $options = []): array
     {
@@ -78,16 +82,20 @@ abstract class AbstractLayoutObject implements LayoutObjectInterface
      *                                - levels int(1): The number of levels we should render the nested menus recursively.
      *                                - showSpacers bool(FALSE): If set to true the "spacers" inside a menu will also be
      *                                rendered to the resulting array with a type of "spacer" instead of "link"
-     *                                - postProcessor string: A class that can be used to filter/alter the menu array
-     *                                before it is passed to the frontend api. Has to implement the
-     *                                PageMenuPostProcessorInterface
+     *                                - preProcessor callable: A callable that is used to filter the typoScript configuration
+     *                                that is used to generate the menu before it is passed to the data processor.
+     *                                The callback receives $tsConfig (The raw typoScript array), $options (The provided options),
+     *                                $rendererClass (The name of the renderer class). It MUST return the $tsConfig array, modified or not!
+     *                                - postProcessor callable: A callable that is used to filter the finished menu array before it is returned
+     *                                The callback receives $menu (The generated menu array), $options (The provided options),
+     *                                $rendererClass (The name of the renderer class). It MUST return the $menu array, modified or not!
+     *                                - itemPostProcessor callable: Quite similar to postProcessor, but is applied on a per-item
+     *                                level while the menu tree is generated. The callback receives $item (The generated menu item array),
+     *                                $row (The database row of the page), $options (The provided options) and $rendererClass
+     *                                (The name of the renderer class). It MUST return the $item array, modified or not!
      *                                - fileFields array: A list of page fields that should be resolved as fal file references
-     *                                - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item level while
-     *                                the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
      *
      * @return array
-     * @see PageMenuPostProcessorInterface
-     * @see PageMenuItemPostProcessorInterface
      */
     protected function makeDirectoryMenu($pid, array $options = []): array
     {
@@ -100,12 +108,15 @@ abstract class AbstractLayoutObject implements LayoutObjectInterface
      * Renders a language switcher menu
      *
      * @param   array  $options   The options to build this menu with
-     *                            - postProcessor string: A class that can be used to filter/alter the menu array
-     *                            before it is passed to the frontend api. Has to implement the
-     *                            PageMenuPostProcessorInterface
+     *                            - preProcessor callable: A callable that is used to filter the typoScript configuration
+     *                            that is used to generate the menu before it is passed to the data processor.
+     *                            The callback receives $tsConfig (The raw typoScript array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $tsConfig array, modified or not!
+     *                            - postProcessor callable: A callable that is used to filter the finished menu array before it is returned
+     *                            The callback receives $menu (The generated menu array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $menu array, modified or not!
      *
      * @return array
-     * @see PageMenuPostProcessorInterface
      */
     protected function makeLanguageMenu(array $options = []): array
     {
@@ -126,16 +137,20 @@ abstract class AbstractLayoutObject implements LayoutObjectInterface
      *                            - levels int(2): The number of levels we should render the nested menus recursively.
      *                            - showSpacers bool(FALSE): If set to true the "spacers" inside a menu will also be
      *                            rendered to the resulting array with a type of "spacer" instead of "link"
-     *                            - postProcessor string: A class that can be used to filter/alter the menu array
-     *                            before it is passed to the frontend api. Has to implement the
-     *                            PageMenuPostProcessorInterface
+     *                            - preProcessor callable: A callable that is used to filter the typoScript configuration
+     *                            that is used to generate the menu before it is passed to the data processor.
+     *                            The callback receives $tsConfig (The raw typoScript array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $tsConfig array, modified or not!
+     *                            - postProcessor callable: A callable that is used to filter the finished menu array before it is returned
+     *                            The callback receives $menu (The generated menu array), $options (The provided options),
+     *                            $rendererClass (The name of the renderer class). It MUST return the $menu array, modified or not!
+     *                            - itemPostProcessor callable: Quite similar to postProcessor, but is applied on a per-item
+     *                            level while the menu tree is generated. The callback receives $item (The generated menu item array),
+     *                            $row (The database row of the page), $options (The provided options) and $rendererClass
+     *                            (The name of the renderer class). It MUST return the $item array, modified or not!
      *                            - fileFields array: A list of page fields that should be resolved as fal file references
-     *                            - itemPostProcessor string: Quite similar to postProcessor, but is applied on a per-item
-     *                            level while the menu tree is generated. The class has to implement PageMenuItemPostProcessorInterface.
      *
      * @return array
-     * @see PageMenuPostProcessorInterface
-     * @see PageMenuItemPostProcessorInterface
      */
     protected function makePageMenu(array $options = []): array
     {

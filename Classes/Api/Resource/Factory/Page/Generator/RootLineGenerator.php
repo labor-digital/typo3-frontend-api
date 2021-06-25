@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 10:26
+ * Last modified: 2021.06.24 at 19:02
  */
 
 declare(strict_types=1);
@@ -83,16 +83,14 @@ class RootLineGenerator
     {
         $config = $this->getTypoContext()->config()->getSiteBasedConfigValue('t3fa.page', []);
         
-        $container = $this->getContainer();
         /** @var RootLineDataProviderInterface[] $dataProviders */
         $dataProviders = [];
         foreach ($config['rootLineDataProviders'] ?? [] as $dataProviderClass) {
-            $dataProviders[] = $container->has($dataProviderClass)
-                ? $this->getService($dataProviderClass) : $this->makeInstance($dataProviderClass);
+            $dataProviders[] = $this->getServiceOrInstance($dataProviderClass);
         }
         
         $e = $this->eventDispatcher->dispatch(new PageRootLineFilterEvent(
-            $data->pid, $data->language, array_reverse($data->rootLine)
+            $data->uid, $data->language, array_reverse($data->rootLine)
         ));
         
         $rootLine = array_values($e->getRootLine());
@@ -115,7 +113,7 @@ class RootLineGenerator
             }
             
             foreach ($dataProviders as $dataProvider) {
-                $dataProvider->addData($data->pid, $entry, $rootLine);
+                $dataProvider->addData($data->uid, $entry, $rootLine);
             }
             
             $entries[] = $entry;

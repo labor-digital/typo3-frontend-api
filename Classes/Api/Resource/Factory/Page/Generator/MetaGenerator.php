@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 14:15
+ * Last modified: 2021.06.24 at 18:24
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use DOMDocument;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Tool\Tsfe\TsfeService;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
+use LaborDigital\T3fa\Event\Resource\Page\PageMetaTagsFilterEvent;
 use Neunerlei\Arrays\Arrays;
 use Neunerlei\PathUtil\Path;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -89,16 +90,19 @@ class MetaGenerator
             return;
         }
         
-        $meta = [
-            'hrefLang' => $this->findHrefLangUrls($data),
-            'metaTags' => $this->findMetaTags($data),
-        ];
+        $e = $this->eventDispatcher->dispatch(new PageMetaTagsFilterEvent(
+            $this->findMetaTags($data),
+            $this->findHrefLangUrls($data),
+            $data
+        ));
         
-        // @todo implement this
-        // This has to be adjusted, but it makes more sense to allow filtering the whole meta array
-//        $this->eventDispatcher->dispatch(($e = new PageMetaTagsFilterEvent($tags, $value)));
-        
-        $data->attributes['meta'] = array_merge($data->attributes['meta'], $meta);
+        $data->attributes['meta'] = array_merge(
+            $data->attributes['meta'],
+            [
+                'hrefLang' => $e->getHrefLangUrls(),
+                'metaTags' => $e->getTags(),
+            ]
+        );
     }
     
     /**

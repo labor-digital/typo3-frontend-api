@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.22 at 21:35
+ * Last modified: 2021.06.25 at 19:08
  */
 
 declare(strict_types=1);
@@ -29,15 +29,18 @@ use FastRoute\RouteParser\Std;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\VarFs\VarFs;
 use LaborDigital\T3ba\ExtConfig\Traits\SiteConfigAwareTrait;
+use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Api\Route\SchedulerController;
 use LaborDigital\T3fa\Api\Route\UpController;
 use LaborDigital\T3fa\Core\Routing\Strategy\ExtendedApplicationStrategy;
+use LaborDigital\T3fa\Event\Routing\RouterInstanceFilterEvent;
 use LaborDigital\T3fa\Middleware\Api\AttributeProviderMiddleware;
 use LaborDigital\T3fa\Middleware\Api\BodyParserMiddleware;
 use LaborDigital\T3fa\Middleware\Api\CacheMiddleware;
 use League\Route\Route;
 use League\Route\Router;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class RouterFactory
 {
@@ -49,11 +52,17 @@ class RouterFactory
      */
     protected $varFs;
     
-    public function __construct(TypoContext $context, VarFs $varFs)
+    /**
+     * @var \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+    
+    public function __construct(TypoContext $context, VarFs $varFs, EventDispatcherInterface $eventDispatcher)
     {
         $this->context = $context;
         $this->varFs = $varFs;
         $this->registerConfig('t3fa.routing.routes');
+        $this->eventDispatcher = $eventDispatcher;
     }
     
     /**
@@ -67,15 +76,13 @@ class RouterFactory
         $cacheKey = 't3fa.router.prepared.' . $this->getSiteIdentifier();
         
         if ($cache->has($cacheKey)) {
-            $router = unserialize($cache->get($cacheKey), [
-                'allowed_classes' => [
-                    Router::class,
-                    Route::class,
-                    AttributeProviderMiddleware::class,
-                    RouteCollector::class,
-                    Std::class,
-                    GroupCountBased::class,
-                ],
+            $router = SerializerUtil::unserialize($cache->get($cacheKey), [
+                Router::class,
+                Route::class,
+                AttributeProviderMiddleware::class,
+                RouteCollector::class,
+                Std::class,
+                GroupCountBased::class,
             ]);
         }
         
@@ -83,17 +90,16 @@ class RouterFactory
             $router = $this->makeInstance(Router::class);
             $this->buildRouter($router);
             
-            $cache->set($cacheKey, serialize($router));
+            $cache->set($cacheKey, SerializerUtil::serialize($router));
         }
         
         $strategy = $this->makeInstance(ExtendedApplicationStrategy::class);
         $strategy->setContainer($this->getContainer());
         $router->setStrategy($strategy);
         
-        // @todo an event would be nice here
-        
-        return $router;
-        
+        return $this->eventDispatcher->dispatch(
+            new RouterInstanceFilterEvent($router)
+        )->getRouter();
     }
     
     /**

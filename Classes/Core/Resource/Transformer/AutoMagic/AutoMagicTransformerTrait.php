@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.08 at 17:09
+ * Last modified: 2021.06.25 at 18:52
  */
 
 declare(strict_types=1);
@@ -35,9 +35,21 @@ trait AutoMagicTransformerTrait
         $this->autoTransformer = $autoTransformer;
     }
     
+    /**
+     * Can take virtually ANY value and convert it into a json compatible representation.
+     *
+     * @param   mixed       $value    The value to transform
+     * @param   array|null  $options  Options for the transformation of objects. You can use the
+     *                                options defined here {@Link AbstractResourceElement::asArray()}
+     *                                Additionally: if $value is an array, you can define a special "byKey"
+     *                                option which allows you to configure the options for each key of the
+     *                                $value array separately. The options will be merged into the root level options.
+     *                                This works ONLY for arrays not for iterable objects, tho!
+     *
+     * @return array|bool|float|int|mixed|string|null
+     */
     protected function autoTransform($value, array $options = [])
     {
-        // @todo docs
         return $this->autoTransformer->transform($value, $options);
     }
     

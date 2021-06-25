@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 11:24
+ * Last modified: 2021.06.24 at 19:41
  */
 
 declare(strict_types=1);
@@ -97,7 +97,7 @@ class ResourceRepository implements PublicServiceInterface, SingletonInterface
             $config = $this->configRepository->getResourceConfig($resourceType);
             
             if ($config === null) {
-                return $this->backend->getEmptyCollection($config['type']);
+                return $this->backend->getEmptyCollection('unknown');
             }
             
             return $this->backend->getCollection($query, $config);

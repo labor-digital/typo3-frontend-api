@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 12:21
+ * Last modified: 2021.06.25 at 19:17
  */
 /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
 declare(strict_types=1);
@@ -72,6 +72,17 @@ class ApiConfigurator implements NoDiInterface
      * @var int
      */
     protected $cacheDefaultLifetime = 60 * 60 * 24 * 365;
+    
+    /**
+     * The number of seconds how long the CacheMiddleware should store request caches.
+     * By default we limit the lifetime of the cache to a day here,
+     * because the request cache handles a lot of possible permutations.
+     * This allows the garbage collector to flush the cache more frequently.
+     *
+     * @var int
+     * @see \LaborDigital\T3fa\Middleware\Api\CacheMiddleware
+     */
+    protected $requestCacheLifetime = 60 * 60 * 24;
     
     public function __construct(
         TransformerConfigurator $transformerCollector,
@@ -160,6 +171,35 @@ class ApiConfigurator implements NoDiInterface
     }
     
     /**
+     * Returns the number of seconds how long the CacheMiddleware should store request caches.
+     *
+     * @return int
+     */
+    public function getRequestCacheLifetime()
+    {
+        return $this->requestCacheLifetime;
+    }
+    
+    /**
+     * Allows you to configure the number of seconds how long the CacheMiddleware should store request caches.
+     * By default we limit the lifetime of the cache to a day here,
+     * because the request cache handles a lot of possible permutations.
+     * This allows the garbage collector to flush the cache more frequently.
+     * DEFAULT: 60 * 60 * 24
+     *
+     * @param   int  $lifetime
+     *
+     * @return $this
+     * @see \LaborDigital\T3fa\Middleware\Api\CacheMiddleware
+     */
+    public function setRequestCacheLifetime(int $lifetime): self
+    {
+        $this->requestCacheLifetime = $lifetime;
+        
+        return $this;
+    }
+    
+    /**
      * Access to the list of globally registered transformers for this site
      *
      * @return \LaborDigital\T3fa\ExtConfigHandler\Api\Transformer\TransformerConfigurator
@@ -219,5 +259,6 @@ class ApiConfigurator implements NoDiInterface
     {
         $state->set('apiHost', $this->apiHost);
         $state->set('cache.defaultLifetime', $this->cacheDefaultLifetime);
+        $state->set('cache.requestLifetime', $this->requestCacheLifetime);
     }
 }

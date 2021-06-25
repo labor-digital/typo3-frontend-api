@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 10:27
+ * Last modified: 2021.06.24 at 19:05
  */
 
 declare(strict_types=1);
@@ -126,13 +126,13 @@ class TransformerFactory implements PublicServiceInterface
      */
     protected function makeTransformerInstance(string $class, ?array $postProcessorClasses, ?array $accessInfo): TransformerInterface
     {
-        $transformer = $this->getService($class);
+        $transformer = $this->getServiceOrInstance($class);
         
         if ($transformer instanceof ResourceTransformerInterface) {
             $postProcessors = [];
             if (is_array($postProcessorClasses)) {
                 foreach ($postProcessorClasses as $postProcessorClass) {
-                    $postProcessors[] = $this->getService($postProcessorClass);
+                    $postProcessors[] = $this->getServiceOrInstance($postProcessorClass);
                 }
             }
             

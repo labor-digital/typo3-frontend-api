@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.07 at 12:00
+ * Last modified: 2021.06.24 at 18:12
  */
 
 declare(strict_types=1);
@@ -34,7 +34,7 @@ class PageData implements NoDiInterface
      *
      * @var int
      */
-    public $pid;
+    public $uid;
     
     /**
      * The language the data is generated for
@@ -99,9 +99,9 @@ class PageData implements NoDiInterface
      */
     public $slideParentPageInfoMap = [];
     
-    public function __construct(int $pid, SiteLanguage $language, SiteInterface $site)
+    public function __construct(int $uid, SiteLanguage $language, SiteInterface $site)
     {
-        $this->pid = $pid;
+        $this->uid = $uid;
         $this->language = $language;
         $this->site = $site;
     }
@@ -116,7 +116,7 @@ class PageData implements NoDiInterface
     {
         return array_values(
             [
-                'id' => $this->pid,
+                'id' => $this->uid,
                 'attributes' => $this->attributes,
             ]
         );

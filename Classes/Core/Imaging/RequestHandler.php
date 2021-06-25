@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.24 at 12:27
+ * Last modified: 2021.06.25 at 18:36
  */
 
 declare(strict_types=1);
@@ -32,6 +32,7 @@ use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Imaging\Processor\CoreImagingProcessor;
 use LaborDigital\T3fa\Core\Imaging\Processor\ImagingProcessorInterface;
+use LaborDigital\T3fa\Event\Imaging\ImagingPostProcessorEvent;
 use League\Route\Http\Exception\BadRequestException;
 use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\FileSystem\Fs;
@@ -93,7 +94,6 @@ class RequestHandler implements PublicServiceInterface
         
         $this->resolveCropVariant($definition, $request, $imageInfo);
         
-        
         $processor = $this->getServiceOrInstance($config['imagingProcessor'] ?? CoreImagingProcessor::class);
         if (! $processor instanceof ImagingProcessorInterface) {
             throw new InternalServerErrorException('The provider does not implement the required interface!');
@@ -101,13 +101,12 @@ class RequestHandler implements PublicServiceInterface
         
         $processor->process($definition, $fileInfo, $request, $config);
         
-        // @todo implement this
-//        $this->eventDispatcher->dispatch(($e = new ImagingPostProcessorEvent(
-//            $definition, $fileInfo, $request, $provider->getDefaultRedirect(), $provider->getWebPRedirect()
-//        )));
+        $e = $this->eventDispatcher->dispatch(new ImagingPostProcessorEvent(
+            $definition, $fileInfo, $request, $processor->getDefaultRedirect(), $processor->getWebPRedirect()
+        ));
         
-        Fs::writeFile($request->redirectInfoPath, $processor->getDefaultRedirect());
-        $webPRedirect = $processor->getWebPRedirect();
+        Fs::writeFile($request->redirectInfoPath, $e->getDefaultRedirect());
+        $webPRedirect = $e->getWebPRedirect();
         if (! empty($webPRedirect)) {
             Fs::writeFile($request->redirectInfoPath . '-webp', $webPRedirect);
         }

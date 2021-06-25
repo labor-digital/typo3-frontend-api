@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 11:23
+ * Last modified: 2021.06.25 at 18:57
  */
 
 declare(strict_types=1);
@@ -29,6 +29,8 @@ use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\Internal\PropertyAccessResolver;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\ExtBaseReflector;
 use LaborDigital\T3fa\Core\Resource\Transformer\Schema\Reflection\GenericReflector;
+use LaborDigital\T3fa\Event\Transformer\SchemaFilterEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class SchemaFactory implements PublicServiceInterface
@@ -55,17 +57,24 @@ class SchemaFactory implements PublicServiceInterface
      */
     protected $configRepository;
     
+    /**
+     * @var \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+    
     public function __construct(
         ExtBaseReflector $extBaseReflector,
         GenericReflector $genericReflector,
         PropertyAccessResolver $accessResolver,
-        ResourceConfigRepository $configRepository
+        ResourceConfigRepository $configRepository,
+        EventDispatcherInterface $eventDispatcher
     )
     {
         $this->extBaseReflector = $extBaseReflector;
         $this->genericReflector = $genericReflector;
         $this->accessResolver = $accessResolver;
         $this->configRepository = $configRepository;
+        $this->eventDispatcher = $eventDispatcher;
     }
     
     /**
@@ -84,16 +93,12 @@ class SchemaFactory implements PublicServiceInterface
         
         if ($this->configRepository->isCollection($value)) {
             $schema->isCollection = is_iterable($value);
+        } elseif ($value instanceof AbstractEntity) {
+            $this->extBaseReflector->reflect($value, $schema);
         } else {
-            if ($value instanceof AbstractEntity) {
-                $this->extBaseReflector->reflect($value, $schema);
-            } else {
-                $this->genericReflector->reflect($value, $schema);
-            }
+            $this->genericReflector->reflect($value, $schema);
         }
         
-        // @todo an event would be nice here
-        
-        return $schema;
+        return $this->eventDispatcher->dispatch(new SchemaFilterEvent($className, $schema))->getSchema();
     }
 }

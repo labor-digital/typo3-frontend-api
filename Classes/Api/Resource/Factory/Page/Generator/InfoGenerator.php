@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 13:31
+ * Last modified: 2021.06.24 at 18:18
  */
 
 declare(strict_types=1);
@@ -34,6 +34,8 @@ use LaborDigital\T3fa\Core\Resource\Exception\ResourceNotFoundException;
 use LaborDigital\T3fa\Core\Resource\Repository\Backend\ResourceFactory;
 use LaborDigital\T3fa\Core\Routing\Util\RedirectUtil;
 use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
+use LaborDigital\T3fa\Event\Resource\Page\PageDataModelFilterEvent;
+use LaborDigital\T3fa\Event\Resource\Page\PageInfoFilterEvent;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
@@ -130,18 +132,15 @@ class InfoGenerator
      */
     protected function findInfoArray(PageData $data): array
     {
-        $info = $this->pageService->getPageInfo($data->pid, $this->typoContext->preview()->isPreview());
+        $info = $this->pageService->getPageInfo($data->uid, $this->typoContext->preview()->isPreview());
         
         if (empty($info)) {
-            throw new ResourceNotFoundException('There is no page with the required pid: ' . $data->pid);
+            throw new ResourceNotFoundException('There is no page with the required pid: ' . $data->uid);
         }
         
-        $info = $this->applySlideFields($info, $data);
-        
-        // @todo implement this
-//        $info = $this->eventDispatcher->dispatch(new PageDataPageInfoFilterEvent($data->pid, $info, $data))->getInfo();
-        
-        return $info;
+        return $this->eventDispatcher->dispatch(
+            new PageInfoFilterEvent($this->applySlideFields($info, $data), $data)
+        )->getInfo();
     }
     
     /**
@@ -235,7 +234,7 @@ class InfoGenerator
         );
         
         return $data->rootLine
-            = $this->pageService->getRootLine($data->pid, ['additionalFields' => $additionalFields]);
+            = $this->pageService->getRootLine($data->uid, ['additionalFields' => $additionalFields]);
     }
     
     /**
@@ -281,9 +280,8 @@ class InfoGenerator
         
         $this->applySlideProperties($data, $modelClass, $model);
         
-        // @todo add an event here
+        return $this->eventDispatcher->dispatch(new PageDataModelFilterEvent($model, $data))->getModel();
         
-        return $model;
     }
     
     /**

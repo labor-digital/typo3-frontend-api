@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.24 at 12:43
+ * Last modified: 2021.06.25 at 18:07
  */
 
 declare(strict_types=1);
@@ -175,7 +175,6 @@ class FileTransformer extends AbstractResourceTransformer implements LoggerAware
             'alignment' => $imageInfo->getImageAlignment(),
         ];
         
-        // @todo modify this to match the imaging requirements
         if ($this->getTypoContext()->config()->getConfigValue('t3fa.imaging.enabled') === true) {
             // Render Imaging url
             $image['url'] = $this->processFileUrl(LinkBuilder::build($fileInfo));

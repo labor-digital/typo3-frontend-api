@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 13:17
+ * Last modified: 2021.06.25 at 19:02
  */
 
 declare(strict_types=1);
@@ -24,7 +24,9 @@ namespace LaborDigital\T3fa\Core\Routing\Util;
 
 
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Event\Routing\TypoRequestFilterEvent;
 use Neunerlei\Inflection\Inflector;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -56,10 +58,20 @@ class RequestRewriter
      */
     protected $requestFactory;
     
-    public function __construct(TypoContext $context, ServerRequestFactory $requestFactory)
+    /**
+     * @var \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+    
+    public function __construct(
+        TypoContext $context,
+        ServerRequestFactory $requestFactory,
+        EventDispatcherInterface $eventDispatcher
+    )
     {
         $this->context = $context;
         $this->requestFactory = $requestFactory;
+        $this->eventDispatcher = $eventDispatcher;
     }
     
     /**
@@ -131,8 +143,9 @@ class RequestRewriter
             }
             
             $typoRequest = $typoRequest->withAttribute('normalizedParams', NormalizedParams::createFromRequest($typoRequest));
-            
-            // @todo an event would be nice here
+            $typoRequest = $this->eventDispatcher->dispatch(
+                new TypoRequestFilterEvent($typoRequest, $request)
+            )->getTypoRequest();
             
             return $callback($typoRequest);
             
