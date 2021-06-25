@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.05.07 at 10:04
+ * Last modified: 2021.06.25 at 12:34
  */
 
 declare(strict_types=1);
@@ -166,6 +166,15 @@ class Parser
             
             // While given via PHP we allow providing the fields as an array
             $items = $query['sort'];
+            foreach ($items as $field => $direction) {
+                if ($direction !== 'desc' && $direction !== 'asc') {
+                    throw new InvalidQueryException(
+                        'An array based sort definition must be a $field => "asc" or "desc" list. The value ' .
+                        (string)$direction . ' is invalid for field: ' . $field);
+                }
+            }
+            
+            return $items;
         }
         
         if (! isset($items)) {
