@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.02 at 11:12
+ * Last modified: 2021.06.25 at 20:13
  */
 
 declare(strict_types=1);
@@ -30,7 +30,6 @@ use LaborDigital\T3fa\Core\Resource\Transformer\TransformerScope;
 use League\Fractal\Manager;
 use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\Serializer\DataArraySerializer;
-use League\Fractal\Serializer\JsonApiSerializer;
 use League\Fractal\Serializer\SerializerAbstract;
 use Neunerlei\Options\Options;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -66,6 +65,13 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
     protected $baseUrl;
     
     /**
+     * The query parameters to append to json api links
+     *
+     * @var string
+     */
+    protected $linkQueryParams;
+    
+    /**
      * The list of transformed variants by their unique options key
      *
      * @var array
@@ -84,6 +90,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
         $raw,
         ?array $meta,
         string $baseUrl,
+        string $linkQueryParams,
         TransformerFactory $transformerFactory
     )
     {
@@ -91,6 +98,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
         $this->raw = $raw;
         $this->meta = $meta;
         $this->transformerFactory = $transformerFactory;
+        $this->linkQueryParams = $linkQueryParams;
         $this->baseUrl = $baseUrl;
     }
     
@@ -195,7 +203,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
             
             if ($options['jsonApi']) {
                 $serializer = GeneralUtility::makeInstance(
-                    JsonApiSerializer::class, $this->baseUrl
+                    QueryAwareJsonApiSerializer::class, $this->linkQueryParams, $this->baseUrl
                 );
             } else {
                 $serializer = GeneralUtility::makeInstance(DataArraySerializer::class);

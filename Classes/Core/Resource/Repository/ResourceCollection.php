@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.10 at 10:13
+ * Last modified: 2021.06.25 at 20:04
  */
 
 declare(strict_types=1);
@@ -63,12 +63,13 @@ class ResourceCollection extends AbstractResourceElement implements \Iterator
         ?iterable $raw,
         ?array $meta,
         string $baseUrl,
+        string $linkQueryParams,
         Pagination $pagination,
         ResourceFactory $resourceFactory,
         TransformerFactory $transformerFactory
     )
     {
-        parent::__construct($resourceType, $raw, $meta, $baseUrl, $transformerFactory);
+        parent::__construct($resourceType, $raw, $meta, $baseUrl, $linkQueryParams, $transformerFactory);
         $this->pagination = $pagination;
         $this->resourceFactory = $resourceFactory;
     }

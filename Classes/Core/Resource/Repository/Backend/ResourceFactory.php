@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.23 at 11:19
+ * Last modified: 2021.06.25 at 20:02
  */
 
 declare(strict_types=1);
@@ -33,6 +33,7 @@ use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\AutoTransformUtil;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
+use LaborDigital\T3fa\Core\Routing\Util\RequestRewriter;
 use Psr\Http\Message\ServerRequestInterface;
 
 class ResourceFactory implements PublicServiceInterface
@@ -69,6 +70,13 @@ class ResourceFactory implements PublicServiceInterface
      */
     protected $baseUrlCache = [];
     
+    /**
+     * The resolved link query parameters that should be added to each resource link
+     *
+     * @var string|null
+     */
+    protected $linkParameters;
+    
     public function __construct(
         TransformerFactory $transformerFactory,
         TypoContext $context,
@@ -104,7 +112,14 @@ class ResourceFactory implements PublicServiceInterface
         
         return $this->makeInstance(
             static::$resourceItemClass,
-            [$resourceType, $raw, $meta, $this->makeBaseUrl(), $this->transformerFactory]
+            [
+                $resourceType,
+                $raw,
+                $meta,
+                $this->makeBaseUrl(),
+                $this->makeLinkQueryParams(),
+                $this->transformerFactory,
+            ]
         );
     }
     
@@ -148,7 +163,16 @@ class ResourceFactory implements PublicServiceInterface
         
         return $this->makeInstance(
             static::$resourceCollectionClass,
-            [$resourceType, $raw, $meta, $this->makeBaseUrl(), $pagination, $this, $this->transformerFactory]
+            [
+                $resourceType,
+                $raw,
+                $meta,
+                $this->makeBaseUrl(),
+                $this->makeLinkQueryParams(),
+                $pagination,
+                $this,
+                $this->transformerFactory,
+            ]
         );
     }
     
@@ -241,5 +265,41 @@ class ResourceFactory implements PublicServiceInterface
         $params['page']['number'] = '___pageNumber___';
         
         return urldecode(http_build_query($params));
+    }
+    
+    /**
+     * Builds the list of query parameters that should be added to each link
+     * the Fractal Serializer generates. This is important, so that the links point
+     * to the same context than the request.
+     *
+     * @return string
+     */
+    protected function makeLinkQueryParams(): string
+    {
+        $request = $this->getApiRequest();
+        if (! $request) {
+            return '';
+        }
+        
+        $linkParams = [];
+        $params = $request->getQueryParams();
+        foreach (
+            [
+                RequestRewriter::REQUEST_SLUG_QUERY_KEY,
+                RequestRewriter::REQUEST_SITE_QUERY_KEY,
+                RequestRewriter::REQUEST_LANG_QUERY_KEY,
+            ] as $inheritedParam
+        ) {
+            if (isset($params[$inheritedParam])) {
+                $linkParams[$inheritedParam] = $params[$inheritedParam];
+            }
+        }
+        
+        if (empty($linkParams)) {
+            return '';
+        }
+        
+        return '?' . http_build_query($linkParams);
+        
     }
 }
