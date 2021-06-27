@@ -27,7 +27,13 @@ composer require labor-digital/typo3-frontend-api
 
 After that, you can activate the extension in the Extensions-Manager of your TYPO3 installation
 
-[comment]: <> (## Documentation)
+## Example extension
+
+To take a look a how to use the extension, you can take a look at the [example extension](https://github.com/labor-digital/typo3-frontend-api-example).
+
+## Documentation
+
+After a complete rewrite of the extension for TYPO3 v10 the old documentation has to be rewritten as well. I'm currently working on that.
 
 [comment]: <> (The documentation can be found [here]&#40;https://typo3-frontend-api.labor.tools&#41;.)
 
