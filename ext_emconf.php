@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.27 at 21:15
+ * Last modified: 2021.06.27 at 21:27
  */
 
 $EM_CONF[$_EXTKEY] = [
@@ -28,7 +28,7 @@ $EM_CONF[$_EXTKEY] = [
     'conflicts' => '',
     'priority' => '',
     'module' => '',
-    'state' => 'alpha',
+    'state' => 'stable',
     'internal' => '',
     'uploadfolder' => 0,
     'createDirs' => '',
