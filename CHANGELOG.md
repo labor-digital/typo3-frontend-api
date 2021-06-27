@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.4.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.4...v10.0.0-beta.4.2) (2021-06-27)
+
+
+### Features
+
+* remove _ToMigrate directory ([864ab80](https://github.com/labor-digital/typo3-frontend-api/commit/864ab80870d5d19748d73d424333cea729d9ef35))
+* **Resource:** append context relevant query parameters to json api links ([fe42bdf](https://github.com/labor-digital/typo3-frontend-api/commit/fe42bdf115067b3bc7d94667c04a6fb1ea12db6c))
+* finish migrating imaging api ([ec9deaf](https://github.com/labor-digital/typo3-frontend-api/commit/ec9deafd702e711581cb02bd202c9a2d6b8b981c))
+* implement missing events + clear out remaining todos ([01eb765](https://github.com/labor-digital/typo3-frontend-api/commit/01eb7654a50355d299341db41e230c7c3a36a5b5))
+* **Page\InfoGenerator:** add pid configuration to page information ([874e2b7](https://github.com/labor-digital/typo3-frontend-api/commit/874e2b7629fff47a7a557ad791e4d9a1f9b1a1d1))
+* migrate translation handling ([3ef06bd](https://github.com/labor-digital/typo3-frontend-api/commit/3ef06bd8dae186549d064261603f0db19d148251))
+
+
+### Bug Fixes
+
+* **Cache:** use original http request if possible to get query parameters ([f60032a](https://github.com/labor-digital/typo3-frontend-api/commit/f60032a79f3a4771205cf92034675190c52935b5))
+* **ContentElement:** don't capture http exceptions in the jsonErrorBoundary ([95243ff](https://github.com/labor-digital/typo3-frontend-api/commit/95243ff9229b626afa51204b9e75b08309b63692))
+* **ExtRedirectsMiddleware:** pass along correct constructor dependencies ([cc0bbaa](https://github.com/labor-digital/typo3-frontend-api/commit/cc0bbaa2982afcc47c9de4bf9794adacea1f019e))
+* **RequestRewriter:** allow language query key to be forwarded ([733e484](https://github.com/labor-digital/typo3-frontend-api/commit/733e484a78b813d5056e9516a5428a8f0c78ab69))
+* **Resource\Query:** parse array based "sort" constraints correctly ([04008d2](https://github.com/labor-digital/typo3-frontend-api/commit/04008d2d7171c47d5719dd49ccebe2e5608cb32c))
+
 ## [10.0.0-beta.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.3...v10.0.0-beta.4) (2021-06-22)
 
 
