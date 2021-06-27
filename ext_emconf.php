@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.16 at 11:06
+ * Last modified: 2021.06.27 at 21:15
  */
 
 $EM_CONF[$_EXTKEY] = [
@@ -35,7 +35,7 @@ $EM_CONF[$_EXTKEY] = [
     'modify_tables' => '',
     'clearCacheOnLoad' => 1,
     'lockType' => '',
-    'version' => '9.37.2',
+    'version' => '10.0.0',
     'constraints' => [
         'depends' => [
             'typo3' => '10.0.0-10.99.99',
