@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 LABOR.digital
+ * Copyright 2021 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.03.21 at 19:09
+ * Last modified: 2021.06.27 at 21:19
  */
 // This helper is used to automatically set the version in the ext_emconf.php file to the latest version
 // after the conventional release generated a new number for us
-const fs = require("fs");
-const path = require("path");
-const filename = path.join(__dirname, "ext_emconf.php");
+const fs = require('fs');
+const path = require('path');
 const version = process.argv[2];
-let content = fs.readFileSync(filename).toString("utf-8");
-content = content.replace(/("version"\s+=>\s+)(["'].*?["'])/, "$1\"" + version + "\"");
-fs.writeFileSync(filename, content);
+
+function updateEmConfVersion(filename, version)
+{
+    let content = fs.readFileSync(filename).toString('utf-8');
+    content = content.replace(/(["']version["']\s+=>\s+)(["'].*?["'])/, '$1"' + version + '"');
+    fs.writeFileSync(filename, content);
+}
+
+updateEmConfVersion(path.join(__dirname, 'ext_emconf.php'), version);
