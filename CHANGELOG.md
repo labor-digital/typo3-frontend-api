@@ -2,59 +2,112 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [9.38.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.38.0...v9.38.1) (2021-05-27)
-
-
-### Bug Fixes
-
-* make ApiRedirectMiddleware more resilient ([b974eac](https://github.com/labor-digital/typo3-frontend-api/commit/b974eac437cbcc08179eff3234ed437598f937df))
-
-## [9.38.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.7...v9.38.0) (2021-05-25)
+## [10.0.0-beta.4.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.4...v10.0.0-beta.4.2) (2021-06-27)
 
 
 ### Features
 
-* add ttl to cache metrics tracker ([cbe90c3](https://github.com/labor-digital/typo3-frontend-api/commit/cbe90c307d108f797f5a0b1b7d86584b26c3aefb))
+* remove _ToMigrate directory ([864ab80](https://github.com/labor-digital/typo3-frontend-api/commit/864ab80870d5d19748d73d424333cea729d9ef35))
+* **Resource:** append context relevant query parameters to json api links ([fe42bdf](https://github.com/labor-digital/typo3-frontend-api/commit/fe42bdf115067b3bc7d94667c04a6fb1ea12db6c))
+* finish migrating imaging api ([ec9deaf](https://github.com/labor-digital/typo3-frontend-api/commit/ec9deafd702e711581cb02bd202c9a2d6b8b981c))
+* implement missing events + clear out remaining todos ([01eb765](https://github.com/labor-digital/typo3-frontend-api/commit/01eb7654a50355d299341db41e230c7c3a36a5b5))
+* **Page\InfoGenerator:** add pid configuration to page information ([874e2b7](https://github.com/labor-digital/typo3-frontend-api/commit/874e2b7629fff47a7a557ad791e4d9a1f9b1a1d1))
+* migrate translation handling ([3ef06bd](https://github.com/labor-digital/typo3-frontend-api/commit/3ef06bd8dae186549d064261603f0db19d148251))
 
 
 ### Bug Fixes
 
-* **PageDataLinkGenerator:** make sure canonical url gets generated correctly ([483794b](https://github.com/labor-digital/typo3-frontend-api/commit/483794bd892061f3d795dcb33b7a7793ccaedbf2))
+* **Cache:** use original http request if possible to get query parameters ([f60032a](https://github.com/labor-digital/typo3-frontend-api/commit/f60032a79f3a4771205cf92034675190c52935b5))
+* **ContentElement:** don't capture http exceptions in the jsonErrorBoundary ([95243ff](https://github.com/labor-digital/typo3-frontend-api/commit/95243ff9229b626afa51204b9e75b08309b63692))
+* **ExtRedirectsMiddleware:** pass along correct constructor dependencies ([cc0bbaa](https://github.com/labor-digital/typo3-frontend-api/commit/cc0bbaa2982afcc47c9de4bf9794adacea1f019e))
+* **RequestRewriter:** allow language query key to be forwarded ([733e484](https://github.com/labor-digital/typo3-frontend-api/commit/733e484a78b813d5056e9516a5428a8f0c78ab69))
+* **Resource\Query:** parse array based "sort" constraints correctly ([04008d2](https://github.com/labor-digital/typo3-frontend-api/commit/04008d2d7171c47d5719dd49ccebe2e5608cb32c))
 
-### [9.37.7](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.6...v9.37.7) (2021-05-07)
-
-
-### Bug Fixes
-
-* make sure data maps for unmapped models are generated correctly ([5474443](https://github.com/labor-digital/typo3-frontend-api/commit/5474443e364a83098e38401794ea3e72b15f938a))
-
-### [9.37.6](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.5...v9.37.6) (2021-05-05)
+## [10.0.0-beta.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.3...v10.0.0-beta.4) (2021-06-22)
 
 
-### Bug Fixes
+### Features
 
-* **ContentElementController:** pass correct language code to content element instance ([afaadd2](https://github.com/labor-digital/typo3-frontend-api/commit/afaadd2c7ae0efe394b54e6392c0ef06d2d64349))
-
-### [9.37.5](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.4...v9.37.5) (2021-05-05)
-
-
-### Bug Fixes
-
-* remove dev output ([dc81e0f](https://github.com/labor-digital/typo3-frontend-api/commit/dc81e0ffed1d44565668248d9e84385526295dc0))
-
-### [9.37.4](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.3...v9.37.4) (2021-05-05)
+* implement layout object handling ([2ad8482](https://github.com/labor-digital/typo3-frontend-api/commit/2ad8482a9c453e4770922535e2c220b3e1ec4ba4))
+* migrate up and scheduler routes ([7a0b33b](https://github.com/labor-digital/typo3-frontend-api/commit/7a0b33bfec0c16e3162351b0d865c38e07afd0d7))
+* **ContentBundle:** add routes for RESTful content element requests ([211f592](https://github.com/labor-digital/typo3-frontend-api/commit/211f5928d144bd906c71a88ccaca3e55fa8ea2df))
+* **ContentElement:** allow usage of StandaloneView in JsonResponse ([79f7be2](https://github.com/labor-digital/typo3-frontend-api/commit/79f7be296ebd8eb25417dc04187ec70812191823))
+* **ContentElement:** implement getFormInfo() in JsonContentElementControllerTrait ([81ff7c3](https://github.com/labor-digital/typo3-frontend-api/commit/81ff7c397beb0407984981209de9df9e6274b888))
+* **ContentElement:** make controller data resolution more generic ([2996205](https://github.com/labor-digital/typo3-frontend-api/commit/2996205f1fffa258b6e41bd2434200b52e36f590))
+* **Link:** implement ApiLink as api link builder ([78458eb](https://github.com/labor-digital/typo3-frontend-api/commit/78458eb3b1d6d5a464aadae9895bb69afe58a8d5))
 
 
 ### Bug Fixes
 
-* fix multiple issues when the same domain model was mapped on multiple types ([213b1f6](https://github.com/labor-digital/typo3-frontend-api/commit/213b1f6c531bd9af72d8eb42bdcb43fe8a000f47))
+* **JsonContentActionController:** break processRequest when error boundary is disabled ([c260610](https://github.com/labor-digital/typo3-frontend-api/commit/c26061030bd240652e5ce67d8ca00e4a9bba02db))
+* **JsonContentActionController:** disable error boundary when using the backend preview renderer ([d7130d7](https://github.com/labor-digital/typo3-frontend-api/commit/d7130d7256a35f6c262c2f5be581ff1e975d86f7))
+* **resource\page:** fix issues when previewing pages ([cc2a672](https://github.com/labor-digital/typo3-frontend-api/commit/cc2a672f65e9ece990b7b946aa4f48c27393789b))
+* **resource\pageContent:** implement support for page preview ([ab621e7](https://github.com/labor-digital/typo3-frontend-api/commit/ab621e7c612551fb8a696912e0ce172ebfb8a2ab))
+* **Routing:** inherit parsed body from base request to typo request ([a3bf941](https://github.com/labor-digital/typo3-frontend-api/commit/a3bf9419cc29a4349dcc463695d8b522e6af7709))
 
-### [9.37.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.2...v9.37.3) (2021-05-04)
+## [10.0.0-beta.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.2...v10.0.0-beta.3) (2021-06-16)
 
 
 ### Bug Fixes
 
-* **Cache\CacheScopeRegistry:** don't crash if announceTtl() is executed without scopes ([f431361](https://github.com/labor-digital/typo3-frontend-api/commit/f43136159ba3015feed70906879e1864fd33e8f0))
+* update t3ba to beta 11 ([99fe157](https://github.com/labor-digital/typo3-frontend-api/commit/99fe157848c6d248f3ebed39ab83263c4b81f408))
+* **Middleware\ExtRedirectsMiddleware:** fix issue when ext:redirects was not installed ([c6b73f8](https://github.com/labor-digital/typo3-frontend-api/commit/c6b73f83ec30ffc36e1e462a1d3b82c126df1654))
+
+## [10.0.0-beta.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.1...v10.0.0-beta.2) (2021-06-16)
+
+
+### Bug Fixes
+
+* **ExtConfigHandler\Page:** use correct default data model class ([749a64a](https://github.com/labor-digital/typo3-frontend-api/commit/749a64af5e5a72eb4a8779f0d89effc256a61987))
+
+## [10.0.0-beta.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.0-beta.0...v10.0.0-beta.1) (2021-06-16)
+
+## [10.0.0-beta.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.2...v10.0.0-beta.0) (2021-06-16)
+
+
+### Features
+
+* bump labor-digital/typo3-better-api to 10.0.0-beta.10 ([a2bffd6](https://github.com/labor-digital/typo3-frontend-api/commit/a2bffd6843327a4dfa0e95e2669e79c7c9a0d4ec))
+* implement redirect handling for ext:redirects ([cba2193](https://github.com/labor-digital/typo3-frontend-api/commit/cba2193c37603e9413e0a064fa4ce9247f0c2401))
+* **BundleCollector:** implement clear method to remove all registered bundles ([794746b](https://github.com/labor-digital/typo3-frontend-api/commit/794746be7c886241f68e0c31c7b9d3e78a7a8de5))
+* **ContentElement:** implement json centric content element controller ([067dc57](https://github.com/labor-digital/typo3-frontend-api/commit/067dc57ef967e92372de5d2feb4aa182abb42049))
+* **ErrorHandler:** extract error logging into separate trait ([d6aa06d](https://github.com/labor-digital/typo3-frontend-api/commit/d6aa06dba2c62cd71b9aae1edb10b1242caeebdc))
+* **ErrorHandler:** mirror core error handler functionality ([ca8aa98](https://github.com/labor-digital/typo3-frontend-api/commit/ca8aa9839a4c9e6339021a001b80358a978e6693))
+* **Resource\Repository:** implement caching hooks ([32942d2](https://github.com/labor-digital/typo3-frontend-api/commit/32942d2454f6135af5743669be0eecc0a92f97e6))
+* finish implementing content element and page content resources ([cdf4c46](https://github.com/labor-digital/typo3-frontend-api/commit/cdf4c4683408619ab26ac51ac634b795f058bc72))
+* **ExtConfig\Api:** implement collection class handling ([584b2d0](https://github.com/labor-digital/typo3-frontend-api/commit/584b2d07b2af003a036ba01676091184c9b08ec3))
+* **Routing\AbstractRouteController:** implement ResponseFactoryTrait to controller abstract ([22290c8](https://github.com/labor-digital/typo3-frontend-api/commit/22290c89b8825f14adcfef7d3fea7d210f2f7d2f))
+* **Routing\RequestRewriter:** streamline rewrite process ([dcd0de9](https://github.com/labor-digital/typo3-frontend-api/commit/dcd0de90e4642bffe7db9b26a79f3d2a818f2c3d))
+* **Routing\Strategy:** implement automatic options route support ([317066f](https://github.com/labor-digital/typo3-frontend-api/commit/317066f0a8233b42c489b2a7e37774a6b9bab347))
+* **Transformer:** finalize implementing the auto transformer ([542c042](https://github.com/labor-digital/typo3-frontend-api/commit/542c042f89f185f0693b944374e5b208d7f3ca9f))
+* **Transformer:** implement cache hooks into transformer proxy ([608dccc](https://github.com/labor-digital/typo3-frontend-api/commit/608dccc5832dd3a2fa60a882ae9b24ae0b2861a9))
+* **Transformer\Schema:** implement generic reflector and property reflection ([8e4ef93](https://github.com/labor-digital/typo3-frontend-api/commit/8e4ef938804cdd7e56428c01cd756eb1bcd863d2))
+* begin complete rewrite from ground up ([11e1ba0](https://github.com/labor-digital/typo3-frontend-api/commit/11e1ba0eb6310ecc516f90f02158a11f998882a5))
+* change composer namespace ([55740d2](https://github.com/labor-digital/typo3-frontend-api/commit/55740d2f2677bd4ad3f6aee63fe8a9643743f1be))
+* finalize page resource ([6f6863e](https://github.com/labor-digital/typo3-frontend-api/commit/6f6863e0673bc66e77bb30167f1da8ab286e5449))
+* implement basic api routing ([6c66e79](https://github.com/labor-digital/typo3-frontend-api/commit/6c66e79ca177935d3c3b760c98e448c7a6dc91af))
+* implement BodyParserMiddleware ([343fb34](https://github.com/labor-digital/typo3-frontend-api/commit/343fb34eba212fb37dc222e473faf6dae499837f))
+* move all api related stuff into the /Api/ namespace ([589def4](https://github.com/labor-digital/typo3-frontend-api/commit/589def4d8b253c29f9b79e3d7ea0bb4f9e9771a7))
+* move SiteConfigAwareTrait to T3BA extension ([6418cdc](https://github.com/labor-digital/typo3-frontend-api/commit/6418cdc9fc9a900ec12b7cf0d9dc826f2cfc494a))
+* streamline cache implementation ([c1ee1c3](https://github.com/labor-digital/typo3-frontend-api/commit/c1ee1c32c9e838d9ce7c74b08ef73850cf2975fe))
+
+
+### Bug Fixes
+
+* add some forgotten files ([d8642b3](https://github.com/labor-digital/typo3-frontend-api/commit/d8642b32a8430c68ca5651f0322ac78385de5c72))
+* remove TestEventHandler ([94f23b2](https://github.com/labor-digital/typo3-frontend-api/commit/94f23b2fbbebc8e65f8d9ce09b2d7ce2833b92cc))
+* **CacheOptionsTrait:** remove return type to prevent IDE issues ([5b16164](https://github.com/labor-digital/typo3-frontend-api/commit/5b16164c33b23ec87f5e758d1b4a0d152c216f64))
+* **DefaultResourceController:** throw correct NotFoundException ([dbd625e](https://github.com/labor-digital/typo3-frontend-api/commit/dbd625ee1134b6a7f49adc443f93a84af9775a39))
+* **ErrorHandler:** reset status code to 200 when an error occurred ([a2423d0](https://github.com/labor-digital/typo3-frontend-api/commit/a2423d08813326086dbf9b896290be2b370f8da1))
+* **ErrorHandler:** trigger ErrorFilterEvent when a frontend error occurs ([7c6e287](https://github.com/labor-digital/typo3-frontend-api/commit/7c6e287845a9ea438dfff8f95725df680e4f9ffb))
+* **NoCollectionException:** pass correct constructor arguments to http exception ([e6afe5e](https://github.com/labor-digital/typo3-frontend-api/commit/e6afe5e021120066d58ca7cb41ee276953dfe390))
+* **RequestRewriter:** use REQUEST_LANG_QUERY_KEY and REQUEST_SITE_QUERY_KEY correctly ([f522ee0](https://github.com/labor-digital/typo3-frontend-api/commit/f522ee02f4ba910997c73282fc34c398175bb085))
+* **Resource:** fix multiple issues with the SelfPaginatingINterface ([edce5aa](https://github.com/labor-digital/typo3-frontend-api/commit/edce5aae11f8669550c0b187422ea3998635d4f5))
+* **Resource\ResourceCollection:** add iterable type hint to $raw attribute ([3f90645](https://github.com/labor-digital/typo3-frontend-api/commit/3f906454ec6c38d38e4f4a49f106d5bc073e29e6))
+* **Transformer:** migrate to t3ba SiteConfigAwareTrait ([688b6b5](https://github.com/labor-digital/typo3-frontend-api/commit/688b6b5a8deac60c967664197e497cca3c48fc54))
+* **UnifiedError:** handle ImmediateResponseException more reliably ([3463ff0](https://github.com/labor-digital/typo3-frontend-api/commit/3463ff061481b33c25bad5ac3742121ff9de9d00))
+* **UnifiedError:** the extended error message is generated based on initial error ([10cf49f](https://github.com/labor-digital/typo3-frontend-api/commit/10cf49f91471389fb169afc5ba194b20428fd0cb))
+* **VerboseHtmlRenderer:** handle ImmediateResponseException more reliably ([650d865](https://github.com/labor-digital/typo3-frontend-api/commit/650d8655dbfeef4448210bf0c79537d8c157d07a))
 
 ### [9.37.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.37.1...v9.37.2) (2021-04-13)
 

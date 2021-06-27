@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><!--
-  ~ Copyright 2020 LABOR.digital
+  ~ Copyright 2021 LABOR.digital
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,17 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  ~ Last modified: 2020.05.28 at 21:20
+  ~ Last modified: 2021.06.02 at 20:00
   -->
 
 <xliff version="1.0">
-    <file source-language="en" datatype="plaintext" original="messages" date="2019-10-30T17:39:36Z" product-name="typo3_better_api" target-language="de">
-        <header/>
-        <body>
-            <trans-unit id="t.tt_content.ceAction">
-                <source>Display mode</source>
-                <target>Anzeige-Modus</target>
-            </trans-unit>
-        </body>
-    </file>
+	<file source-language="en" datatype="plaintext" original="messages" date="2019-10-30T17:39:36Z" product-name="typo3_frontend_api" target-language="de">
+		<header/>
+		<body>
+			<trans-unit id="t.backendLayout.field.identifier">
+				<source>Frontend Api Identifier</source>
+				<target>Frontend Api ID</target>
+			</trans-unit>
+			<trans-unit id="t.backendLayout.msg.identifierModified">
+				<source>The Frontend Api Identifier was adjusted to match the requirements. It was: "%s", and is now: "%s"</source>
+				<target>Die Frontend Api ID wurde automatisch angepasst. Der Wert war: "%s" und ist jetzt: "%s"</target>
+			</trans-unit>
+		</body>
+	</file>
 </xliff>

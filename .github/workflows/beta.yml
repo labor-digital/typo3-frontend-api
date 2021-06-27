@@ -1,0 +1,22 @@
+name: Create new (beta) release
+
+on:
+  push:
+    branches:
+      - feat-v10
+    paths-ignore:
+      - 'composer.json'
+      - 'package.json'
+      - 'CHANGELOG.md'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v1
+      -
+        name: Create Changelog and bump release version
+        uses: labor-digital/conventional-release-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          preRelease: beta
