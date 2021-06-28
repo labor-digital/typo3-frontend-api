@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.39.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.39.0...v9.39.1) (2021-06-28)
+
+
+### Bug Fixes
+
+* **Resource\Menu:** implement renderPostProcessing() hook for menu renderers ([7dbdca0](https://github.com/labor-digital/typo3-frontend-api/commit/7dbdca09822107c4a2f62ada839809d393518686))
+
 ## [9.39.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.38.1...v9.39.0) (2021-06-28)
 
 
