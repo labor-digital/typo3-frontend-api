@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.25 at 18:49
+ * Last modified: 2021.06.28 at 12:13
  */
 
 declare(strict_types=1);
@@ -148,9 +148,12 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
         
         PageMenuItemDataProcessor::$cacheTags = [];
         
-        $result = $this->makeInstance($this->processorClass)
+        $result = $this->getServiceOrInstance($this->processorClass)
                        ->process($this->tsfeService->getContentObjectRenderer(), [], $tsConfig, []);
+        
         $result = PageMenuItemDataProcessor::removeInvalidMarkers($result['menu']);
+        
+        $result = $this->renderPostProcessing($result, $options);
         
         if (! empty(PageMenuItemDataProcessor::$cacheTags)) {
             $this->runInCacheScope(static function (Scope $scope): void {
@@ -164,6 +167,19 @@ abstract class AbstractMenuRenderer implements PublicServiceInterface
         }
         
         return $result;
+    }
+    
+    /**
+     * Designed to be overwritten by child classes. It allows to modify the menu array before the post processor is executed.
+     *
+     * @param   array  $menu     The generated menu
+     * @param   array  $options  The options used to generate the menu
+     *
+     * @return array MUST return the modified menu array.
+     */
+    protected function renderPostProcessing(array $menu, array $options): array
+    {
+        return $menu;
     }
     
     /**

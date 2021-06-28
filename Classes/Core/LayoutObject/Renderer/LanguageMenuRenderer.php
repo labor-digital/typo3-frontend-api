@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 18:54
+ * Last modified: 2021.06.28 at 12:12
  */
 
 declare(strict_types=1);
@@ -80,10 +80,9 @@ class LanguageMenuRenderer extends AbstractMenuRenderer
     /**
      * @inheritDoc
      */
-    public function render(array $options): array
+    protected function renderPostProcessing(array $menu, array $options): array
     {
-        $entries = parent::render($options);
-        foreach ($entries as &$entry) {
+        foreach ($menu as &$entry) {
             $entry['id'] = $entry['twoLetterIsoCode'];
             $entry['isTranslated'] = (bool)$entry['available'];
             
@@ -96,8 +95,7 @@ class LanguageMenuRenderer extends AbstractMenuRenderer
                 $entry['twoLetterIsoCode'], $entry['languageId']);
         }
         
-        return $entries;
+        return $menu;
     }
-    
     
 }
