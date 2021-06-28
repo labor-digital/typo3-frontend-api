@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.39.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.38.1...v9.39.0) (2021-06-28)
+
+
+### Features
+
+* add v9 workflow ([152689f](https://github.com/labor-digital/typo3-frontend-api/commit/152689f7341da556bc46645dc20aeec957710c04))
+
 ### [9.38.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.38.0...v9.38.1) (2021-05-27)
 
 
