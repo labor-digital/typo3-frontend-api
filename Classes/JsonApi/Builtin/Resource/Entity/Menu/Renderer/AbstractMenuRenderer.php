@@ -101,8 +101,23 @@ abstract class AbstractMenuRenderer
         $processor = $context->getInstanceOf($this->processorClass);
         $result    = $processor->process($context->Tsfe()->getContentObjectRenderer(), [], $tsConfig, []);
         $result    = PageMenuItemDataProcessor::removeInvalidMarkers($result['menu']);
+        $result    = $this->renderPostProcessing($key, $result, $options);
 
         return $this->runPostProcessing($result);
+    }
+
+    /**
+     * Designed to be overwritten by child classes. It allows to modify the menu array before the post processor is executed.
+     *
+     * @param   string  $key      The unique key for this menu to render
+     * @param   array   $menu     The generated menu
+     * @param   array   $options  The options used to generate the menu
+     *
+     * @return array MUST return the modified menu array.
+     */
+    protected function renderPostProcessing(string $key, array $menu, array $options): array
+    {
+        return $menu;
     }
 
     /**

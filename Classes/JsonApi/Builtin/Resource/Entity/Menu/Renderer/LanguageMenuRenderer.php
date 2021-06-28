@@ -77,12 +77,11 @@ class LanguageMenuRenderer extends AbstractMenuRenderer
     /**
      * @inheritDoc
      */
-    public function render(string $key, array $options): array
+    protected function renderPostProcessing(string $key, array $menu, array $options): array
     {
-        $entries     = parent::render($key, $options);
         $linkService = $this->FrontendApiContext()->Links();
         $site        = $this->FrontendApiContext()->TypoContext()->Site()->getCurrent();
-        foreach ($entries as &$entry) {
+        foreach ($menu as &$entry) {
             $entry['id']           = $entry['twoLetterIsoCode'];
             $entry['isTranslated'] = (bool)$entry['available'];
             if ($entry['available']) {
@@ -104,7 +103,7 @@ class LanguageMenuRenderer extends AbstractMenuRenderer
 
         }
 
-        return $entries;
+        return $menu;
     }
 
 
