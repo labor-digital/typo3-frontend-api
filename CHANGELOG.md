@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.0.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.3...v10.0.4) (2021-07-02)
+
+
+### Bug Fixes
+
+* **Resource\ContentElement:** content elements based on typoscript paths are no longer cached ([a44e9db](https://github.com/labor-digital/typo3-frontend-api/commit/a44e9dbd8b435c2b21d53dfcb11a5ad40b2421e6))
+* **Resource\Page:** temporarily integration of the T3FA frontend meta tag registration ([8e6704f](https://github.com/labor-digital/typo3-frontend-api/commit/8e6704f79e957a512c07d0f4bcc644fdfc82a0f8))
+
 ### [10.0.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.2...v10.0.3) (2021-06-27)
 
 
