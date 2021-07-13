@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 20:35
+ * Last modified: 2021.07.13 at 13:02
  */
 
 declare(strict_types=1);
@@ -30,6 +30,7 @@ use LaborDigital\T3ba\Tool\TypoScript\TypoScriptService;
 use LaborDigital\T3fa\Api\Resource\Factory\ContentElement\ContentObject\ThrowingRecordsContentObject;
 use LaborDigital\T3fa\Core\Cache\Scope\Scope;
 use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
+use LaborDigital\T3fa\Core\ContentElement\ContentElementProxyException;
 use LaborDigital\T3fa\Core\ContentElement\HtmlSerializer;
 use Neunerlei\Inflection\Inflector;
 use Neunerlei\TinyTimy\DateTimy;
@@ -74,17 +75,26 @@ class DataGenerator implements PublicServiceInterface
             ],
             function () use ($uid, $language) {
                 return $this->process($uid, $language, function () use ($uid) {
-                    // I have to be a bit creative here,
-                    // to find out if a content element exists I use an extension of the records content element
-                    // that will throw a not found exception if the result is empty and no data was resolved.
-                    $result = $this->typoScriptService->renderContentObject(
-                        'T3FA_RECORDS_THROWING',
-                        [
-                            'tables' => 'tt_content',
-                            'source' => $uid,
-                            'dontCheckPid' => 1,
-                        ]
-                    );
+                    try {
+                        ContentElementProxyException::enable();
+                        
+                        // I have to be a bit creative here,
+                        // to find out if a content element exists I use an extension of the records content element
+                        // that will throw a not found exception if the result is empty and no data was resolved.
+                        $result = $this->typoScriptService->renderContentObject(
+                            'T3FA_RECORDS_THROWING',
+                            [
+                                'tables' => 'tt_content',
+                                'source' => $uid,
+                                'dontCheckPid' => 1,
+                            ]
+                        );
+                    } catch (ContentElementProxyException $e) {
+                        ContentElementProxyException::enable(false);
+                        throw $e->getProxiedException();
+                    } finally {
+                        ContentElementProxyException::enable(false);
+                    }
                     
                     if (ThrowingRecordsContentObject::$lastRenderedPid !== null) {
                         $this->runInCacheScope(static function (Scope $scope): void {
