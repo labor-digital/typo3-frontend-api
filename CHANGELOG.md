@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.0.5](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.4...v10.0.5) (2021-07-13)
+
+
+### Bug Fixes
+
+* **LayoutObject:** implement renderPostProcessing() hook for layout object renderers ([f2ba26e](https://github.com/labor-digital/typo3-frontend-api/commit/f2ba26e47d4b07ccba51b61d9941d94a1081c605))
+* **Resource\ContentElement:** handle HTTP exceptions in content elements correctly ([ca403a9](https://github.com/labor-digital/typo3-frontend-api/commit/ca403a9412c4d465574411869fb905e08b98aa2e))
+
 ### [10.0.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.3...v10.0.4) (2021-07-02)
 
 
