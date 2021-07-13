@@ -139,20 +139,7 @@ class ContentElementResourceFactory
     {
         return $this->makeInstance(
             ContentElementEntity::class,
-            $this->getCache()->remember(
-                function () use ($typoScriptObjectPath, $language) {
-                    return $this->getService(DataGenerator::class)->makeFromTsPath($typoScriptObjectPath, $language);
-                },
-                [
-                    'ce_resource',
-                    $typoScriptObjectPath,
-                    $language->getTwoLetterIsoCode(),
-                    '@query' => true,
-                ],
-                [
-                    'tags' => ['contentElement'],
-                ]
-            )
+            $this->getService(DataGenerator::class)->makeFromTsPath($typoScriptObjectPath, $language)
         );
     }
     

@@ -26,6 +26,7 @@ namespace LaborDigital\T3fa\Api\Resource\Factory\Page\Generator;
 use DOMDocument;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Tool\Tsfe\TsfeService;
+use LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\Adapter\T3baFrontendApplierAdapter;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 use LaborDigital\T3fa\Event\Resource\Page\PageMetaTagsFilterEvent;
 use Neunerlei\Arrays\Arrays;
@@ -68,15 +69,22 @@ class MetaGenerator
      */
     protected $metaTagRegistry;
     
+    /**
+     * @var \LaborDigital\T3fa\Api\Resource\Factory\Page\Generator\Adapter\T3baFrontendApplierAdapter
+     */
+    protected $t3baFrontendApplier;
+    
     public function __construct(
         TsfeService $tsfeService,
         EventDispatcherInterface $eventDispatcher,
-        MetaTagManagerRegistry $metaTagRegistry
+        MetaTagManagerRegistry $metaTagRegistry,
+        T3baFrontendApplierAdapter $t3baFrontendApplier
     )
     {
         $this->tsfeService = $tsfeService;
         $this->eventDispatcher = $eventDispatcher;
         $this->metaTagRegistry = $metaTagRegistry;
+        $this->t3baFrontendApplier = $t3baFrontendApplier;
     }
     
     /**
@@ -89,6 +97,8 @@ class MetaGenerator
         if ($data->isRedirect) {
             return;
         }
+        
+        $this->t3baFrontendApplier->applyConfiguredMetaTags($data);
         
         $e = $this->eventDispatcher->dispatch(new PageMetaTagsFilterEvent(
             $this->findMetaTags($data),
