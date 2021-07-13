@@ -229,19 +229,22 @@ class ContentElement implements SelfTransformingInterface
     {
         // Store backups
         $tsfe                           = $this->FrontendApiContext()->Tsfe()->getTsfe();
+        $configBackup                   = $tsfe->config;
         $spaModeBackup                  = ContentElementHandler::$spaMode;
         ContentElementHandler::$spaMode = true;
         $cObjectDepthCounterBackup      = $tsfe->cObjectDepthCounter;
 
         // Render the content element using the generator function
         try {
-            $this->data          = $generator();
-            $this->componentType = 'html';
+            $tsfe->config['config']['contentObjectExceptionHandler'] = 0;
+            $this->data                                              = $generator();
+            $this->componentType                                     = 'html';
         } catch (SpaContentPreparedException $e) {
             foreach (get_object_vars($e->getContentElement()) as $k => $v) {
                 $this->$k = $v;
             }
         } finally {
+            $tsfe->config                   = $configBackup;
             $tsfe->cObjectDepthCounter      = $cObjectDepthCounterBackup;
             ContentElementHandler::$spaMode = $spaModeBackup;
         }
