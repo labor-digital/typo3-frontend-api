@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.25 at 19:02
+ * Last modified: 2021.07.14 at 21:58
  */
 
 declare(strict_types=1);
@@ -167,7 +167,8 @@ class RequestRewriter
     {
         $inheritedQueryParams = [];
         
-        $allowedParams = ['cHash', 'id', static::REQUEST_LANG_QUERY_KEY];
+        // @todo this should be configurable via an option
+        $allowedParams = ['cHash', 'id', static::REQUEST_LANG_QUERY_KEY, 'no_cache'];
         
         foreach ($queryParams as $k => $v) {
             if (str_starts_with($k, 'tx_') || in_array($k, $allowedParams, true)) {
