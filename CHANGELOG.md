@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.1.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.5...v10.1.0) (2021-07-15)
+
+
+### Features
+
+* **Resource\Page:** implement TCA preview handler support ([a8f624c](https://github.com/labor-digital/typo3-frontend-api/commit/a8f624c6fa84d4a80d92db6b3e432427224f0abf))
+
+
+### Bug Fixes
+
+* **RequestRewriter:** pass through no_cache get parameter to TYPO request ([eaa522a](https://github.com/labor-digital/typo3-frontend-api/commit/eaa522a5e7262ddad0dd43d2900987068fa25d93))
+
 ### [10.0.5](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.4...v10.0.5) (2021-07-13)
 
 
