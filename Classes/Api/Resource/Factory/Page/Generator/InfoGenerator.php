@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.24 at 18:18
+ * Last modified: 2021.07.15 at 14:49
  */
 
 declare(strict_types=1);
@@ -27,6 +27,7 @@ use LaborDigital\T3ba\Tool\Database\DbService;
 use LaborDigital\T3ba\Tool\ExtBase\Hydrator\Hydrator;
 use LaborDigital\T3ba\Tool\Link\LinkService;
 use LaborDigital\T3ba\Tool\Page\PageService;
+use LaborDigital\T3ba\Tool\Tca\Preview\PreviewHandler;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Api\Resource\Factory\Page\PageData;
 use LaborDigital\T3fa\Configuration\Table\Override\BackendLayoutTable;
@@ -36,6 +37,7 @@ use LaborDigital\T3fa\Core\Routing\Util\RedirectUtil;
 use LaborDigital\T3fa\Domain\DataModel\Page\DefaultPageDataModel;
 use LaborDigital\T3fa\Event\Resource\Page\PageDataModelFilterEvent;
 use LaborDigital\T3fa\Event\Resource\Page\PageInfoFilterEvent;
+use LaborDigital\T3fa\Event\Resource\Page\PageIsPreviewFilterEvent;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
@@ -116,7 +118,7 @@ class InfoGenerator
                 'layout' => $this->findLayout($data),
                 'language' => $data->language->getTwoLetterIsoCode(),
                 'languages' => $this->findSiteLanguages($data),
-                'isPreview' => $this->typoContext->preview()->isPreview(),
+                'isPreview' => $this->checkIfIsPreview($data),
                 'pids' => $this->typoContext->pid()->getAll(),
             ]
         );
@@ -386,5 +388,29 @@ class InfoGenerator
         return array_map(static function (SiteLanguage $language): string {
             return $language->getTwoLetterIsoCode();
         }, $data->site->getLanguages());
+    }
+    
+    /**
+     * Generates the preview flag for the page
+     *
+     * @param   \LaborDigital\T3fa\Api\Resource\Factory\Page\PageData  $data
+     *
+     * @return bool
+     */
+    protected function checkIfIsPreview(PageData $data): bool
+    {
+        $isPreview = $this->typoContext->preview()->isPreview();
+        
+        if (! $isPreview && (
+                class_exists(PreviewHandler::class) &&
+                $this->typoContext->request()->hasGet(PreviewHandler::PREVIEW_QUERY_KEY)
+            )
+        ) {
+            $isPreview = true;
+        }
+        
+        return $this->eventDispatcher->dispatch(
+            new PageIsPreviewFilterEvent($isPreview, $data)
+        )->isPreview();
     }
 }
