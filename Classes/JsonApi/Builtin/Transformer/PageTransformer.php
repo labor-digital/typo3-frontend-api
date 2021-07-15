@@ -20,6 +20,7 @@
 namespace LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Transformer;
 
 
+use LaborDigital\Typo3BetterApi\Frontend\TablePreview\PreviewHandler;
 use LaborDigital\Typo3FrontendApi\JsonApi\Builtin\Resource\Entity\Page;
 use LaborDigital\Typo3FrontendApi\JsonApi\Transformation\AbstractResourceTransformer;
 
@@ -71,7 +72,10 @@ class PageTransformer extends AbstractResourceTransformer
             'pageLayout'    => $value->getPageLayout(),
             'rootLine'      => $value->getRootLine(),
             'links'         => $value->getLinks(),
-            'isPreview'     => $this->Tsfe()->getTsfe()->fePreview === 1,
+            'isPreview'     => $this->Tsfe()->getTsfe()->fePreview === 1
+                               ||
+                               (class_exists(PreviewHandler::class) &&
+                                $this->TypoContext()->Request()->hasGet(PreviewHandler::PREVIEW_QUERY_KEY)),
         ];
     }
 

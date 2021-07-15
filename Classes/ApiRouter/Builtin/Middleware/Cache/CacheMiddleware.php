@@ -104,8 +104,10 @@ class CacheMiddleware implements MiddlewareInterface, LoggerAwareInterface
         $collectMetrics = isset($request->getQueryParams()[static::REQUEST_QUERY_METRICS_ARG])
                           && ($this->typoContext->Env()->isFeDebug() ||
                               $this->typoContext->Env()->isDev());
-        $isCacheable    = in_array(strtoupper($request->getMethod()), ['GET', 'HEAD']);
-        $forceUpdate    = $this->typoContext->BeUser()->isLoggedIn() && (
+        $isBeUser       = $this->typoContext->BeUser()->isLoggedIn();
+        $isCacheable    = ! ($isBeUser && ! empty($request->getQueryParams()['no_cache']))
+                          && in_array(strtoupper($request->getMethod()), ['GET', 'HEAD']);
+        $forceUpdate    = $isBeUser && (
                 stripos($request->getHeaderLine('cache-control'), 'no-cache') !== false
                 || stripos($request->getHeaderLine('pragma'), 'no-cache') !== false
             );
