@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.40.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.39.2...v9.40.0) (2021-07-15)
+
+
+### Features
+
+* implement support for new T3BA record preview feature ([e73a545](https://github.com/labor-digital/typo3-frontend-api/commit/e73a5459185dfb94a271a1c8f598b2b9aa95af62))
+
 ### [9.39.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.39.1...v9.39.2) (2021-07-13)
 
 
