@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.06.21 at 14:18
+ * Last modified: 2021.07.27 at 08:40
  */
 
 declare(strict_types=1);
@@ -128,7 +128,11 @@ class DataGenerator implements PublicServiceInterface
         // If I ever come across a better solution, I will rewrite this.
         foreach (
             $this->pageService->getPageContents(
-                $pid, ['includeHiddenPages' => $this->typoContext->preview()->isPreview()]
+                $pid, [
+                    'includeHiddenPages' =>
+                        $this->typoContext->preview()->isPreview() ||
+                        $this->typoContext->visibility()->includeHiddenPages(),
+                ]
             ) as $colPos => $elements
         ) {
             $cols[$colPos] = $this->processColumn($elements);
