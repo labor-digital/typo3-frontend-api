@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.1.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.0...v10.1.1) (2021-07-27)
+
+
+### Bug Fixes
+
+* **PageContent\DataGenerator:** ensure the "includeHiddenPages" stays true if already set by the outside ([a3af558](https://github.com/labor-digital/typo3-frontend-api/commit/a3af5582281dcc25882eebef891b53d88a3573da))
+
 ## [10.1.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.0.5...v10.1.0) (2021-07-15)
 
 
