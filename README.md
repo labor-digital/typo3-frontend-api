@@ -17,6 +17,10 @@ render data based elements instead of fluid styled content.
 - [TYPO3 - Better API](https://github.com/labor-digital/typo3-better-api)
 - Installation using Composer
 
+## Known issues
+
+- This extension is NOT tested with workspaces, and will probably not work correctly.
+
 ## Installation
 
 Install this package using composer:
