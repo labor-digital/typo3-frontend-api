@@ -265,6 +265,9 @@ class FrontendSimulationMiddleware implements MiddlewareInterface, SingletonInte
             $slug = $queryParams['slug'];
             if (! isset($this->slugCache[$slug])) {
                 try {
+                    // Remove superfluous / or /index.html from the tail of a slug
+                    $slug = '/' . ltrim(preg_replace('~(.*)/(?:index\.x?html?)?$~i', '$1', $slug), '/');
+
                     // Simulate a request on the slug to match the site
                     $subRequest = $request->withUri($request->getUri()->withPath($slug)->withQuery(''));
                     /** @var \TYPO3\CMS\Core\Routing\SiteRouteResult $siteRouteResult */
