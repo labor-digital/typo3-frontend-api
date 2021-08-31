@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.40.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.0...v9.40.1) (2021-08-31)
+
+
+### Bug Fixes
+
+* **FrontendSimulationMiddleware:** ensure resolution of slugs ending with / or /index.html ([e9def9b](https://github.com/labor-digital/typo3-frontend-api/commit/e9def9b5ded416a4a0970794be76c281dc11f6d2))
+
 ## [9.40.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.39.2...v9.40.0) (2021-07-15)
 
 
