@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.40.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.1...v9.40.2) (2021-08-31)
+
+
+### Bug Fixes
+
+* **RteContentParser:** set htmlSanitize into config when possible ([fd48ee6](https://github.com/labor-digital/typo3-frontend-api/commit/fd48ee61527b1eb74d05d3744a967dfff3848f1b))
+
 ### [9.40.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.0...v9.40.1) (2021-08-31)
 
 
