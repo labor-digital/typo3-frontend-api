@@ -28,7 +28,9 @@ use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use LaborDigital\Typo3BetterApi\TypoScript\TypoScriptService;
 use Neunerlei\FileSystem\Fs;
 use Throwable;
+use TYPO3\CMS\Core\Configuration\Features;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 class RteContentParser implements SingletonInterface
@@ -95,9 +97,13 @@ class RteContentParser implements SingletonInterface
         // Parse the string using the simulator
         return (string)$this->simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($content) {
             $this->ensureTsParserConfig($this->tsfeService->getTsfe());
-            $result = $this->tsfeService->getContentObjectRenderer()->parseFunc($content, null, '< lib.parseFunc_RTE');
 
-            return $result;
+            $features = GeneralUtility::makeInstance(Features::class);
+            $config   = [
+                'htmlSanitize' => (int)$features->isFeatureEnabled('security.frontend.htmlSanitizeParseFuncDefault'),
+            ];
+
+            return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, $config, '< lib.parseFunc_RTE');
         });
     }
 
