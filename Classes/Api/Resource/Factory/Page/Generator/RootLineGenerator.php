@@ -90,7 +90,7 @@ class RootLineGenerator
         }
         
         $e = $this->eventDispatcher->dispatch(new PageRootLineFilterEvent(
-            $data->uid, $data->language, array_reverse($data->rootLine)
+            $data->uid, $data->language, array_reverse($data->rootLine ?? [])
         ));
         
         $rootLine = array_values($e->getRootLine());
