@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.1.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.3...v10.1.4) (2021-10-04)
+
+
+### Bug Fixes
+
+* **RootLineGenerator:** ensure rootline is always an array ([08458bd](https://github.com/labor-digital/typo3-frontend-api/commit/08458bd67ca98cb25d1d77d8188a080f408f3d4f))
+
 ### [10.1.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.2...v10.1.3) (2021-07-27)
 
 ### [10.1.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.1...v10.1.2) (2021-07-27)
