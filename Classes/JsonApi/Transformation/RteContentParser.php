@@ -98,12 +98,7 @@ class RteContentParser implements SingletonInterface
         return (string)$this->simulator->runWithEnvironment(['ignoreIfFrontendExists'], function () use ($content) {
             $this->ensureTsParserConfig($this->tsfeService->getTsfe());
 
-            $features = GeneralUtility::makeInstance(Features::class);
-            $config   = [
-                'htmlSanitize' => (int)$features->isFeatureEnabled('security.frontend.htmlSanitizeParseFuncDefault'),
-            ];
-
-            return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, $config, '< lib.parseFunc_RTE');
+            return $this->tsfeService->getContentObjectRenderer()->parseFunc($content, null, '< lib.parseFunc_RTE');
         });
     }
 
@@ -125,6 +120,15 @@ class RteContentParser implements SingletonInterface
         if (! isset($tsfe->tmpl->setup['lib.']['parseFunc_RTE.'])) {
             $config                                      = $this->getFallbackParserConfig();
             $tsfe->tmpl->setup['lib.']['parseFunc_RTE.'] = $config['lib.']['parseFunc_RTE.'] ?? [];
+        }
+
+        // Ensure that "htmlSanitize" is set correctly
+        $features          = GeneralUtility::makeInstance(Features::class);
+        $htmlSanitizeState = (int)$features->isFeatureEnabled('security.frontend.htmlSanitizeParseFuncDefault');
+        foreach (['parseFunc.', 'parseFunc_RTE.'] as $key) {
+            if (! isset($tsfe->tmpl->setup['lib.'][$key]['htmlSanitize'])) {
+                $tsfe->tmpl->setup['lib.'][$key]['htmlSanitize'] = $htmlSanitizeState;
+            }
         }
     }
 
