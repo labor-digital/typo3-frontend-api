@@ -26,6 +26,7 @@ namespace LaborDigital\T3fa\Core\Resource\Repository\Backend;
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Core\Resource\Query\QueryDefaults;
 use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Pagination;
 use LaborDigital\T3fa\Core\Resource\Repository\Pagination\Paginator;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
@@ -152,8 +153,9 @@ class ResourceFactory implements PublicServiceInterface
         
         // Create a fallback pagination object
         if ($pagination === null) {
+            $config = $this->configRepository->getResourceConfig($resourceType);
             [, $pagination] = $this->paginator->paginate(
-                $raw, 1, $this->paginator->getItemCount($raw), null
+                $raw, 1, $config['pageSize'] ?? QueryDefaults::$pageSize, null
             );
         }
         
