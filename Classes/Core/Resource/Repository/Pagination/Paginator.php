@@ -56,7 +56,7 @@ class Paginator
     public function paginate($raw, int $queryPage, int $pageSize, ?callable $pageFinder): array
     {
         $pagination = $this->makeInstance(Pagination::class);
-        $pagination->pageSize = $pageSize;
+        $pagination->pageSize = max(1, $pageSize);
         $pagination->itemCount = $this->getItemCount($raw);
         $pagination->pages = (int)max(ceil($pagination->itemCount / $pagination->pageSize), 1);
         $pagination->page = (int)max(min($pagination->pages, $this->findPage($raw, $queryPage, $pageSize, $pageFinder)), 1);
