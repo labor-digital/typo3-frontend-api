@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.1.5](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.4...v10.1.5) (2021-12-20)
+
+
+### Bug Fixes
+
+* **Paginator:** avoid division by zero when paginating empty results ([d2e7ffb](https://github.com/labor-digital/typo3-frontend-api/commit/d2e7ffbaabc8ec674f5a27f8863f3467f668cd17))
+* **ResourceFactory:** avoid division by zero when paginating empty results ([98a0e8e](https://github.com/labor-digital/typo3-frontend-api/commit/98a0e8e746b7946125c1e9615d33c55d2d7a1907))
+
 ### [10.1.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.3...v10.1.4) (2021-10-04)
 
 
