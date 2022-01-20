@@ -114,6 +114,10 @@ class RequestFactory implements NoDiInterface
         $request->redirectHashPath = $redirectHashPath;
         $request->redirectInfoPath = $redirectInfoPath;
         
+        if (! empty(getenv('T3FA_IMAGING_USE_PROXY_INSTEAD_REDIRECT'))) {
+            $request->requestProxyHandler = new RequestProxyHandler();
+        }
+        
         return $request;
     }
     

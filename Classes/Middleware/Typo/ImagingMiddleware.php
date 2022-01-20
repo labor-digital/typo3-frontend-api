@@ -46,12 +46,13 @@ class ImagingMiddleware implements MiddlewareInterface
     {
         $givenPath = $request->getUri()->getPath();
         if (str_starts_with($givenPath, T3FA_IMAGING_ENDPOINT_PREFIX) && RequestFactory::getRequest() !== null) {
-            return $this->getService(ErrorHandler::class)->handleErrorsIn(function () {
+            return $this->makeInstance(ErrorHandler::class)->handleErrorsIn(function () {
                 /** @var \LaborDigital\T3fa\Core\Imaging\Request $imagingRequest */
                 $imagingRequest = RequestFactory::getRequest();
                 
-                $this->getService(RequestHandler::class)->process($imagingRequest);
+                $this->makeInstance(RequestHandler::class)->process($imagingRequest);
                 
+                // @todo would be nice to return a response here
                 $imagingRequest->settleIfPossible();
                 
                 throw new NotFoundException();

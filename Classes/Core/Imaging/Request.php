@@ -26,6 +26,13 @@ namespace LaborDigital\T3fa\Core\Imaging;
 class Request
 {
     /**
+     * Contains the request proxy handler if images should be proxied instead of redirected through 301
+     *
+     * @var \LaborDigital\T3fa\Core\Imaging\RequestProxyHandlerInterface
+     */
+    public $requestProxyHandler;
+    
+    /**
      * The name of the required file
      *
      * @var string
@@ -136,6 +143,8 @@ class Request
     /**
      * Checks if both the redirect info and hash files exist and executes the
      * redirect to the correct target, before killing the process
+     *
+     * @todo can we return a response object here?
      */
     public function settleIfPossible(): void
     {
@@ -151,6 +160,11 @@ class Request
         $redirectTarget = @file_get_contents($redirectInfoPath);
         if (! $redirectTarget) {
             RequestFactory::error(404);
+        }
+        
+        if (isset($this->requestProxyHandler)) {
+            $this->requestProxyHandler->settle($redirectTarget, $this);
+            exit();
         }
         
         if ($redirectTarget[0] === '/') {
