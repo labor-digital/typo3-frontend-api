@@ -76,6 +76,8 @@ class ImagingEndpointGenerator
         $varDir       = $this->configRepository->tool()->get('imaging.options.redirectDirectoryPath');
         $vendorDir    = $this->context->Path()->getVendorPath();
         $endpointPath = $this->configRepository->tool()->get('imaging.options.endpointDirectoryPath');
+        $docRootDir   = $this->context->Path()->getPublicPath();
+        $useProxy     = $this->configRepository->tool()->get('imaging.options.useProxyInsteadOfRedirect', false) ? 'true' : 'false';
 
         // Calculate entry point depth
         $endpointPathRelative = Path::makeRelative($endpointPath, $this->context->Path()->getPublicPath());
@@ -84,8 +86,8 @@ class ImagingEndpointGenerator
 
         // Load the template and apply the placeholders
         $tpl = Fs::readFile(__DIR__ . '/imaging.template.php');
-        $tpl = str_replace(['@@FAI_HOST@@', '@@FAI_REDIRECT_DIR@@', '@@FAI_VENDOR_DIR@@', '@@FAI_EPD@@'],
-            [$hostname, $varDir, $vendorDir, $entryPointDepth], $tpl);
+        $tpl = str_replace(['@@FAI_HOST@@', '@@FAI_REDIRECT_DIR@@', '@@FAI_VENDOR_DIR@@', '@@FAI_EPD@@', '@@FAI_DOCROOT_DIR@@', '@@FAI_USE_PROXY@@'],
+            [$hostname, $varDir, $vendorDir, $entryPointDepth, $docRootDir, $useProxy], $tpl);
 
         // Write the endpoint file at the configured location
         $endpointPath = Path::join($endpointPath, 'imaging.php');

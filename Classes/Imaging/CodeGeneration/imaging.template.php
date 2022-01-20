@@ -20,6 +20,8 @@ declare(strict_types=1);
  * Last modified: 2020.04.01 at 20:29
  */
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use LaborDigital\Typo3BetterApi\Container\TypoContainer;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingApplication;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingContext;
@@ -35,8 +37,10 @@ define('FRONTEND_API_IMAGING_ENTRY_POINT', true);
 define('FRONTEND_API_IMAGING_SHOW_ERRORS', false);
 define('FRONTEND_API_IMAGING_HOST', '@@FAI_HOST@@');
 define('FRONTEND_API_IMAGING_REDIRECT_DIR', '@@FAI_REDIRECT_DIR@@');
+define('FRONTEND_API_IMAGING_DOCROOT_DIR', '@@FAI_DOCROOT_DIR@@');
 define('FRONTEND_API_IMAGING_VENDOR_DIR', '@@FAI_VENDOR_DIR@@');
 define('FRONTEND_API_IMAGING_ENTRY_POINT_DEPTH', '@@FAI_EPD@@');
+define('FRONTEND_API_IMAGING_USE_PROXY_INSTEAD_REDIRECT', '@@FAI_USE_PROXY@@');
 
 // Compiled variables END
 
@@ -117,6 +121,17 @@ class ImagingRequest
 
 class ImagingHandler
 {
+
+    /**
+     * @var \RequestProxyHandler|null
+     */
+    protected $requestProxyHandler;
+
+    public function setRequestProxyHandler(RequestProxyHandler $requestProxyHandler): void
+    {
+        $this->requestProxyHandler = $requestProxyHandler;
+        $requestProxyHandler->setHandler($this);
+    }
 
     /**
      * Runs the low level imaging handler
@@ -258,6 +273,11 @@ class ImagingHandler
         if (! $redirectTarget) {
             $this->error(404);
         }
+
+        if (isset($this->requestProxyHandler)) {
+            $this->requestProxyHandler->settle($redirectTarget, $request);
+        }
+
         if ($redirectTarget[0] === '/') {
             $redirectTarget = FRONTEND_API_IMAGING_HOST . $redirectTarget;
         }
@@ -285,4 +305,124 @@ class ImagingHandler
     }
 }
 
-(new ImagingHandler())->run();
+class RequestProxyHandler
+{
+    protected const PROXY_HEADERS
+        = [
+            'Date',
+            'Expires',
+            'Cache-Control',
+            'Content-Length',
+            'Last-Modified',
+            'Age',
+            'Content-Type',
+            'ETag',
+        ];
+
+    /**
+     * @var \ImagingHandler|null
+     */
+    protected $handler;
+
+    public function setHandler(ImagingHandler $handler)
+    {
+        $this->handler = $handler;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function settle(string $redirectTarget, ImagingRequest $request): void
+    {
+        $docRoot = FRONTEND_API_IMAGING_DOCROOT_DIR;
+        if ($redirectTarget[0] === '/') {
+            if ($docRoot && file_exists($docRoot . DIRECTORY_SEPARATOR . $redirectTarget)) {
+                $this->dumpLocalFile($docRoot . DIRECTORY_SEPARATOR . $redirectTarget);
+            }
+            $redirectTarget = FRONTEND_API_IMAGING_HOST . $redirectTarget;
+        }
+
+        $this->streamProxyImage($redirectTarget);
+    }
+
+    /**
+     * Used to output a local image as response to the request.
+     *
+     * @param   string  $filename
+     *
+     * @return void
+     */
+    protected function dumpLocalFile(string $filename): void
+    {
+        $size = getimagesize($filename);
+        $fp   = fopen($filename, 'rb');
+
+        if ($size && $fp) {
+            header('Content-Type: ' . $size['mime']);
+            header('Content-Length: ' . filesize($filename));
+
+            fpassthru($fp);
+            fclose($fp);
+        } else {
+            $this->handler->error(404);
+        }
+
+        exit();
+    }
+
+    /**
+     * Streams the image using guzzle as a proxy from the source url
+     *
+     * @param   string  $url
+     *
+     * @return void
+     */
+    protected function streamProxyImage(string $url): void
+    {
+        try {
+            $response = (new Client())->request('GET', $url, [
+                'timeout' => max((int)getenv('T3FA_IMAGING_PROXY_TIMEOUT'), 30),
+                'stream'  => true,
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                $this->handler->error($response->getStatusCode(), null, $response->getReasonPhrase());
+            }
+
+            foreach (static::PROXY_HEADERS as $headerName) {
+                if (isset($response->getHeader($headerName)[0])) {
+                    header($headerName . ': ' . $response->getHeader($headerName)[0]);
+                }
+            }
+
+            while (! $response->getBody()->eof()) {
+                echo $response->getBody()->read(1024);
+                flush();
+            }
+
+            exit();
+        } catch (ClientException $e) {
+            if ($e->getResponse()) {
+                $response = $e->getResponse();
+
+                if ($response->getStatusCode() === 401) {
+                    $this->handler->error(407, null, 'Proxy Authentication Required');
+                }
+
+                $this->handler->error($e->getResponse()->getStatusCode(), null, $e->getResponse()->getReasonPhrase());
+            }
+
+            $this->handler->error(502, null, 'Bad Gateway');
+        } catch (\Throwable $e) {
+            $this->handler->error(503);
+        }
+    }
+}
+
+$handler = new ImagingHandler();
+
+if (FRONTEND_API_IMAGING_USE_PROXY_INSTEAD_REDIRECT === 'true') {
+    $handler->setRequestProxyHandler(new RequestProxyHandler());
+}
+
+$handler->run();

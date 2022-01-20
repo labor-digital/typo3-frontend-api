@@ -124,7 +124,7 @@ class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface
 
         // Validate the options
         $options = Options::make($options, [
-            "redirectDirectoryPath" => [
+            "redirectDirectoryPath"     => [
                 "type"      => "string",
                 "validator" => function ($v) {
                     if (! is_dir($v)) {
@@ -146,7 +146,7 @@ class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface
                     return Path::unifyPath($v);
                 },
             ],
-            "endpointDirectoryPath" => [
+            "endpointDirectoryPath"     => [
                 "type"      => "string",
                 "validator" => function ($v) {
                     if (! is_dir($v)) {
@@ -172,7 +172,7 @@ class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface
                     return Path::unifyPath($v);
                 },
             ],
-            "imagingProvider"       => [
+            "imagingProvider"           => [
                 "type"      => "string",
                 "validator" => function ($v) {
                     if (! class_exists($v)) {
@@ -186,7 +186,11 @@ class FrontendApiToolConfigGenerator implements CachedValueGeneratorInterface
                 },
                 "default"   => CoreImagingProvider::class,
             ],
-            "webPConverterOptions"  => [
+            "useProxyInsteadOfRedirect" => [
+                'type'    => 'bool',
+                'default' => false,
+            ],
+            "webPConverterOptions"      => [
                 "type"    => "array",
                 "default" => [],
             ],
