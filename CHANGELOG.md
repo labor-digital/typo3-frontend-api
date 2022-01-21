@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.41.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.3...v9.41.0) (2022-01-20)
+
+
+### Features
+
+* **Imaging:** allow image delivery through proxy ([69ded3a](https://github.com/labor-digital/typo3-frontend-api/commit/69ded3a0689c9bbbb1da19b4daf6a010116a86aa))
+
 ### [9.40.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.2...v9.40.3) (2021-11-03)
 
 
