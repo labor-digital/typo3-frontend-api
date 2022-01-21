@@ -319,6 +319,22 @@ class RequestProxyHandler
             'ETag',
         ];
 
+    protected const FALLBACK_MIME_MAP
+        = [
+            'png'  => 'image/png',
+            'jpe'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'jpg'  => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'bmp'  => 'image/bmp',
+            'ico'  => 'image/vnd.microsoft.icon',
+            'tiff' => 'image/tiff',
+            'tif'  => 'image/tiff',
+            'svg'  => 'image/svg+xml',
+            'svgz' => 'image/svg+xml',
+            'webp' => 'image/webp',
+        ];
+
     /**
      * @var \ImagingHandler|null
      */
@@ -354,11 +370,10 @@ class RequestProxyHandler
      */
     protected function dumpLocalFile(string $filename): void
     {
-        $size = getimagesize($filename);
-        $fp   = fopen($filename, 'rb');
+        $fp = fopen($filename, 'rb');
 
-        if ($size && $fp) {
-            header('Content-Type: ' . $size['mime']);
+        if ($fp) {
+            header('Content-Type: ' . $this->findContentType($filename));
             header('Content-Length: ' . filesize($filename));
 
             fpassthru($fp);
@@ -416,6 +431,54 @@ class RequestProxyHandler
         } catch (\Throwable $e) {
             $this->handler->error(503);
         }
+    }
+
+    /**
+     * Tries to find the correct mime/content type for the given local filename.
+     * The method assumes that the file exists on the disc
+     *
+     * @param   string  $filename
+     *
+     * @return string
+     */
+    protected function findContentType(string $filename): string
+    {
+        $size = getimagesize($filename);
+        if ($size && is_string($size['mime'] ?? null)) {
+            return $size['mime'];
+        }
+
+        if (function_exists('finfo_open')) {
+            $fp       = finfo_open(FILEINFO_MIME_TYPE);
+            $mimetype = finfo_file($fp, $filename);
+            finfo_close($fp);
+
+            if (is_string($mimetype)) {
+                if ($mimetype === 'image/svg') {
+                    return 'image/svg+xml';
+                }
+
+                return $mimetype;
+            }
+        }
+
+        if (function_exists('mime_content_type')) {
+            $mimetype = mime_content_type($filename);
+            if (is_string($mimetype)) {
+                if ($mimetype === 'image/svg') {
+                    return 'image/svg+xml';
+                }
+
+                return $mimetype;
+            }
+        }
+
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        if (is_string($ext) && isset(static::FALLBACK_MIME_MAP[$ext])) {
+            return static::FALLBACK_MIME_MAP[$ext];
+        }
+
+        return 'application/octet-stream';
     }
 }
 
