@@ -46,7 +46,6 @@ use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
-use TYPO3\CMS\Core\Log\LogLevel;
 use TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler;
 
 class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensionInterface
@@ -56,12 +55,6 @@ class Typo3FrontendApiExtConfig implements ExtConfigInterface, ExtConfigExtensio
      */
     public function configure(ExtConfigOptionList $configurator, ExtConfigContext $context)
     {
-        // Register frontend be logger
-        $configurator->log()->registerBeLogLogger([
-            'namespace' => 'LaborDigital\\Typo3FrontendApi\\Whoops',
-            'logLevel'  => LogLevel::WARNING,
-        ]);
-
         // Register translation
         $configurator->translation()->registerContext('frontendApi');
 
