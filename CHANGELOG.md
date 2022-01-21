@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.41.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.1...v9.41.2) (2022-01-21)
+
+
+### Bug Fixes
+
+* **Imaging:** ensure correct resolution of svg images when using proxy ([3c02b0b](https://github.com/labor-digital/typo3-frontend-api/commit/3c02b0b9f7998541eecae8b66f4b753c93131ed2))
+
 ### [9.41.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.0...v9.41.1) (2022-01-21)
 
 
