@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.41.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.0...v9.41.1) (2022-01-21)
+
+
+### Bug Fixes
+
+* disable automatic logging ([8f1949c](https://github.com/labor-digital/typo3-frontend-api/commit/8f1949c0d50f8ec8126395a692ba1512e6aba7b6))
+
 ## [9.41.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.40.3...v9.41.0) (2022-01-20)
 
 
