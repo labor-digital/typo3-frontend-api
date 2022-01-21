@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.2.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.5...v10.2.0) (2022-01-21)
+
+
+### Features
+
+* **Imaging:** allow streaming of images instead of 301 redirects ([a4b06d9](https://github.com/labor-digital/typo3-frontend-api/commit/a4b06d97d04c116b2fe145792791bcc40e698308))
+
+
+### Bug Fixes
+
+* **Imaging:** ensure correct proxy streaming for svg files ([7e67a5f](https://github.com/labor-digital/typo3-frontend-api/commit/7e67a5fb7128fc2e57ca26276001086f6d32773c))
+
 ### [10.1.5](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.4...v10.1.5) (2021-12-20)
 
 
