@@ -160,6 +160,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
             return $this->transformed[$storageKey];
         }
         
+        $pathBackup = TransformerScope::$path;
         $allIncludes = TransformerScope::$allIncludes;
         $accessCheck = TransformerScope::$accessCheck;
         
@@ -189,6 +190,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
         try {
             $fractal = GeneralUtility::makeInstance(Manager::class);
             
+            TransformerScope::$allIncludes = false;
             TransformerScope::$accessCheck = ! $options['noAccessCheck'];
             
             if ($options['include'] === true || $options['include'] === '*') {
@@ -217,6 +219,7 @@ abstract class AbstractResourceElement implements NoDiInterface, SelfTransformin
                 = $fractal->createData($this->getFractalElement())->toArray();
             
         } finally {
+            TransformerScope::$path = $pathBackup;
             TransformerScope::$allIncludes = $allIncludes;
             TransformerScope::$accessCheck = $accessCheck;
         }
