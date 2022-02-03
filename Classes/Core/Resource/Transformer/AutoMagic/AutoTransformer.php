@@ -30,12 +30,17 @@ use LaborDigital\T3fa\Core\Resource\Repository\ResourceCollection;
 use LaborDigital\T3fa\Core\Resource\Repository\ResourceItem;
 use LaborDigital\T3fa\Core\Resource\ResourceConfigRepository;
 use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\Link\RteContentParser;
+use LaborDigital\T3fa\Core\Resource\Transformer\ResourceTransformerProxy;
+use LaborDigital\T3fa\Core\Resource\Transformer\Schema\SchemaAwareTransformerTrait;
 use LaborDigital\T3fa\Core\Resource\Transformer\TransformerFactory;
+use LaborDigital\T3fa\Core\Resource\Transformer\TransformerScope;
 use Throwable;
+use TYPO3\CMS\Core\SingletonInterface;
 
-class AutoTransformer
+class AutoTransformer implements SingletonInterface
 {
     use ContainerAwareTrait;
+    use SchemaAwareTransformerTrait;
     
     protected const REFERENCE_MARKER_TPL = '{{AUTOMAGIC_AUTO_TRANSFORMER_CIRCULAR_REF_%s}}';
     
@@ -52,6 +57,8 @@ class AutoTransformer
      * @var array
      */
     protected $path = [];
+    
+    protected $excludedTransformer;
     
     /**
      * Handled circular transformation results
@@ -97,56 +104,34 @@ class AutoTransformer
      *                                This works ONLY for arrays not for iterable objects, tho!
      *
      * @return array|bool|float|int|mixed|string|null
+     * @throws \LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\CircularValueException
      */
     public function transform($value, ?array $options = null)
     {
         $value = AutoTransformUtil::unifyValue($value);
         
-        $isRoot = $this->activeOptions === null;
-        $pathBackup = $this->path;
         $optionBackup = $this->activeOptions;
+        $excludedTransformerBackup = $this->excludedTransformer;
         $this->activeOptions = $options ?? [];
         
         try {
-            $isScalar = is_scalar($value);
-            
-            if (! $isScalar && in_array($value, $this->path, true)) {
-                $circular = $this->handleCircularTransformation($value);
-                
-                // The $circular value is a string with the reference marker if it got replaced
-                // If an array was wrongly detected it will be the array, so we check here again
-                if (is_string($circular)) {
-                    return $circular;
+            if (is_object($value)) {
+                if (func_num_args() > 2) {
+                    $this->excludedTransformer = func_get_arg(2);
+                } elseif (in_array($value, TransformerScope::$path, true)) {
+                    throw CircularValueException::makeInstance($value);
                 }
-                
-                $value = $circular;
-                unset($circular);
-            }
-            
-            if (! $isScalar) {
-                $referenceKey = microtime(true) . mt_rand();
-                $this->path[$referenceKey] = $value;
             }
             
             if (! empty($options)) {
                 $this->activeOptions = $options;
             }
+            unset($e);
             
-            $transformed = $this->transformValue($value);
-            
-            // Check if a reference key exists and it has been back-referenced somewhere
-            if (isset($referenceKey) && ($this->circularReferences[$referenceKey] ?? null) === true) {
-                $transformed = $this->replaceCircularReferences($transformed, $referenceKey);
-            }
-            
-            return $transformed;
+            return $this->transformValue($value);
         } finally {
+            $this->excludedTransformer = $excludedTransformerBackup;
             $this->activeOptions = $optionBackup;
-            $this->path = $pathBackup;
-            
-            if ($isRoot) {
-                $this->circularReferences = [];
-            }
         }
     }
     
@@ -243,8 +228,19 @@ class AutoTransformer
     {
         $options = $this->activeOptions;
         
+        $transformer = $this->transformerFactory->getTransformer($value);
+        if (isset($this->excludedTransformer) &&
+            ($transformer instanceof ResourceTransformerProxy
+                ? get_class($transformer->getConcreteTransformer())
+                : get_class($transformer)
+            ) === get_class($this->excludedTransformer)) {
+            $schema = $this->getSchema($value);
+            
+            return $this->transform($schema->getAttributes($value));
+        }
+        
         if ($this->transformerFactory->hasValueTransformer($value)) {
-            return $this->transformerFactory->getTransformer($value)->transform($value);
+            return $transformer->transform($value);
         }
         
         if ($value instanceof ResourceItem || $value instanceof ResourceCollection) {
@@ -284,6 +280,7 @@ class AutoTransformer
      * @param $value
      *
      * @return mixed|string
+     * @deprecated will be removed in the next major release
      */
     protected function handleCircularTransformation($value)
     {
@@ -318,6 +315,7 @@ class AutoTransformer
      * @param   string  $referenceKey
      *
      * @return mixed|null
+     * @deprecated will be removed in the next major release
      */
     protected function replaceCircularReferences($transformedValue, string $referenceKey)
     {
@@ -325,8 +323,8 @@ class AutoTransformer
         
         $marker = '"' . sprintf(static::REFERENCE_MARKER_TPL, $referenceKey) . '"';
         $transformedString = SerializerUtil::serializeJson($transformedValue);
-        $referenceString = str_replace($marker, '"[RECURSION]"', $transformedString);
-        $transformedString = str_replace($marker, $referenceString, $transformedString);
+        $referenceString = str_replace(['[' . $marker . ']', $marker], '"[RECURSION]"', $transformedString);
+        $transformedString = str_replace(['[' . $marker . ']', $marker], $referenceString, $transformedString);
         
         return SerializerUtil::unserializeJson($transformedString);
     }

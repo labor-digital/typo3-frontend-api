@@ -26,11 +26,14 @@ namespace LaborDigital\T3fa\Core\Resource\Transformer;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\Core\Exception\NotImplementedException;
 use LaborDigital\T3ba\Tool\Cache\CacheInterface;
+use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
 use LaborDigital\T3fa\Core\Cache\Scope\ScopeRegistry;
 use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
+use LaborDigital\T3fa\Core\Resource\Transformer\AutoMagic\CircularValueException;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\Scope;
 use League\Fractal\TransformerAbstract;
+use Neunerlei\Arrays\Arrays;
 
 class ResourceTransformerProxy extends TransformerAbstract implements ResourceTransformerInterface, NoDiInterface
 {
@@ -79,23 +82,51 @@ class ResourceTransformerProxy extends TransformerAbstract implements ResourceTr
             $scope->addCacheTag($value);
         });
         
-        $result = $this->concreteTransformer->transform($value);
-        
-        foreach ($this->postProcessors as $postProcessor) {
-            $result = $postProcessor->process($result, $value);
-        }
-        
-        if (TransformerScope::$accessCheck) {
-            if (! empty($this->accessInfo['allowed'])) {
-                $result = array_intersect_key($result, array_fill_keys($this->accessInfo['allowed'], true));
+        $pathBackup = TransformerScope::$path;
+        if (is_object($value)) {
+            if (in_array($value, TransformerScope::$path, true)) {
+                throw CircularValueException::makeInstance($value);
             }
             
-            if (! empty($this->accessInfo['denied'])) {
-                $result = array_diff_key($result, array_fill_keys($this->accessInfo['denied'], true));
-            }
+            TransformerScope::$path[] = $value;
         }
         
-        return $result;
+        try {
+            $result = $this->concreteTransformer->transform($value);
+            
+            foreach ($this->postProcessors as $postProcessor) {
+                $result = $postProcessor->process($result, $value);
+            }
+            
+            if (TransformerScope::$accessCheck) {
+                if (! empty($this->accessInfo['allowed'])) {
+                    $result = array_intersect_key($result, array_fill_keys($this->accessInfo['allowed'], true));
+                }
+                
+                if (! empty($this->accessInfo['denied'])) {
+                    $result = array_diff_key($result, array_fill_keys($this->accessInfo['denied'], true));
+                }
+            }
+            
+            if (is_object($value)) {
+                TransformerScope::$transformed[spl_object_id($value)] = SerializerUtil::serializeJson($result);
+            }
+            
+            return $result;
+        } catch (CircularValueException $e) {
+            if (isset(TransformerScope::$transformed[$e->getCode()])) {
+                return TransformerScope::$transformed[$e->getCode()];
+            }
+            throw $e;
+        } finally {
+            TransformerScope::$path = $pathBackup;
+        }
+        
+    }
+    
+    public function getConcreteTransformer(): ResourceTransformerInterface
+    {
+        return $this->concreteTransformer;
     }
     
     /**
@@ -147,30 +178,48 @@ class ResourceTransformerProxy extends TransformerAbstract implements ResourceTr
      */
     public function processIncludedResources(Scope $scope, $data)
     {
-        if (TransformerScope::$allIncludes) {
-            $includedData = [];
-            
-            foreach ($this->getAvailableIncludes() as $include) {
-                if ($resource = $this->callIncludeMethod($scope, $include, $data)) {
-                    $childScope = $scope->embedChildScope($include, $resource);
-                    
-                    if ($childScope->getResource() instanceof Primitive) {
-                        $includedData[$include] = $childScope->transformPrimitiveResource();
-                    } else {
-                        $includedData[$include] = $childScope->toArray();
-                    }
-                }
-            }
-            
-            return $includedData === [] ? false : $includedData;
+        $pathBackup = TransformerScope::$path;
+        if (is_object($data)) {
+            TransformerScope::$path[] = $data;
         }
         
-        return parent::processIncludedResources($scope, $data);
+        try {
+            if (TransformerScope::$allIncludes) {
+                $includedData = [];
+                
+                foreach ($this->getAvailableIncludes() as $include) {
+                    if ($resource = $this->callIncludeMethod($scope, $include, $data)) {
+                        $childScope = $scope->embedChildScope($include, $resource);
+                        
+                        if ($childScope->getResource() instanceof Primitive) {
+                            $includedData[$include] = $childScope->transformPrimitiveResource();
+                        } else {
+                            $includedData[$include] = $childScope->toArray();
+                        }
+                    }
+                }
+                
+                return $includedData === [] ? false : $includedData;
+            }
+            
+            return parent::processIncludedResources($scope, $data);
+        } catch (CircularValueException $e) {
+            $code = $e->getCode();
+            if (isset(TransformerScope::$transformed[$code])) {
+                $data = TransformerScope::$transformed[$code];
+                
+                return Arrays::getPath(SerializerUtil::unserializeJson($data), [$this->getAvailableIncludes()], []);
+            }
+            
+            throw $e;
+        } finally {
+            TransformerScope::$path = $pathBackup;
+            if (empty($pathBackup)) {
+                TransformerScope::$transformed = [];
+            }
+        }
     }
     
-    /**
-     * @inheritDoc
-     */
     public function __call($name, $arguments)
     {
         return call_user_func_array([$this->concreteTransformer, $name], $arguments);

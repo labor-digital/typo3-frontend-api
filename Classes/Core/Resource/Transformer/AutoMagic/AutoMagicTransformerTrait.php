@@ -50,7 +50,7 @@ trait AutoMagicTransformerTrait
      */
     protected function autoTransform($value, array $options = [])
     {
-        return $this->autoTransformer->transform($value, $options);
+        return $this->autoTransformer->transform($value, $options, $this);
     }
     
     /**

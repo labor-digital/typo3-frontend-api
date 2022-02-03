@@ -38,4 +38,18 @@ class TransformerScope
      * @var bool
      */
     public static $accessCheck = true;
+    
+    /**
+     * Defines the path through all objects that are in the current chain of transformation
+     *
+     * @var array
+     */
+    public static $path = [];
+    
+    /**
+     * A cache of all transformed object data entries to resolve circular dependencies
+     *
+     * @var array
+     */
+    public static $transformed = [];
 }
