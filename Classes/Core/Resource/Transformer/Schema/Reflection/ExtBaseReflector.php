@@ -86,6 +86,10 @@ class ExtBaseReflector extends AbstractReflector
                 continue;
             }
             
+            if ($this->configRepository->isComplexValue($propertyClass)) {
+                continue;
+            }
+            
             $related[$property] = $columnMap->getTypeOfRelation() !== ColumnMap::RELATION_HAS_ONE;
         }
         

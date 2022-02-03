@@ -129,6 +129,10 @@ abstract class AbstractReflector
         
         $type = reset($types);
         
+        if ($this->configRepository->isComplexValue($type)) {
+            return;
+        }
+        
         if ($this->configRepository->getResourceType($type) !== null) {
             $related[$propertyName] = false;
         }

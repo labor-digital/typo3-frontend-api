@@ -52,7 +52,7 @@ class ResourceConfigRepository implements PublicServiceInterface
     public function __construct(TypoContext $context)
     {
         $this->context = $context;
-        $this->registerConfig('t3fa.resource', function () {
+        $this->registerConfig('t3fa', function () {
             $this->resourceTypeCache = [];
             $this->collectionTypeCache = [];
         });
@@ -100,6 +100,24 @@ class ResourceConfigRepository implements PublicServiceInterface
     }
     
     /**
+     * Checks if the given value can be transformed using a value
+     *
+     * @param   object|string  $value
+     *
+     * @return bool
+     */
+    public function isComplexValue($value): bool
+    {
+        if (! is_object($value) && ! is_string($value)) {
+            return false;
+        }
+        
+        $class = is_string($value) ? $value : get_class($value);
+        
+        return isset($this->getSiteConfig()['transformer']['value'][$class]);
+    }
+    
+    /**
      * Returns the configuration registered for a single resource type
      *
      * @param   mixed  $value  Either the name of a class, or an object that represents the resource type to find
@@ -113,7 +131,7 @@ class ResourceConfigRepository implements PublicServiceInterface
             return null;
         }
         
-        return $this->getSiteConfig()['types'][$resourceType] ?? null;
+        return $this->getSiteConfig()['resource']['types'][$resourceType] ?? null;
     }
     
     /**
@@ -156,7 +174,7 @@ class ResourceConfigRepository implements PublicServiceInterface
         }
         
         // If the class is a registered collection class -> this is a collection
-        $collectionClasses = $this->getSiteConfig()['collectionClasses'] ?? [];
+        $collectionClasses = $this->getSiteConfig()['resource']['collectionClasses'] ?? [];
         if (in_array($class, $collectionClasses, true)) {
             return $this->collectionTypeCache[$class] = true;
         }
@@ -199,7 +217,7 @@ class ResourceConfigRepository implements PublicServiceInterface
             return $this->resourceTypeCache[$cacheKey];
         }
         
-        $config = $this->getSiteConfig();
+        $config = $this->getSiteConfig()['resource'] ?? [];
         
         // $class is rather counter-intuitive here -> if a string was given
         // it has the same value that $value has, but if $value was an object, the if does not crash
