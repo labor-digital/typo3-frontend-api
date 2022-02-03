@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.2.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.0...v10.2.1) (2022-02-03)
+
+
+### Bug Fixes
+
+* **Repository:** ensure that "allIncludes" gets reset before child transformations ([92b69d1](https://github.com/labor-digital/typo3-frontend-api/commit/92b69d1fdd7cfb337f6b093a07ec5dfd4097bb91))
+* **Transformer:** ensure values with type-transformers are not "related" ([f797404](https://github.com/labor-digital/typo3-frontend-api/commit/f797404b26e4c824118d34c3c629c96054b19db0))
+* **Transformer:** harden the detection of circular transformations ([2a08653](https://github.com/labor-digital/typo3-frontend-api/commit/2a08653854ac4ff54e1ca6d5a07642d3dd6ee54a))
+
 ## [10.2.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.1.5...v10.2.0) (2022-01-21)
 
 
