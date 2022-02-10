@@ -207,6 +207,14 @@ class ResourceDataRepository implements SingletonInterface
             $queryString = (empty($queryString) ? "" : "?" . $queryString);
         }
 
+        // Inherit the language in child requests if not requested in the default language
+        try {
+            $language    = $this->context->Language()->getCurrentFrontendLanguage();
+            $queryString .= (empty($queryString) ? "?" : "&") . 'L=' . $language->getLanguageId();
+        } catch (\Throwable $e) {
+            // No site or language can be resolved -> ignore
+        }
+
         // Build a resource uri if required
         if (! empty($resourceType)) {
             // Read base url
