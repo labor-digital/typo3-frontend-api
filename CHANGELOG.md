@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.41.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.2...v9.41.3) (2022-02-10)
+
+
+### Bug Fixes
+
+* **ResourceDataRepository:** inherit the current system language for child requests ([91bd32a](https://github.com/labor-digital/typo3-frontend-api/commit/91bd32aab978970837e54bf966bf32777b4cb430))
+
 ### [9.41.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.1...v9.41.2) (2022-01-21)
 
 
