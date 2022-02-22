@@ -47,7 +47,7 @@ class BodyParserMiddleware implements MiddlewareInterface
      *
      * @var string[]
      */
-    protected $activeMethods = ['POST', 'PUT', 'DELETE'];
+    protected $activeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
     
     /**
      * Registers a new body parser that is used for the given content types
@@ -110,6 +110,16 @@ class BodyParserMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        // TYPO applies some strange magic to PUT, PATCH and DELETE requests (probably to work with html forms?)
+        // We don't want that behaviour in an api environment. So we simply drop the parsed body if we detect it in a request.
+        if (in_array($request->getMethod(), ['PUT', 'PATCH', 'DELETE'], true)) {
+            parse_str((string)$request->getBody(), $tParsedBody);
+            if ($tParsedBody === $request->getParsedBody()) {
+                $request = $request->withParsedBody(null);
+            }
+            unset($tParsedBody);
+        }
+        
         if (! empty($request->getParsedBody())) {
             return $handler->handle($request);
         }
