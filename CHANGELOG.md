@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.2.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.1...v10.2.2) (2022-02-22)
+
+
+### Bug Fixes
+
+* **BodyParserMiddleware:** fix parsedBody in PUT, PATCH and DELETE ([87a19c6](https://github.com/labor-digital/typo3-frontend-api/commit/87a19c688e1e2f3a511e1036ae03e0a0398793d5))
+
 ### [10.2.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.0...v10.2.1) (2022-02-03)
 
 
