@@ -302,6 +302,7 @@ class UnifiedError
             $this->stack[] = [
                 'title' => $this->extractMessage($error),
                 'code' => $error->getCode(),
+                'throwable' => get_class($error),
                 'trace' => array_map(static function ($v) {
                     unset($v['args'], $v['type']);
                     if (isset($v['file'], $v['line'])) {
