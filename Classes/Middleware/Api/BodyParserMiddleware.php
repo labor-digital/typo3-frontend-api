@@ -22,9 +22,8 @@ declare(strict_types=1);
 
 namespace LaborDigital\T3fa\Middleware\Api;
 
+use LaborDigital\T3ba\Tool\OddsAndEnds\SerializerUtil;
 use League\Route\Http\Exception\BadRequestException;
-use Neunerlei\Arrays\ArrayGeneratorException;
-use Neunerlei\Arrays\Arrays;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -135,7 +134,7 @@ class BodyParserMiddleware implements MiddlewareInterface
             if (stripos($contentType, $parserContentType) !== 0) {
                 continue;
             }
-            $request = $parsers[$parserContentType]($request);
+            $request = $parser($request);
             break;
         }
         
@@ -165,11 +164,11 @@ class BodyParserMiddleware implements MiddlewareInterface
         
         $this->addParser(['application/json'], static function (ServerRequestInterface $request) {
             try {
-                $content = Arrays::makeFromJson($request->getBody()->getContents());
+                $content = SerializerUtil::unserializeJson((string)$request->getBody());
                 
                 return $request->withParsedBody($content);
-            } catch (ArrayGeneratorException $exception) {
-                throw new BadRequestException('Invalid JSON data given');
+            } catch (Throwable $exception) {
+                throw new BadRequestException('Invalid JSON data given', $exception);
             }
         });
         
@@ -183,7 +182,7 @@ class BodyParserMiddleware implements MiddlewareInterface
             try {
                 return $request->withParsedBody(new SimpleXMLElement($content));
             } catch (Throwable $e) {
-                throw new BadRequestException($e->getMessage());
+                throw new BadRequestException($e->getMessage(), $e);
             }
         });
     }
