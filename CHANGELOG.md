@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.3.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.2...v10.3.0) (2022-02-22)
+
+
+### Features
+
+* **UnifiedError:** add "throwable" to error stack ([b3db9bd](https://github.com/labor-digital/typo3-frontend-api/commit/b3db9bdd765acfb9332d4e92c6b0bbc0cbdb7ab2))
+
+
+### Bug Fixes
+
+* **BodyParserMiddleware:** throw errors on invalid request body ([cfdae92](https://github.com/labor-digital/typo3-frontend-api/commit/cfdae92f1e43356c181dee7b2af7619602f5aa38))
+
 ### [10.2.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.1...v10.2.2) (2022-02-22)
 
 
