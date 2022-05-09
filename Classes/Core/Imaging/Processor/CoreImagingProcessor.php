@@ -41,8 +41,10 @@ namespace LaborDigital\T3fa\Core\Imaging\Processor;
 use LaborDigital\T3ba\Tool\Fal\FalService;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\FileInfo;
 use LaborDigital\T3fa\Core\Imaging\Request;
+use LaborDigital\T3fa\Event\Imaging\CoreImagingPostProcessorEvent;
 use League\Route\Http\Exception\NotFoundException;
 use Neunerlei\FileSystem\Fs;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Resource\Exception\InvalidHashException;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
@@ -61,13 +63,20 @@ class CoreImagingProcessor extends AbstractImagingProcessor
      */
     protected $falService;
     
+    /**
+     * @var \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+    
     public function __construct(
         ProcessedFileRepository $fileRepository,
-        FalService $falService
+        FalService $falService,
+        EventDispatcherInterface $eventDispatcher
     )
     {
         $this->fileRepository = $fileRepository;
         $this->falService = $falService;
+        $this->eventDispatcher = $eventDispatcher;
     }
     
     /**
@@ -148,6 +157,14 @@ class CoreImagingProcessor extends AbstractImagingProcessor
             
             $this->webPRedirect = $realUrl;
         }
+        
+        $e = $this->eventDispatcher->dispatch(new CoreImagingPostProcessorEvent(
+            $definition, $fileInfo, $request, $this->defaultRedirect, $this->webPRedirect,
+            $processed, $processedWebp ?? null, $config
+        ));
+        
+        $this->defaultRedirect = $e->getDefaultRedirect();
+        $this->webPRedirect = $this->getWebPRedirect();
     }
     
 }
