@@ -20,8 +20,10 @@
 namespace LaborDigital\Typo3FrontendApi\Imaging\Provider;
 
 
+use LaborDigital\Typo3BetterApi\Event\TypoEventBus;
 use LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService;
 use LaborDigital\Typo3BetterApi\FileAndFolder\FileInfo\FileInfo;
+use LaborDigital\Typo3FrontendApi\Event\CoreImagingPostProcessorEvent;
 use LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingContext;
 use LaborDigital\Typo3FrontendApi\Imaging\ImagingException;
@@ -56,20 +58,20 @@ class CoreImagingProvider extends AbstractImagingProvider
     protected $configRepository;
 
     /**
-     * CoreImagingProvider constructor.
-     *
-     * @param   \TYPO3\CMS\Core\Resource\ProcessedFileRepository                      $fileRepository
-     * @param   \LaborDigital\Typo3BetterApi\FileAndFolder\FalFileService             $falFileService
-     * @param   \LaborDigital\Typo3FrontendApi\ExtConfig\FrontendApiConfigRepository  $configRepository
+     * @var \LaborDigital\Typo3BetterApi\Event\TypoEventBus
      */
+    protected $eventBus;
+
     public function __construct(
         ProcessedFileRepository $fileRepository,
         FalFileService $falFileService,
-        FrontendApiConfigRepository $configRepository
+        FrontendApiConfigRepository $configRepository,
+        TypoEventBus $eventBus
     ) {
         $this->fileRepository   = $fileRepository;
         $this->falFileService   = $falFileService;
         $this->configRepository = $configRepository;
+        $this->eventBus         = $eventBus;
     }
 
     /**
@@ -152,6 +154,14 @@ class CoreImagingProvider extends AbstractImagingProvider
             }
             $this->webPRedirect = $realUrl;
         }
+
+        $e = $this->eventBus->dispatch(new CoreImagingPostProcessorEvent(
+            $definition, $fileInfo, $context, $this->defaultRedirect, $this->webPRedirect,
+            $processed, $processedWebp ?? null
+        ));
+
+        $this->defaultRedirect = $e->getDefaultRedirect();
+        $this->webPRedirect    = $this->getWebPRedirect();
     }
 
 }
