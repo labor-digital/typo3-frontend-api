@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.42.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.3...v9.42.0) (2022-05-10)
+
+
+### Features
+
+* implement locking for cpu heavy tasks ([e4a3553](https://github.com/labor-digital/typo3-frontend-api/commit/e4a3553104c7beac9f28a83674af61436788f878))
+* **Imaging:** add distinct core imaging post processor event ([3333a3e](https://github.com/labor-digital/typo3-frontend-api/commit/3333a3e591d3cedb1a808b82279fd55ed2d2e56a))
+
 ### [9.41.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.2...v9.41.3) (2022-02-10)
 
 
