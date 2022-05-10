@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace LaborDigital\Typo3FrontendApi\Cache;
 
 
+use LaborDigital\Typo3BetterApi\Locking\LockerTrait;
 use LaborDigital\Typo3BetterApi\NamingConvention\Naming;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\ArrayBasedCacheKeyGenerator;
 use LaborDigital\Typo3FrontendApi\Cache\KeyGeneration\CacheKeyGeneratorInterface;
@@ -42,6 +43,7 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class CacheService implements SingletonInterface
 {
+    use LockerTrait;
 
     /**
      * @var \LaborDigital\Typo3FrontendApi\Cache\Scope\CacheScopeRegistry
@@ -98,6 +100,11 @@ class CacheService implements SingletonInterface
             $context->ConfigRepository()->cache()->get('cacheIdentifier')
         );
         $this->envCacheKeyGenerator = $envCacheKeyGenerator;
+    }
+
+    public function __destruct()
+    {
+        $this->releaseAllLocks();
     }
 
     /**
@@ -415,7 +422,14 @@ class CacheService implements SingletonInterface
 
         // Return existing value
         $key = $this->generateCacheKey($options['keyGenerator']);
+        if (! $this->isUpdate && ! $this->cache->has($key)) {
+            $this->acquireLock($key);
+            clearstatcache();
+        }
+
         if (! $this->isUpdate && $this->cache->has($key)) {
+            $this->releaseLock($key);
+
             $result = $this->cache->get($key);
             $tags   = $result['tags'] ?? [];
             $result = $result['content'] ?? $result;
@@ -473,6 +487,8 @@ class CacheService implements SingletonInterface
 
         // Skip, if the the caching was disabled on the fly
         if (! $scope->enabled) {
+            $this->releaseLock($key);
+
             return $scope->result;
         }
 
@@ -484,6 +500,8 @@ class CacheService implements SingletonInterface
 
         $frozen = ['content' => $frozen, 'tags' => $scope->tags];
         $this->cache->set($key, $frozen, $scope->tags, $scope->ttl);
+
+        $this->releaseLock($key);
 
         return $scope->result;
     }
