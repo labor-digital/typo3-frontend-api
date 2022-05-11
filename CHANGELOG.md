@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.4.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.3.0...v10.4.0) (2022-05-11)
+
+
+### Features
+
+* **Imaging:** add distinct core imaging post processor event ([7db02a9](https://github.com/labor-digital/typo3-frontend-api/commit/7db02a97337085c9b4b1cc6927264f8b92c680ec))
+
+
+### Bug Fixes
+
+* **Cache:** calculate query cache key using both requests ([c3562dc](https://github.com/labor-digital/typo3-frontend-api/commit/c3562dcafc22d757a0bc81b0ab282ee0498180d5))
+
 ## [10.3.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.2.2...v10.3.0) (2022-02-22)
 
 
