@@ -30,6 +30,7 @@ use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Cache\Constraint\ConstraintBuilder;
 use LaborDigital\T3fa\Core\Cache\Scope\Scope;
 use LaborDigital\T3fa\Core\Cache\Scope\ScopeRegistry;
+use Psr\Http\Message\ServerRequestInterface;
 
 class T3faCache extends FrontendCache
 {
@@ -243,20 +244,27 @@ class T3faCache extends FrontendCache
             return $keyArgs;
         }
         
-        if ($request->getAttribute('originalRequest') !== null) {
-            $request = $request->getAttribute('originalRequest');
+        $query = $request->getQueryParams();
+        $originalQuery = [];
+        $originalRequest = $request->getAttribute('originalRequest');
+        if ($originalRequest instanceof ServerRequestInterface) {
+            $originalQuery = $originalRequest->getQueryParams();
+        }
+        unset($originalRequest);
+        
+        $queryArg = null;
+        
+        if ($queryConfig === true) {
+            $queryArg = [$query, $originalQuery];
+        } elseif (is_string($queryConfig)) {
+            $queryArg = $query[$queryConfig] ?? $originalQuery[$queryConfig] ?? null;
         }
         
-        $query = $request->getQueryParams();
-        if (empty($query)) {
+        if (! $queryArg) {
             return $keyArgs;
         }
         
-        if ($queryConfig === true) {
-            $keyArgs[] = md5(SerializerUtil::serializeJson($query));
-        } elseif (isset($query[$queryConfig])) {
-            $keyArgs[] = md5(SerializerUtil::serializeJson($query[$queryConfig]));
-        }
+        $keyArgs[] = md5(SerializerUtil::serializeJson($queryArg));
         
         return $keyArgs;
     }
