@@ -98,33 +98,33 @@ class ContentElementResourceFactory
         
         $uid = $row['uid'];
         
-        return $this->makeInstance(
-            ContentElementEntity::class,
-            $this->getCache()->remember(
-                function () use ($uid, $language, $childGenerator) {
-                    $data = $this->getService(DataGenerator::class)->makeFromId($uid, $language);
-                    
-                    if (! is_array($data[1]['children']) && is_callable($childGenerator)) {
-                        $children = $childGenerator($data, $uid, $language);
-                        if (is_array($children)) {
-                            ksort($children);
-                            $data[1]['children'] = $children;
-                        }
-                    }
-                    
-                    return $data;
-                },
-                [
-                    'ce_resource',
-                    $uid,
-                    $language->getTwoLetterIsoCode(),
-                    '@query' => $this->findQueryParameterNs($row),
-                ],
-                [
-                    'tags' => ['contentElement', 'tt_content_' . $uid],
-                ]
-            )
+        $data = $this->getCache()->remember(
+            function () use ($uid, $language) {
+                return $this->getService(DataGenerator::class)->makeFromId($uid, $language);
+            },
+            [
+                'ce_resource',
+                $uid,
+                $language->getTwoLetterIsoCode(),
+                '@query' => $this->findQueryParameterNs($row),
+            ],
+            [
+                'tags' => ['contentElement', 'tt_content_' . $uid],
+            ]
         );
+        
+        // The child generation is not cacheable, because we don't know which GET parameters
+        // should be considered a "part" of the cacheable content.
+        // Therefore, we cache each element separately
+        if (is_callable($childGenerator) && ! is_array($data[1]['children'] ?? null)) {
+            $children = $childGenerator($data, $uid, $language);
+            if (is_array($children)) {
+                ksort($children);
+                $data[1]['children'] = $children;
+            }
+        }
+        
+        return $this->makeInstance(ContentElementEntity::class, $data);
     }
     
     /**

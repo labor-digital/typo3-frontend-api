@@ -163,18 +163,22 @@ class DataGenerator implements PublicServiceInterface
         $col = [];
         
         foreach ($elements as $element) {
-            $el = $this->elementFactory->makeFromRow($element['record'], function () use ($element) {
-                if (! empty($element['children'])) {
-                    $childCols = [];
-                    foreach ($element['children'] as $colPos => $childElements) {
-                        $childCols[$colPos] = $this->processColumn($childElements);
+            $childGenerator = empty($element['children'])
+                ? null
+                : function () use ($element) {
+                    if (! empty($element['children'])) {
+                        $childCols = [];
+                        foreach ($element['children'] as $colPos => $childElements) {
+                            $childCols[$colPos] = $this->processColumn($childElements);
+                        }
+                        
+                        return $childCols;
                     }
                     
-                    return $childCols;
-                }
-                
-                return null;
-            });
+                    return null;
+                };
+            
+            $el = $this->elementFactory->makeFromRow($element['record'], $childGenerator);
             
             $col[] = $this->resourceFactory->makeResourceItem($el)->asArray([
                 'include' => true,
