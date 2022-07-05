@@ -24,7 +24,9 @@ namespace LaborDigital\T3fa\Api\Resource\Factory\PageContent;
 
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
+use LaborDigital\T3ba\Tool\Cache\Page\PageCacheTaggerAwareTrait;
 use LaborDigital\T3fa\Api\Resource\Entity\PageContentEntity;
+use LaborDigital\T3fa\Core\Cache\Scope\Scope;
 use LaborDigital\T3fa\Core\Cache\T3faCacheAwareTrait;
 use TYPO3\CMS\Core\Site\Entity\SiteInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -33,6 +35,7 @@ class PageContentResourceFactory
 {
     use ContainerAwareTrait;
     use T3faCacheAwareTrait;
+    use PageCacheTaggerAwareTrait;
     
     public function make(int $pid, SiteLanguage $language, SiteInterface $site): PageContentEntity
     {
@@ -40,7 +43,13 @@ class PageContentResourceFactory
             PageContentEntity::class,
             $this->getCache()->remember(
                 function () use ($pid, $language, $site) {
-                    return $this->getService(DataGenerator::class)->generate($pid, $language, $site);
+                    $data = $this->getService(DataGenerator::class)->generate($pid, $language, $site);
+                    
+                    $this->runInCacheScope(function (Scope $scope) {
+                        $scope->addCacheTags($this->getPageCacheTagger()->getTags());
+                    });
+                    
+                    return $data;
                 },
                 [
                     'page_content_resource',
