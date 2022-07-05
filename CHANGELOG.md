@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.5.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.4.0...v10.5.0) (2022-07-05)
+
+
+### Features
+
+* **PageContent:** inherit page renderer cache tags for t3fa cache ([470ac12](https://github.com/labor-digital/typo3-frontend-api/commit/470ac128bbe423a41040c4fc9eef109161f3b670))
+
+
+### Bug Fixes
+
+* **PageContent:** use container elements (gridElements) as non-cacheable passthrough ([34eada3](https://github.com/labor-digital/typo3-frontend-api/commit/34eada3f43f718b5e4fb91686a3e9a6c5ff97d0e))
+
 ## [10.4.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.3.0...v10.4.0) (2022-05-11)
 
 
