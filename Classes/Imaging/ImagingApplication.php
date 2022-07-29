@@ -20,12 +20,15 @@ declare(strict_types=1);
 
 namespace LaborDigital\Typo3FrontendApi\Imaging;
 
+use LaborDigital\Typo3BetterApi\Locking\LockerTrait;
 use LaborDigital\Typo3BetterApi\TypoContext\TypoContext;
 use Throwable;
 use TYPO3\CMS\Core\Core\ApplicationInterface;
 
 class ImagingApplication implements ApplicationInterface
 {
+    use LockerTrait;
+
     /**
      * @var \LaborDigital\Typo3BetterApi\TypoContext\TypoContext
      */
@@ -58,7 +61,12 @@ class ImagingApplication implements ApplicationInterface
         }
 
         try {
-            $this->imagingService->process($execute());
+            /** @var \LaborDigital\Typo3FrontendApi\Imaging\ImagingContext $context */
+            $context = $execute();
+            $key     = md5(implode(',', get_object_vars($context->getRequest())));
+            $this->acquireLock($key);
+            $this->imagingService->process($context);
+            $this->releaseAllLocks();
         } catch (Throwable $e) {
             if ($e->getCode() === 400) {
                 $this->handleError(400, 'Bad Request', $e->getMessage());
