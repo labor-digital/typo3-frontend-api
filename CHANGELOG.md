@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.42.1](https://github.com/labor-digital/typo3-frontend-api/compare/v9.42.0...v9.42.1) (2022-07-29)
+
+
+### Bug Fixes
+
+* **Imaging:** use locking when rendering images ([5b0a7b3](https://github.com/labor-digital/typo3-frontend-api/commit/5b0a7b3b21926488335f7fa3cede598840212be2))
+
 ## [9.42.0](https://github.com/labor-digital/typo3-frontend-api/compare/v9.41.3...v9.42.0) (2022-05-10)
 
 
