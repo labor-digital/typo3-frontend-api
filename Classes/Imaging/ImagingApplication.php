@@ -66,7 +66,6 @@ class ImagingApplication implements ApplicationInterface
             $key     = md5(implode(',', get_object_vars($context->getRequest())));
             $this->acquireLock($key);
             $this->imagingService->process($context);
-            $this->releaseAllLocks();
         } catch (Throwable $e) {
             if ($e->getCode() === 400) {
                 $this->handleError(400, 'Bad Request', $e->getMessage());
@@ -78,6 +77,8 @@ class ImagingApplication implements ApplicationInterface
                 throw $e;
             }
             $this->handleError(500, 'Internal Server Error');
+        } finally {
+            $this->releaseAllLocks();
         }
     }
 
