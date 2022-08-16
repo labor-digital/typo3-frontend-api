@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.6.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.5.0...v10.6.0) (2022-08-16)
+
+
+### Features
+
+* **Imaging:** lock image calculation requests ([ce545ac](https://github.com/labor-digital/typo3-frontend-api/commit/ce545acb2a937921adc13d64925193682b9dbe75))
+
 ## [10.5.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.4.0...v10.5.0) (2022-07-05)
 
 
