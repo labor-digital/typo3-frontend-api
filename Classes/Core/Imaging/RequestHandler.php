@@ -25,6 +25,7 @@ namespace LaborDigital\T3fa\Core\Imaging;
 
 use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\PublicServiceInterface;
+use LaborDigital\T3ba\Core\Locking\LockerTrait;
 use LaborDigital\T3ba\Tool\Fal\FalService;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\FileInfo;
 use LaborDigital\T3ba\Tool\Fal\FileInfo\ImageFileInfo;
@@ -43,6 +44,7 @@ use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 class RequestHandler implements PublicServiceInterface
 {
     use ContainerAwareTrait;
+    use LockerTrait;
     
     /**
      * @var \LaborDigital\T3ba\Tool\TypoContext\TypoContext
@@ -74,6 +76,9 @@ class RequestHandler implements PublicServiceInterface
      * Processes the given imaging context by creating the required processed files and their matching redirect configuration
      *
      * @param   \LaborDigital\T3fa\Core\Imaging\Request  $request
+     *
+     * @throws \League\Route\Http\Exception\BadRequestException
+     * @throws \TYPO3\CMS\Core\Error\Http\InternalServerErrorException
      */
     public function process(Request $request): void
     {
@@ -83,32 +88,37 @@ class RequestHandler implements PublicServiceInterface
             throw new BadRequestException('The imaging endpoint is disabled');
         }
         
-        $definition = $this->resolveDefinition($config, $request);
-        $fileInfo = $this->resolveFileInfo($request);
-        /** @var \LaborDigital\T3ba\Tool\Fal\FileInfo\ImageFileInfo $imageInfo */
-        $imageInfo = $fileInfo->getImageInfo();
-        
-        if (! $this->validateHash($request, $fileInfo, $imageInfo)) {
-            return;
-        }
-        
-        $this->resolveCropVariant($definition, $request, $imageInfo);
-        
-        $processor = $this->getServiceOrInstance($config['imagingProcessor'] ?? CoreImagingProcessor::class);
-        if (! $processor instanceof ImagingProcessorInterface) {
-            throw new InternalServerErrorException('The provider does not implement the required interface!');
-        }
-        
-        $processor->process($definition, $fileInfo, $request, $config);
-        
-        $e = $this->eventDispatcher->dispatch(new ImagingPostProcessorEvent(
-            $definition, $fileInfo, $request, $processor->getDefaultRedirect(), $processor->getWebPRedirect()
-        ));
-        
-        Fs::writeFile($request->redirectInfoPath, $e->getDefaultRedirect());
-        $webPRedirect = $e->getWebPRedirect();
-        if (! empty($webPRedirect)) {
-            Fs::writeFile($request->redirectInfoPath . '-webp', $webPRedirect);
+        try {
+            $this->acquireLock(implode(',', get_object_vars($request)));
+            
+            $definition = $this->resolveDefinition($config, $request);
+            $fileInfo = $this->resolveFileInfo($request);
+            /** @var \LaborDigital\T3ba\Tool\Fal\FileInfo\ImageFileInfo $imageInfo */
+            $imageInfo = $fileInfo->getImageInfo();
+            
+            if (! $this->validateHash($request, $fileInfo, $imageInfo)) {
+                return;
+            }
+            $this->resolveCropVariant($definition, $request, $imageInfo);
+            
+            $processor = $this->getServiceOrInstance($config['imagingProcessor'] ?? CoreImagingProcessor::class);
+            if (! $processor instanceof ImagingProcessorInterface) {
+                throw new InternalServerErrorException('The provider does not implement the required interface!');
+            }
+            
+            $processor->process($definition, $fileInfo, $request, $config);
+            
+            $e = $this->eventDispatcher->dispatch(new ImagingPostProcessorEvent(
+                $definition, $fileInfo, $request, $processor->getDefaultRedirect(), $processor->getWebPRedirect()
+            ));
+            
+            Fs::writeFile($request->redirectInfoPath, $e->getDefaultRedirect());
+            $webPRedirect = $e->getWebPRedirect();
+            if (! empty($webPRedirect)) {
+                Fs::writeFile($request->redirectInfoPath . '-webp', $webPRedirect);
+            }
+        } finally {
+            $this->releaseAllLocks();
         }
     }
     
