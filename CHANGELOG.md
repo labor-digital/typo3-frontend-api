@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.7.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.6.0...v10.7.0) (2022-08-23)
+
+
+### Features
+
+* **ExtConfig:** add feature toggle to keep trailing slash in page links ([e3790b6](https://github.com/labor-digital/typo3-frontend-api/commit/e3790b6118298bff879c55fd2a0a8ac8a1025fea))
+
 ## [10.6.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.5.0...v10.6.0) (2022-08-16)
 
 
