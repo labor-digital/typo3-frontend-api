@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.7.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.7.0...v10.7.1) (2022-08-24)
+
+
+### Bug Fixes
+
+* **Imaging:** always force xml in svg minetype ([599c829](https://github.com/labor-digital/typo3-frontend-api/commit/599c829e854ccabf685f60b1529e45083d84204e))
+* **Imaging:** fix proxy issue while generating hash ([f4808a0](https://github.com/labor-digital/typo3-frontend-api/commit/f4808a05a04156bdc7246131eedad615640107ac))
+
 ## [10.7.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.6.0...v10.7.0) (2022-08-23)
 
 
