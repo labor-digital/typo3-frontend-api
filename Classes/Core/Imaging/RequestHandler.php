@@ -89,7 +89,7 @@ class RequestHandler implements PublicServiceInterface
         }
         
         try {
-            $this->acquireLock(implode(',', get_object_vars($request)));
+            $this->acquireLock(SerializerUtil::serializeJson(get_object_vars($request)));
             
             $definition = $this->resolveDefinition($config, $request);
             $fileInfo = $this->resolveFileInfo($request);

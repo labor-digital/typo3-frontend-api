@@ -56,6 +56,10 @@ class RequestProxyHandler implements RequestProxyHandlerInterface
             'webp' => 'image/webp',
         ];
     
+    protected const MIME_TRANSLATION_MAP = [
+        'image/svg' => 'image/svg+xml',
+    ];
+    
     /**
      * @inheritDoc
      */
@@ -180,7 +184,7 @@ class RequestProxyHandler implements RequestProxyHandlerInterface
     {
         $size = getimagesize($filename);
         if ($size && is_string($size['mime'] ?? null)) {
-            return $size['mime'];
+            return static::MIME_TRANSLATION_MAP[$size['mime']] ?? $size['mime'];
         }
         
         if (function_exists('finfo_open')) {
@@ -189,14 +193,14 @@ class RequestProxyHandler implements RequestProxyHandlerInterface
             finfo_close($fp);
             
             if (is_string($mimetype)) {
-                return $mimetype;
+                return static::MIME_TRANSLATION_MAP[$mimetype] ?? $mimetype;
             }
         }
         
         if (function_exists('mime_content_type')) {
             $mimetype = mime_content_type($filename);
             if (is_string($mimetype)) {
-                return $mimetype;
+                return static::MIME_TRANSLATION_MAP[$mimetype] ?? $mimetype;
             }
         }
         

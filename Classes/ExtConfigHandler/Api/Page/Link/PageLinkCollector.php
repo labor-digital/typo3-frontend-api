@@ -23,12 +23,15 @@ declare(strict_types=1);
 namespace LaborDigital\T3fa\ExtConfigHandler\Api\Page\Link;
 
 
+use LaborDigital\T3ba\Core\Di\ContainerAwareTrait;
 use LaborDigital\T3ba\Core\Di\NoDiInterface;
 use LaborDigital\T3ba\Tool\Link\Link;
 use LaborDigital\T3ba\Tool\Link\LinkService;
+use LaborDigital\T3fa\T3faFeatureToggles;
 
 class PageLinkCollector implements NoDiInterface
 {
+    use ContainerAwareTrait;
     
     /**
      * @var \LaborDigital\T3ba\Tool\Link\LinkService
@@ -61,7 +64,7 @@ class PageLinkCollector implements NoDiInterface
     public function registerLink(string $key, ?Link $link = null): self
     {
         $link = $link ?? $this->linkService->getLink($key);
-        $this->links[$key] = rtrim($link->build(), '/');
+        $this->links[$key] = $this->cs()->typoContext->config()->isFeatureEnabled(T3faFeatureToggles::PAGE_RESOURCE_LINKS_KEEP_TRAILING_SLASH) ? $link->build() :rtrim($link->build(), '/');
         
         return $this;
     }
@@ -77,7 +80,8 @@ class PageLinkCollector implements NoDiInterface
      */
     public function registerTypoLink(string $key, $linkConfig): self
     {
-        $this->links[$key] = rtrim($this->linkService->getTypoLink($linkConfig), '/');
+        $this->links[$key] = $this->cs()->typoContext->config()->isFeatureEnabled(T3faFeatureToggles::PAGE_RESOURCE_LINKS_KEEP_TRAILING_SLASH) ?
+            $this->linkService->getTypoLink($linkConfig) : rtrim($this->linkService->getTypoLink($linkConfig), '/');
         
         return $this;
     }
@@ -92,7 +96,7 @@ class PageLinkCollector implements NoDiInterface
      */
     public function registerStaticLink(string $key, string $link): self
     {
-        $this->links[$key] = rtrim($link, '/');
+        $this->links[$key] = $this->cs()->typoContext->config()->isFeatureEnabled(T3faFeatureToggles::PAGE_RESOURCE_LINKS_KEEP_TRAILING_SLASH) ? $link : rtrim($link, '/');
         
         return $this;
     }
