@@ -24,6 +24,7 @@ namespace LaborDigital\T3fa\Core\Routing\Util;
 
 
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
+use LaborDigital\T3fa\Event\Routing\BeforeRequestManglingEvent;
 use LaborDigital\T3fa\Event\Routing\TypoRequestFilterEvent;
 use Neunerlei\Inflection\Inflector;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -120,6 +121,10 @@ class RequestRewriter
         $serverBackup = $_SERVER;
         
         try {
+            $request = $this->eventDispatcher->dispatch(
+                new BeforeRequestManglingEvent($request)
+            )->getRequest();
+            
             $GLOBALS['HTTP_GET_VARS'] = null;
             $_GET = $this->rewriteQueryParams($request->getQueryParams());
             
