@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.8.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.0...v10.8.1) (2022-08-31)
+
+
+### Bug Fixes
+
+* **RequestRewriter:** handle against invalid query param input ([130d162](https://github.com/labor-digital/typo3-frontend-api/commit/130d162dd5e174d76d2162e41d57fb61a9efd41a))
+
 ## [10.8.0](https://github.com/labor-digital/typo3-frontend-api/compare/v10.7.1...v10.8.0) (2022-08-29)
 
 
