@@ -176,7 +176,7 @@ class RequestRewriter
         $allowedParams = ['cHash', 'id', static::REQUEST_LANG_QUERY_KEY, 'no_cache'];
         
         foreach ($queryParams as $k => $v) {
-            if (str_starts_with($k, 'tx_') || in_array($k, $allowedParams, true)) {
+            if (str_starts_with((string)$k, 'tx_') || in_array($k, $allowedParams, true)) {
                 $inheritedQueryParams[$k] = $v;
             }
         }
