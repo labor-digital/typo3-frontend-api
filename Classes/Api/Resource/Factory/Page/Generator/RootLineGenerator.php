@@ -104,6 +104,7 @@ class RootLineGenerator
                 'level' => $k,
                 'title' => $item['title'],
                 'navTitle' => $item['nav_title'],
+                'doktype' => $item['doktype'],
                 'link' => $this->linkService->getLink()->withPid($item['uid'])->build(['relative']),
             ];
             
