@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.8.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.1...v10.8.2) (2022-10-06)
+
+
+### Bug Fixes
+
+* **Rootline:** add doktype to rootline data ([5410e85](https://github.com/labor-digital/typo3-frontend-api/commit/5410e851feeeff1e471a0141f6b973ea3e79bdd1))
+
 ### [10.8.1](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.0...v10.8.1) (2022-08-31)
 
 
