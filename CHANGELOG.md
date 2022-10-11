@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.42.3](https://github.com/labor-digital/typo3-frontend-api/compare/v9.42.2...v9.42.3) (2022-10-11)
+
+
+### Bug Fixes
+
+* **hreflang:** set correct rel to alternate ([980c1a7](https://github.com/labor-digital/typo3-frontend-api/commit/980c1a76c59b4c3c887c8d3017ab18977dd3acef))
+
 ### [9.42.2](https://github.com/labor-digital/typo3-frontend-api/compare/v9.42.1...v9.42.2) (2022-07-29)
 
 
