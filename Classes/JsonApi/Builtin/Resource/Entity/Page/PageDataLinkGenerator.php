@@ -87,7 +87,7 @@ class PageDataLinkGenerator implements SingletonInterface
                 foreach ($languages['languagemenu'] as $language) {
                     if ($language['available'] === 1 && ! empty($language['link'])) {
                         $urls[] = [
-                            'rel'      => 'alternative',
+                            'rel'      => 'alternate',
                             'hreflang' => $language['hreflang'],
                             'href'     => (string)Path::makeUri($this->getAbsoluteUrl($language['link']))->withQuery(null),
                         ];
