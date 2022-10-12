@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.8.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.2...v10.8.3) (2022-10-12)
+
+
+### Bug Fixes
+
+* **Seo:** set the correct rel parameter for hreflang ([fa2ecfb](https://github.com/labor-digital/typo3-frontend-api/commit/fa2ecfbeb12ad504db5a44176cf55e4dadfa5149))
+
 ### [10.8.2](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.1...v10.8.2) (2022-10-06)
 
 
