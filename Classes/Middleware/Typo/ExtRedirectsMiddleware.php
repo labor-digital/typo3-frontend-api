@@ -26,8 +26,14 @@ namespace LaborDigital\T3fa\Middleware\Typo;
 use LaborDigital\T3ba\Tool\TypoContext\TypoContext;
 use LaborDigital\T3fa\Core\Routing\Util\RedirectUtil;
 use LaborDigital\T3fa\Core\Routing\Util\ResponseFactoryTrait;
+use Psr\Http\Server\RequestHandlerInterface;
+use phpDocumentor\Reflection\Types\This;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\Log\Logger;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler;
 
 class ExtRedirectsMiddleware
@@ -48,6 +54,9 @@ class ExtRedirectsMiddleware
                 public function __construct()
                 {
                     $di = TypoContext::getInstance()->di();
+                    if (!$this->logger) {
+                        $this->setLogger(GeneralUtility::makeInstance(Logger::class, 'ExtRedirectsMiddleware'));
+                    }
                     parent::__construct($di->getService(RedirectHandler::class)->redirectService);
                 }
                 
