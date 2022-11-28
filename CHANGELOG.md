@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.8.4](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.3...v10.8.4) (2022-11-28)
+
+
+### Bug Fixes
+
+* **RedirectMiddleware:** if logger is not set we make a new logger ([e1ccc83](https://github.com/labor-digital/typo3-frontend-api/commit/e1ccc8385de03cdf05feb58855e5a3ee4720060f))
+
 ### [10.8.3](https://github.com/labor-digital/typo3-frontend-api/compare/v10.8.2...v10.8.3) (2022-10-12)
 
 
